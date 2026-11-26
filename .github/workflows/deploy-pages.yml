@@ -1,0 +1,96 @@
+name: Deploy Dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "reports/**"
+      - "src/**"
+      - "dbt_gringolake/**"
+      - ".github/workflows/deploy-pages.yml"
+  schedule:
+    # Mon-Fri 21:00 America/Sao_Paulo (UTC-3) == Tue-Sat 00:00 UTC (post B3 BDI 20:00 BRT SLA)
+    - cron: "0 0 * * 2-6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Run B3 Medallion Pipeline & Build Evidence.dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv and Python 3.12
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: reports/package-lock.json
+
+      - name: Restore Bronze B3 snapshots cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data/bronze
+          key: b3-bronze-${{ github.run_id }}
+          restore-keys: |
+            b3-bronze-
+
+      - name: Install Python dependencies (locked)
+        run: uv sync --locked --group dev
+
+      - name: Run full B3 Medallion pipeline (Bronze -> Silver -> Gold)
+        run: uv run dg launch --job b3_medallion_full_refresh
+
+      - name: Save updated Bronze B3 snapshots cache
+        uses: actions/cache/save@v4
+        with:
+          path: data/bronze
+          key: b3-bronze-${{ github.run_id }}
+
+      - name: Install Evidence.dev dependencies
+        working-directory: reports
+        run: npm ci
+
+      - name: Build Evidence.dev sources & static site (strict)
+        working-directory: reports
+        run: |
+          npm run sources:strict
+          npm run build:strict
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: reports/build
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

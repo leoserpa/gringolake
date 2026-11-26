@@ -1,6 +1,7 @@
 # GringoLake — Pipeline Medalhão B3 (IBOV × Fluxo de Investidores)
 
 [![CI](https://github.com/leoserpa/gringolake/actions/workflows/ci.yml/badge.svg)](https://github.com/leoserpa/gringolake/actions/workflows/ci.yml)
+[![Dashboard: GitHub Pages](https://img.shields.io/badge/dashboard-GringoLake%20Terminal-facc15.svg)](https://leoserpa.github.io/gringolake/)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](pyproject.toml)
 [![Stack: Dagster + Polars + DuckDB + dbt](https://img.shields.io/badge/stack-Dagster%20%7C%20Polars%20%7C%20DuckDB%20%7C%20dbt-0F172A.svg)](#arquitetura)
