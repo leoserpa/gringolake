@@ -1,0 +1,10 @@
+.evidence/template
+.evidence/meta
+.svelte-kit
+build
+node_modules
+static/data
+*.options.yaml
+sources/gringolake/*.duckdb
+sources/gringolake/*.duckdb.wal
+.env

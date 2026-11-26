@@ -1,0 +1,30 @@
+{
+  "name": "gringolake-dashboard",
+  "version": "0.1.0",
+  "license": "GPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=7.0.0"
+  },
+  "scripts": {
+    "dev": "evidence dev --open /gringolake",
+    "sources": "evidence sources",
+    "sources:strict": "evidence sources --strict",
+    "build": "evidence build",
+    "build:strict": "evidence build:strict",
+    "preview": "evidence preview"
+  },
+  "dependencies": {
+    "@evidence-dev/core-components": "^5.4.2",
+    "@evidence-dev/duckdb": "^2.0.1",
+    "@evidence-dev/evidence": "^40.1.8"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  },
+  "overrides": {
+    "typescript": "^5.8.3"
+  }
+}

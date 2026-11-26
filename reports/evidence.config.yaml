@@ -1,0 +1,50 @@
+appearance:
+  default: dark
+  switcher: true
+
+deployment:
+  basePath: /gringolake
+
+theme:
+  colorPalettes:
+    default:
+      light:
+        - "#ca8a04"
+        - "#737373"
+        - "#a3a3a3"
+        - "#525252"
+        - "#d4d4d4"
+      dark:
+        - "#facc15"
+        - "#d4d4d4"
+        - "#737373"
+        - "#a3a3a3"
+        - "#525252"
+  colors:
+    primary:
+      light: "#ca8a04"
+      dark: "#facc15"
+    accent:
+      light: "#525252"
+      dark: "#a3a3a3"
+    base:
+      light: "#ffffff"
+      dark: "#0f0f0f"
+    info:
+      light: "#ca8a04"
+      dark: "#facc15"
+    positive:
+      light: "#ca8a04"
+      dark: "#facc15"
+    warning:
+      light: "#737373"
+      dark: "#a3a3a3"
+    negative:
+      light: "#525252"
+      dark: "#737373"
+
+plugins:
+  components:
+    "@evidence-dev/core-components": {}
+  datasources:
+    "@evidence-dev/duckdb": {}

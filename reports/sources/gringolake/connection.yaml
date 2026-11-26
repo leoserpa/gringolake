@@ -1,0 +1,4 @@
+name: gringolake
+type: duckdb
+options:
+  filename: ":memory:"

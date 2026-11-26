@@ -27,6 +27,9 @@ uv run pytest -v
 
 # 5. Subir a interface web do Dagster (linhagem, metadados, asset checks e agenda)
 uv run dg dev
+
+# 6. Subir o dashboard interativo em Evidence.dev (GringoLake Terminal)
+cd reports && npm install && npm run sources && npm run dev
 ```
 
 ## Comandos
@@ -40,6 +43,7 @@ uv run dg dev
 | `uv run pytest -v` | Roda testes unitários Python dos clientes B3 e escrita atômica Bronze |
 | `uv run ruff check src tests` | Executa análise estática/lint no código Python |
 | `uv run dg dev` | Inicia a UI web local do Dagster |
+| `(cd reports && npm run sources:strict && npm run build:strict)` | Gera o build estático do dashboard Evidence.dev (`reports/build/`) a partir dos Parquets Silver/Gold |
 | `bash scripts/check_docs_drift.sh` | Verifica via Git se algum documento/ADR ficou defasado em relação ao código |
 
 *(Atalhos equivalentes existem em [`Makefile`](Makefile) caso `make` esteja instalado no ambiente.)*
