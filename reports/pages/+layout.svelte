@@ -368,38 +368,41 @@
     color: #f8f8f8;
   }
 
-  /* ==================== FLOATING PILL TOPNAV ==================== */
+  /* ==================== FULL-WIDTH STICKY TOPNAV ==================== */
   .gl-header-sticky-wrap {
     position: sticky;
     inset-block-start: 0;
     z-index: 40;
-    background: rgba(34, 34, 34, 0.88);
-    backdrop-filter: blur(12px);
-    padding-block-start: max(16px, env(safe-area-inset-top, 0px));
-    padding-block-end: 10px;
-    padding-inline-start: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-left, 0px));
-    padding-inline-end: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-right, 0px));
+    inline-size: 100%;
+    padding: 0;
   }
 
   .site-header {
     inline-size: 100%;
-    max-inline-size: 1376px;
-    margin-inline: auto;
+    max-inline-size: none;
+    margin: 0;
     box-sizing: border-box;
-    background: #2b2b2b;
-    border: 1px solid #363636;
-    border-radius: 999px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+    background: rgba(43, 43, 43, 0.94);
+    backdrop-filter: blur(12px);
+    border: 0;
+    border-block-end: 1px solid #363636;
+    border-radius: 0;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.22);
+    padding-block-start: env(safe-area-inset-top, 0px);
   }
 
   .header-inner {
     inline-size: 100%;
+    max-inline-size: 1440px;
+    margin-inline: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 14px;
-    min-block-size: 58px;
-    padding: 6px 12px 6px 14px;
+    min-block-size: 62px;
+    padding-block: 8px;
+    padding-inline-start: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-left, 0px));
+    padding-inline-end: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-right, 0px));
     box-sizing: border-box;
   }
 
@@ -477,7 +480,7 @@
   .site-menu {
     position: fixed;
     inset: auto;
-    inset-block-start: calc(5rem + env(safe-area-inset-top, 0px));
+    inset-block-start: calc(4.25rem + env(safe-area-inset-top, 0px));
     inset-block-start: anchor(--menu-button bottom);
     inset-inline-start: max(1rem, env(safe-area-inset-left, 0px));
     inline-size: min(84dvw, 19rem);
@@ -633,8 +636,10 @@
   @media (max-width: 720px) {
     .header-inner {
       gap: 10px;
-      padding: 6px 10px;
-      min-block-size: 54px;
+      padding-block: 7px;
+      padding-inline-start: max(14px, env(safe-area-inset-left, 0px));
+      padding-inline-end: max(14px, env(safe-area-inset-right, 0px));
+      min-block-size: 56px;
     }
     .brand-dot,
     .prov-meta {
@@ -968,15 +973,8 @@
   }
 
   @media (max-width: 640px) {
-    .gl-header-sticky-wrap {
-      padding-block-start: max(10px, env(safe-area-inset-top, 0px));
-      padding-block-end: 8px;
-      padding-inline-start: max(14px, env(safe-area-inset-left, 0px));
-      padding-inline-end: max(14px, env(safe-area-inset-right, 0px));
-    }
-
     .gl-page-container {
-      padding-block-start: 12px;
+      padding-block-start: 14px;
       padding-inline-start: max(14px, env(safe-area-inset-left, 0px));
       padding-inline-end: max(14px, env(safe-area-inset-right, 0px));
     }
