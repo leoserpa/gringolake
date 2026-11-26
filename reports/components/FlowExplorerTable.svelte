@@ -173,7 +173,7 @@
     border: 1px solid #e4e4e7;
     background: #fafafa;
     color: #18181b;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12px;
   }
 
@@ -195,7 +195,7 @@
     border: 1px solid #e4e4e7;
     background: #ffffff;
     color: #18181b;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
@@ -246,7 +246,7 @@
   }
 
   .exec-table .ind {
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-weight: 500;
     color: #18181b;
   }
@@ -270,7 +270,7 @@
   }
 
   .exec-table tbody td.status {
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11.5px;
     font-weight: 400;
     color: #71717a;

@@ -117,7 +117,7 @@
   }
 
   .kpi-label {
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
     color: #52525b;
@@ -132,7 +132,7 @@
   }
 
   .kpi-value {
-    font-family: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     font-size: clamp(20px, 1.9vw, 25px);
     font-weight: 700;
     color: #18181b;
@@ -151,7 +151,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 2px 8px;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11px;
     color: #71717a;
     line-height: 1.35;
