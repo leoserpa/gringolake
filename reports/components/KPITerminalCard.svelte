@@ -9,13 +9,31 @@
   export let suffix = '';
   export let decimals = 2;
   export let signed = false;
-  export let icon = 'trend';
+  export let icon = '';
   export let alertCol = null;
   export let liveDot = false;
   export let focal = false;
   export let focalWhenPositive = false;
   export let badge = '';
 
+  const CODE_ICON_MAP = {
+    IBOV: 'trend',
+    ESTRANG: 'globe',
+    PF: 'user',
+    'PF CUM': 'user',
+    'PF DIA': 'user',
+    INSTIT: 'building',
+    'INST FIN': 'bank',
+    MM21: 'wave',
+    '1D': 'delta',
+    MAX: 'up',
+    MIN: 'down',
+    GOLD: 'layers',
+    'ZERO-SUM': 'shield',
+    DIM: 'users',
+  };
+
+  $: resolvedIcon = icon || CODE_ICON_MAP[code] || 'trend';
   $: row = data && data.length > 0 ? data[0] : null;
   $: rawVal = row && value ? row[value] : null;
   $: rawDate = row && dateCol ? row[dateCol] : '';
@@ -49,13 +67,70 @@
   $: formattedDate = rawDate ? formatDate(rawDate) : '';
 </script>
 
-<div class="kpi-card" class:is-focal-card={isFocal && badge} data-code={code || undefined} data-icon={icon || undefined}>
+<div class="kpi-card" class:is-focal-card={isFocal && badge} data-code={code || undefined} data-icon={resolvedIcon}>
   <div class="kpi-head">
     <span class="kpi-label">
+      <svg
+        class="kpi-icon"
+        class:is-focal={isFocal}
+        width="15"
+        height="15"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        {#if resolvedIcon === 'globe'}
+          <circle cx="12" cy="12" r="9" />
+          <path d="M3 12h18" />
+          <path d="M12 3a13.5 13.5 0 0 1 0 18" />
+          <path d="M12 3a13.5 13.5 0 0 0 0 18" />
+        {:else if resolvedIcon === 'user'}
+          <circle cx="12" cy="8" r="4" />
+          <path d="M5 20a7 7 0 0 1 14 0" />
+        {:else if resolvedIcon === 'building'}
+          <rect x="4" y="3" width="16" height="18" rx="2" />
+          <path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1" />
+        {:else if resolvedIcon === 'bank'}
+          <path d="M3 10h18" />
+          <path d="M5 10v8M10 10v8M14 10v8M19 10v8" />
+          <path d="M3 20h18" />
+          <path d="M12 3l9 5H3l9-5z" />
+        {:else if resolvedIcon === 'wave'}
+          <path d="M3 12h4l3-7 4 14 3-7h4" />
+        {:else if resolvedIcon === 'delta'}
+          <path d="M7 17V7m0 0-3 3m3-3 3 3" />
+          <path d="M17 7v10m0 0-3-3m3 3 3-3" />
+        {:else if resolvedIcon === 'up'}
+          <path d="M4 17l6-6 4 4 6-7" />
+          <path d="M15 8h5v5" />
+        {:else if resolvedIcon === 'down'}
+          <path d="M4 7l6 6 4-4 6 7" />
+          <path d="M15 16h5v-5" />
+        {:else if resolvedIcon === 'layers'}
+          <path d="M12 3l9 4.5-9 4.5-9-4.5L12 3z" />
+          <path d="M3 12l9 4.5 9-4.5" />
+          <path d="M3 16.5l9 4.5 9-4.5" />
+        {:else if resolvedIcon === 'shield'}
+          <path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6l7-3z" />
+          <path d="M9 12l2 2 4-4" />
+        {:else if resolvedIcon === 'users'}
+          <circle cx="9" cy="8" r="3.5" />
+          <path d="M3 19a6 6 0 0 1 12 0" />
+          <circle cx="17" cy="9" r="2.5" />
+          <path d="M17 14a4.5 4.5 0 0 1 4 4.5" />
+        {:else}
+          <path d="M3 17l5.5-5.5 4 3.5L21 6.5" />
+          <circle cx="21" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
+        {/if}
+      </svg>
+      <span>{title}</span>
       {#if liveDot}
         <span class="kpi-live-dot" aria-hidden="true"></span>
       {/if}
-      <span>{title}</span>
     </span>
     {#if badge}
       <span class="kpi-pill-badge">{badge}</span>
@@ -121,13 +196,24 @@
     letter-spacing: 0.06em;
     color: #a3a3a3;
     line-height: 1.25;
+    min-inline-size: 0;
+  }
+
+  .kpi-icon {
+    color: #8a8a91;
+    flex-shrink: 0;
+  }
+
+  .kpi-icon.is-focal {
+    color: #f2b94b;
   }
 
   .kpi-live-dot {
-    inline-size: 6px;
-    block-size: 6px;
+    inline-size: 5px;
+    block-size: 5px;
     border-radius: 50%;
     background: #f8f8f8;
+    opacity: 0.75;
     flex-shrink: 0;
   }
 
@@ -191,6 +277,12 @@
     .kpi-label {
       font-size: 10px;
       letter-spacing: 0.05em;
+      gap: 5px;
+    }
+
+    .kpi-icon {
+      inline-size: 13px;
+      block-size: 13px;
     }
 
     .kpi-value {
