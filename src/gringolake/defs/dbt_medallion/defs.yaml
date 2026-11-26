@@ -2,8 +2,8 @@ type: dagster_dbt.DbtProjectComponent
 
 attributes:
   project:
-    project_dir: "{{ context.project_root }}/dbt_gringolandia"
-    profiles_dir: "{{ context.project_root }}/dbt_gringolandia"
+    project_dir: "{{ context.project_root }}/dbt_gringolake"
+    profiles_dir: "{{ context.project_root }}/dbt_gringolake"
   cli_args:
     - build
     - --exclude-resource-type

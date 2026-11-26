@@ -1,4 +1,4 @@
-"""Centralized path and pipeline configuration for the Gringolândia Medallion Lakehouse."""
+"""Centralized path and pipeline configuration for the GringoLake Medallion Lakehouse."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from pathlib import Path
 
 def resolve_project_root() -> Path:
     """Resolve the repository root directory."""
-    env_root = os.getenv("GRINGOLANDIA_ROOT")
+    env_root = os.getenv("GRINGOLAKE_ROOT")
     if env_root:
         return Path(env_root).resolve()
     return Path(__file__).resolve().parents[2]
@@ -29,7 +29,7 @@ class LakehousePaths:
 
     @property
     def duckdb_path(self) -> Path:
-        return self.warehouse_dir / "gringolandia.duckdb"
+        return self.warehouse_dir / "gringolake.duckdb"
 
     @property
     def bronze_ibov_dir(self) -> Path:
@@ -57,7 +57,7 @@ class LakehousePaths:
 
 def get_lakehouse_paths() -> LakehousePaths:
     root = resolve_project_root()
-    data_dir = Path(os.getenv("GRINGOLANDIA_DATA_DIR", root / "data")).resolve()
+    data_dir = Path(os.getenv("GRINGOLAKE_DATA_DIR", root / "data")).resolve()
     return LakehousePaths(
         root=root,
         landing_dir=data_dir / "landing",
@@ -65,5 +65,5 @@ def get_lakehouse_paths() -> LakehousePaths:
         silver_dir=data_dir / "silver",
         gold_dir=data_dir / "gold",
         warehouse_dir=data_dir / "warehouse",
-        dbt_project_dir=root / "dbt_gringolandia",
+        dbt_project_dir=root / "dbt_gringolake",
     )

@@ -1,7 +1,7 @@
 .PHONY: help check run-bronze run-dbt run-all test test-python test-dbt lint dev
 
 help:
-	@echo "Gringolandia - Pipeline Medalhao B3 (Dagster + Polars + DuckDB + dbt)"
+	@echo "GringoLake - Pipeline Medalhao B3 (Dagster + Polars + DuckDB + dbt)"
 	@echo ""
 	@echo "Comandos disponiveis:"
 	@echo "  make check        - Valida componentes e definicoes Dagster + dbt"
@@ -19,7 +19,7 @@ run-bronze:
 	uv run dg launch --assets bronze/b3_ibov_daily,bronze/b3_investor_flow_mtd
 
 run-dbt:
-	cd dbt_gringolandia && uv run dbt build --profiles-dir .
+	cd dbt_gringolake && uv run dbt build --profiles-dir .
 
 run-all:
 	uv run dg launch --job b3_medallion_full_refresh
@@ -28,7 +28,7 @@ test-python:
 	uv run pytest -v
 
 test-dbt:
-	cd dbt_gringolandia && uv run dbt test --profiles-dir .
+	cd dbt_gringolake && uv run dbt test --profiles-dir .
 
 test: test-python test-dbt
 

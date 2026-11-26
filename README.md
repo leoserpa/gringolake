@@ -22,7 +22,7 @@ uv run dg launch --job b3_medallion_full_refresh
 
 # 4. Rodar todos os testes (Python + dbt unit/data tests + invariante soma-zero B3)
 uv run pytest -v
-(cd dbt_gringolandia && uv run dbt test --profiles-dir .)
+(cd dbt_gringolake && uv run dbt test --profiles-dir .)
 
 # 5. Subir a interface web do Dagster (linhagem, metadados, asset checks e agenda)
 uv run dg dev
@@ -35,7 +35,7 @@ uv run dg dev
 | `uv run dg check defs` | Valida YAML dos componentes e carrega todo o grafo Dagster + dbt |
 | `uv run dg launch --assets bronze/b3_ibov_daily,bronze/b3_investor_flow_mtd` | Materializa apenas a camada Bronze a partir das APIs oficiais da B3 |
 | `uv run dg launch --job b3_medallion_full_refresh` | Executa o pipeline completo Medalhão (Bronze → Silver → Gold) + Asset Checks |
-| `(cd dbt_gringolandia && uv run dbt build --profiles-dir .)` | Executa modelos Silver/Gold, unit tests, data tests e exporta Parquet |
+| `(cd dbt_gringolake && uv run dbt build --profiles-dir .)` | Executa modelos Silver/Gold, unit tests, data tests e exporta Parquet |
 | `uv run pytest -v` | Roda testes unitários Python dos clientes B3 e escrita atômica Bronze |
 | `uv run ruff check src tests` | Executa análise estática/lint no código Python |
 | `uv run dg dev` | Inicia a UI web local do Dagster |
@@ -108,7 +108,7 @@ flowchart LR
 
 ## Consumo para os 4 Gráficos (Camada Gold)
 
-Os dados finais ficam sincronizados em `data/warehouse/gringolandia.duckdb` (schemas `silver` e `gold`) e em `data/gold/*.parquet`:
+Os dados finais ficam sincronizados em `data/warehouse/gringolake.duckdb` (schemas `silver` e `gold`) e em `data/gold/*.parquet`:
 
 - **Gráfico 1 — `Relação: IBOV x P.F. (CURTO PRAZO)`:** `gold.mart_ibov_vs_pf_short_term`
   - `trading_date` (eixo X, últimos 160 pregões), `pf_cum_short_term_bi_brl` + `pf_cum_short_term_ma21_bi_brl` (eixo Y esquerdo; filtre `has_full_ma21_window = true` para iniciar a MM21 somente após 21 pregões), `ibov_close` + `ibov_label_points` (eixo Y direito), `is_pf_below_ma21` (faixas de cruzamento).
@@ -120,7 +120,7 @@ Os dados finais ficam sincronizados em `data/warehouse/gringolandia.duckdb` (sch
 ```python
 import duckdb
 
-con = duckdb.connect("data/warehouse/gringolandia.duckdb", read_only=True)
+con = duckdb.connect("data/warehouse/gringolake.duckdb", read_only=True)
 df = con.execute("""
     SELECT trading_date, ibov_close, ibov_label_points,
            estrang_cum_bi_brl, instit_cum_bi_brl, pf_cum_bi_brl, pf_cum_ma21_bi_brl
@@ -133,7 +133,7 @@ print(df.tail(10))
 ## Contribuição e Verificação
 
 Antes de abrir PR ou consolidar alterações:
-1. Rode `uv run ruff check src tests`, `uv run pytest -v` e `(cd dbt_gringolandia && uv run dbt test --profiles-dir .)`.
+1. Rode `uv run ruff check src tests`, `uv run pytest -v` e `(cd dbt_gringolake && uv run dbt test --profiles-dir .)`.
 2. Valide o grafo com `uv run dg check defs`.
 3. Para mudanças arquiteturais, crie um novo ADR em `docs/decisions/` e adicione entrada datada em `CHANGELOG.md` (append-only).
 4. Verifique drift documental com `bash scripts/check_docs_drift.sh`.

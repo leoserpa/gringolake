@@ -1,6 +1,6 @@
 # Architecture Decision Records (ADRs)
 
-Este diretório registra as decisões arquiteturais relevantes do projeto **Gringolândia**. Cada ADR documenta o contexto, a decisão tomada, as alternativas descartadas e as consequências conhecidas.
+Este diretório registra as decisões arquiteturais relevantes do projeto **GringoLake**. Cada ADR documenta o contexto, a decisão tomada, as alternativas descartadas e as consequências conhecidas.
 
 ## Ciclo de Vida
 

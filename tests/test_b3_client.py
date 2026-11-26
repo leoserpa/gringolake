@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from gringolandia.clients.b3_client import (
+from gringolake.clients.b3_client import (
     B3Client,
     parse_b3_reference_date,
     parse_br_number,

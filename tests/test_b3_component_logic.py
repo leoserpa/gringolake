@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from gringolandia.components.b3_market_data_component import (
+from gringolake.components.b3_market_data_component import (
     FINALIZED_MARKER_NAME,
     b3_today,
     resolve_lookback_days,

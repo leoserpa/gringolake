@@ -1178,7 +1178,7 @@ wheels = [
 ]
 
 [[package]]
-name = "gringolandia"
+name = "gringolake"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

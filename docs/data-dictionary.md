@@ -1,7 +1,7 @@
 # Dicionário de Dados — Arquitetura Medalhão (B3)
 
 Referência de grão, chaves primárias, unidades e colunas das camadas **Bronze**, **Silver** e **Gold**.
-Todas as tabelas Silver e Gold existem de forma espelhada em `data/warehouse/gringolandia.duckdb` e em `data/{silver,gold}/<tabela>.parquet` (compressão ZSTD).
+Todas as tabelas Silver e Gold existem de forma espelhada em `data/warehouse/gringolake.duckdb` e em `data/{silver,gold}/<tabela>.parquet` (compressão ZSTD).
 
 ---
 

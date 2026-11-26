@@ -16,9 +16,9 @@ from zoneinfo import ZoneInfo
 import dagster as dg
 import polars as pl
 
-from gringolandia.clients import B3Client
-from gringolandia.config import get_lakehouse_paths
-from gringolandia.storage import (
+from gringolake.clients import B3Client
+from gringolake.config import get_lakehouse_paths
+from gringolake.storage import (
     BRONZE_IBOV_SCHEMA,
     BRONZE_INVESTOR_FLOW_SCHEMA,
     load_optional_investor_backfill,

@@ -1,5 +1,5 @@
 [project]
-name = "gringolandia"
+name = "gringolake"
 requires-python = ">=3.11,<3.15"
 version = "0.1.0"
 description = "Pipeline Medalhão local (Dagster + Polars + DuckDB + dbt) para análise de fluxo de investidores e Ibovespa usando fontes oficiais da B3."
@@ -36,9 +36,9 @@ force-include = { "pyproject.toml" = "pyproject.toml" }
 directory_type = "project"
 
 [tool.dg.project]
-root_module = "gringolandia"
+root_module = "gringolake"
 registry_modules = [
-    "gringolandia.components.*",
+    "gringolake.components.*",
 ]
 
 

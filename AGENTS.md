@@ -1,11 +1,11 @@
 # AGENTS.md — Guia Operacional para Agentes e Engenheiros
 
-Este arquivo documenta as convenções, comandos verificados, armadilhas conhecidas (*gotchas*) e decisões arquiteturais do repositório **Gringolândia**. Consulte os [ADRs](docs/decisions/README.md) antes de propor mudanças estruturais.
+Este arquivo documenta as convenções, comandos verificados, armadilhas conhecidas (*gotchas*) e decisões arquiteturais do repositório **GringoLake**. Consulte os [ADRs](docs/decisions/README.md) antes de propor mudanças estruturais.
 
 ## Arquitetura e Mapa do Repositório
 
 ```text
-src/gringolandia/
+src/gringolake/
 ├── config.py                                  # Resolução centralizada de caminhos do Lakehouse
 ├── definitions.py                             # Entrypoint Dagster (injeta env vars absolutas p/ dbt)
 ├── clients/b3_client.py                       # Cliente HTTP oficial B3 (GetPortfolioDay + BDI SharesInvesVolum)
@@ -16,7 +16,7 @@ src/gringolandia/
     ├── dbt_medallion/defs.yaml                # Instância YAML do DbtProjectComponent
     └── schedules.py                           # Jobs e schedule diário pós-SLA B3 (21h BRT)
 
-dbt_gringolandia/
+dbt_gringolake/
 ├── dbt_project.yml / profiles.yml             # Adapter dbt-duckdb + post-hook de exportação Parquet
 ├── macros/export_parquet.sql                  # Exporta tabelas Silver/Gold para data/{layer}/*.parquet
 ├── models/bronze/_sources.yml                 # External Parquet sources ligados aos assets Bronze
@@ -38,8 +38,8 @@ Não assuma que `make` está instalado no host; prefira sempre `uv run`:
 | Validar componentes e definições Dagster + dbt | `uv run dg check defs` |
 | Materializar apenas Bronze | `uv run dg launch --assets bronze/b3_ibov_daily,bronze/b3_investor_flow_mtd` |
 | Executar pipeline Medalhão completo (Bronze → Silver → Gold) | `uv run dg launch --job b3_medallion_full_refresh` |
-| Executar dbt standalone (build + unit/data tests) | `(cd dbt_gringolandia && uv run dbt build --profiles-dir .)` |
-| Rodar apenas testes dbt (41 data + 2 unit tests) | `(cd dbt_gringolandia && uv run dbt test --profiles-dir .)` |
+| Executar dbt standalone (build + unit/data tests) | `(cd dbt_gringolake && uv run dbt build --profiles-dir .)` |
+| Rodar apenas testes dbt (41 data + 2 unit tests) | `(cd dbt_gringolake && uv run dbt test --profiles-dir .)` |
 | Rodar testes unitários Python | `uv run pytest -v` |
 | Rodar linter Python | `uv run ruff check src tests` |
 | Subir Dagster UI local | `uv run dg dev` |
@@ -55,7 +55,7 @@ Não assuma que `make` está instalado no host; prefira sempre `uv run`:
 ## Armadilhas Conhecidas (Known Gotchas)
 
 - **Não adicione `from __future__ import annotations` em `b3_market_data_component.py`:** como `@dg.asset` é definido dentro da closure `build_defs()`, anotações adiadas (PEP 563) fazem o Dagster receber o nome da classe de `dg.Config` como string e falhar com `DagsterInvalidPythonicConfigDefinitionError`. Use sintaxe de união nativa do Python 3.12 (`int | None`) sem future import.
-- **Caminhos relativos quebram em `DbtProjectComponent`:** o Dagster copia o projeto dbt para `src/gringolandia/defs/.local_defs_state/...` durante execuções. Por isso `definitions.py` injeta `GRINGOLANDIA_DATA_DIR` e `GRINGOLANDIA_DUCKDB_PATH` absolutos via `os.environ.setdefault()` (veja [ADR-004](docs/decisions/004-dual-storage-duckdb-and-zstd-parquet.md)).
+- **Caminhos relativos quebram em `DbtProjectComponent`:** o Dagster copia o projeto dbt para `src/gringolake/defs/.local_defs_state/...` durante execuções. Por isso `definitions.py` injeta `GRINGOLAKE_DATA_DIR` e `GRINGOLAKE_DUCKDB_PATH` absolutos via `os.environ.setdefault()` (veja [ADR-004](docs/decisions/004-dual-storage-duckdb-and-zstd-parquet.md)).
 - **Nunca use `publication_date` da B3 no join com o IBOV:** o BDI `SharesInvesVolum` tem lag D+2 e valores acumulados no mês (MTD). A data real do pregão vem da nota oficial em `table.texts[0].textPt` (`reference_date`), e o fluxo diário é derivado apenas em `int_b3_investor_flow_daily` cruzado com `stg_b3_ibov_daily` (veja [ADR-003](docs/decisions/003-mtd-deaccumulation-using-ibov-calendar.md)).
 - **Nunca apague partições antigas em `data/bronze/b3_investor_flow_mtd/`:** a API BDI da B3 retém apenas `D-21` pregões online. As partições locais são o histórico permanente do pipeline (veja [ADR-002](docs/decisions/002-official-b3-data-sources-only.md)).
 - **Unidades monetárias:** o BDI publica valores em **`R$ mil`** (`*_k_brl`). Para converter para **`R$ bilhões`** (`*_bi_brl`), divida por `1_000_000.0` (`1e6`), não por `1e9`.

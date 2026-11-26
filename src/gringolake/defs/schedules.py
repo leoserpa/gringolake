@@ -1,4 +1,4 @@
-"""Jobs and schedules for the Gringolândia B3 Medallion Lakehouse."""
+"""Jobs and schedules for the GringoLake B3 Medallion Lakehouse."""
 
 import dagster as dg
 

@@ -5,7 +5,7 @@ from datetime import UTC, date, datetime
 import polars as pl
 import pytest
 
-from gringolandia.storage.parquet_store import (
+from gringolake.storage.parquet_store import (
     BRONZE_IBOV_SCHEMA,
     load_optional_investor_backfill,
     write_json_atomic,

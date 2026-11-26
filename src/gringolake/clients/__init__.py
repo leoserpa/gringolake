@@ -1,6 +1,6 @@
 """Official B3 market data API clients."""
 
-from gringolandia.clients.b3_client import (
+from gringolake.clients.b3_client import (
     B3Client,
     B3IbovFetchResult,
     B3InvestorFlowFetchResult,

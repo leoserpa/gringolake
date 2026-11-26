@@ -1,6 +1,6 @@
 """Atomic Parquet and raw JSON Bronze storage utilities powered by Polars."""
 
-from gringolandia.storage.parquet_store import (
+from gringolake.storage.parquet_store import (
     BRONZE_IBOV_SCHEMA,
     BRONZE_INVESTOR_FLOW_SCHEMA,
     load_optional_investor_backfill,
