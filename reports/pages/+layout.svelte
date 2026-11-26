@@ -138,7 +138,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
   <link
-    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@500;600;700&display=swap"
     rel="stylesheet"
   />
 </svelte:head>
@@ -275,7 +275,7 @@
     margin: 0;
     background-color: #f5f5f4 !important;
     color: #18181b !important;
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -299,7 +299,7 @@
   :global(h1),
   :global(h2),
   :global(h3) {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
     letter-spacing: -0.018em;
     color: #18181b;
     text-wrap: balance;
@@ -371,7 +371,7 @@
   }
 
   .brand-name {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 15.5px;
     font-weight: 700;
     color: #18181b;
@@ -617,7 +617,7 @@
   }
 
   :global(.page-title) {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: clamp(20px, 2vw, 24px);
     font-weight: 700;
     color: #18181b;
@@ -627,7 +627,7 @@
   }
 
   :global(.page-subtitle) {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 12.5px;
     color: #71717a;
     margin: 0;
@@ -686,7 +686,7 @@
   :global(.controls-bar [role='group'] button) {
     min-block-size: max(34px, var(--target-size));
     padding: 6px 14px !important;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
     border-color: #e4e4e7 !important;
@@ -771,7 +771,7 @@
   }
 
   :global(.terminal-panel-title) {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 14.5px;
     font-weight: 600;
     color: #18181b;
@@ -780,7 +780,7 @@
   }
 
   :global(.terminal-panel-sub) {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 11.5px;
     color: #71717a;
     margin: 0 0 12px 0;
