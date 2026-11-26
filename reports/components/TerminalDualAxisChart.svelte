@@ -16,6 +16,7 @@
   export let ibovColor = '#9a9aa0';
   export let maColor = '#5c5c62';
   export let zoom = false;
+  export let defaultZoomPoints = 90;
   export let focal = false;
   export let panelIndex = '';
   export let panelTitle = '';
@@ -37,9 +38,15 @@
     return String(val).slice(0, 10);
   }
 
-  function formatShortDate(iso) {
+  function formatShortDate(iso, multiYear = false) {
     if (!iso || iso.length < 10) return iso;
+    if (multiYear) return `${iso.slice(5, 7)}/${iso.slice(2, 4)}`;
     return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+  }
+
+  function formatFullDate(iso) {
+    if (!iso || iso.length < 10) return iso;
+    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
   }
 
   function formatBi(v) {
@@ -80,6 +87,10 @@
   }
 
   $: dates = rows.map((r) => toIsoDate(r[x]));
+  $: isMultiYear = dates.length > 180 || (dates.length > 1 && dates[0].slice(0, 4) !== dates[dates.length - 1].slice(0, 4) && dates.length > 90);
+  $: zoomStartIdx = zoom && dates.length > defaultZoomPoints ? dates.length - defaultZoomPoints : 0;
+  $: zoomEndIdx = dates.length > 0 ? dates.length - 1 : 0;
+  $: useLttb = dates.length > 500;
   $: flowData = rows.map((r) => (r[flowCol] === null || r[flowCol] === undefined ? null : Number(r[flowCol])));
   $: maData = maCol
     ? rows.map((r) => (r[maCol] === null || r[maCol] === undefined ? null : Number(r[maCol])))
@@ -104,7 +115,15 @@
     return -1;
   })();
 
+  $: lastIbovIdx = (() => {
+    for (let i = ibovData.length - 1; i >= 0; i--) {
+      if (ibovData[i] !== null) return i;
+    }
+    return -1;
+  })();
+
   $: latestFlowVal = lastFlowIdx >= 0 ? flowData[lastFlowIdx] : null;
+  $: latestIbovVal = lastIbovIdx >= 0 ? ibovData[lastIbovIdx] : null;
   $: badgeColor = focal || (latestFlowVal !== null && latestFlowVal > 0) ? '#f2b94b' : '#e5e5e5';
 
   $: shadeAreas = (() => {
@@ -143,7 +162,22 @@
               symbol: 'circle',
               symbolSize: 8,
               silent: true,
-              label: { show: false },
+              label: {
+                show: true,
+                position: 'top',
+                distance: 8,
+                align: 'right',
+                formatter: formatBi(latestFlowVal),
+                color: flowColor,
+                backgroundColor: 'rgba(34, 34, 34, 0.92)',
+                borderColor: 'rgba(242, 185, 75, 0.35)',
+                borderWidth: 1,
+                borderRadius: 6,
+                padding: [3, 6],
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: isCompact ? 9.5 : 10.5,
+                fontWeight: 600,
+              },
               itemStyle: { color: flowColor, borderColor: '#2b2b2b', borderWidth: 2 },
               data: [{ coord: [dates[lastFlowIdx], flowData[lastFlowIdx]] }],
             }
@@ -170,6 +204,7 @@
             data: maData,
             showSymbol: false,
             smooth: 0.25,
+            sampling: useLttb ? 'lttb' : undefined,
             connectNulls: true,
             lineStyle: { color: maColor, width: 1.25, type: 'dashed' },
             itemStyle: { color: maColor },
@@ -183,9 +218,36 @@
       data: ibovData,
       showSymbol: false,
       smooth: 0.25,
+      sampling: useLttb ? 'lttb' : undefined,
       connectNulls: true,
       lineStyle: { color: ibovColor, width: 1.5, cap: 'round' },
       itemStyle: { color: ibovColor },
+      markPoint:
+        lastIbovIdx >= 0
+          ? {
+              symbol: 'circle',
+              symbolSize: 6.5,
+              silent: true,
+              label: {
+                show: true,
+                position: 'bottom',
+                distance: 8,
+                align: 'right',
+                formatter: `${formatPts(latestIbovVal)} pts`,
+                color: '#d4d4d8',
+                backgroundColor: 'rgba(34, 34, 34, 0.90)',
+                borderColor: 'rgba(154, 154, 160, 0.32)',
+                borderWidth: 1,
+                borderRadius: 6,
+                padding: [2, 6],
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontSize: isCompact ? 9 : 10,
+                fontWeight: 500,
+              },
+              itemStyle: { color: ibovColor, borderColor: '#2b2b2b', borderWidth: 1.5 },
+              data: [{ coord: [dates[lastIbovIdx], ibovData[lastIbovIdx]] }],
+            }
+          : undefined,
     },
   ];
 
@@ -195,7 +257,7 @@
     grid: {
       top: isCompact ? 34 : 38,
       right: isCompact ? 2 : 6,
-      bottom: zoom ? 64 : 22,
+      bottom: zoom ? 54 : 22,
       left: isCompact ? 2 : 6,
       containLabel: true,
     },
@@ -235,7 +297,8 @@
       },
       formatter: (params) => {
         if (!Array.isArray(params) || !params.length) return '';
-        const dateStr = params[0].axisValueLabel || '';
+        const rawIso = params[0].axisValue || params[0].axisValueLabel || '';
+        const dateStr = formatFullDate(rawIso);
         const lines = [
           `<div style="color:#a3a3a3;margin-bottom:6px;font-family:Plus Jakarta Sans,sans-serif;font-weight:600;font-size:11px;">${dateStr}</div>`,
         ];
@@ -254,48 +317,42 @@
     },
     dataZoom: zoom
       ? [
-          { type: 'inside', xAxisIndex: 0 },
+          {
+            type: 'inside',
+            xAxisIndex: 0,
+            startValue: zoomStartIdx,
+            endValue: zoomEndIdx,
+          },
           {
             type: 'slider',
             xAxisIndex: 0,
-            height: 28,
-            bottom: 6,
+            startValue: zoomStartIdx,
+            endValue: zoomEndIdx,
+            height: 10,
+            bottom: 14,
+            showDataShadow: false,
             brushSelect: false,
-            borderColor: '#45454a',
-            backgroundColor: '#1e1e20',
-            fillerColor: 'rgba(245, 245, 245, 0.09)',
-            dataBackground: {
-              lineStyle: { color: '#5a5a62', width: 1 },
-              areaStyle: { color: 'rgba(255, 255, 255, 0.04)' },
-            },
-            selectedDataBackground: {
-              lineStyle: { color: '#f2b94b', width: 1.75 },
-              areaStyle: { color: 'rgba(242, 185, 75, 0.16)' },
-            },
-            handleIcon: 'path://M-5,-10 A5,5 0 0,1 5,-10 L5,10 A5,5 0 0,1 -5,10 Z',
-            handleSize: '105%',
+            borderColor: 'transparent',
+            backgroundColor: '#3f3f46',
+            fillerColor: '#c4c4cc',
+            handleIcon: 'path://M-9,0 A9,9 0 1,0 9,0 A9,9 0 1,0 -9,0 Z',
+            handleSize: '180%',
             handleStyle: {
               color: '#f5f5f5',
               borderColor: '#222222',
-              borderWidth: 1.5,
+              borderWidth: 2,
               shadowBlur: 6,
-              shadowColor: 'rgba(0, 0, 0, 0.45)',
+              shadowColor: 'rgba(0, 0, 0, 0.5)',
             },
-            moveHandleSize: 7,
-            moveHandleStyle: {
-              color: '#8a8a93',
-            },
+            moveHandleSize: 0,
             emphasis: {
               handleStyle: {
                 color: '#f2b94b',
                 borderColor: '#222222',
               },
-              moveHandleStyle: {
-                color: '#f5f5f5',
-              },
             },
             textStyle: {
-              color: '#d4d4d8',
+              color: '#e5e5e5',
               fontFamily: 'JetBrains Mono, ui-monospace, monospace',
               fontSize: 10.5,
             },
@@ -315,7 +372,7 @@
         fontSize: isCompact ? 9 : 10,
         margin: 10,
         hideOverlap: true,
-        formatter: (v) => formatShortDate(v),
+        formatter: (v) => formatShortDate(v, isMultiYear),
       },
     },
     yAxis: [

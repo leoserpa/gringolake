@@ -25,38 +25,58 @@ FROM gringolake.fct_ibov_investor_flow_daily
         <ButtonGroupItem valueLabel="Outros" value="outros" />
       </ButtonGroup>
 
+      <ButtonGroup name=janela_comparativo>
+        <ButtonGroupItem valueLabel="60d" value="60" />
+        <ButtonGroupItem valueLabel="160d" value="160" default />
+        <ButtonGroupItem valueLabel="Máx" value="9999" />
+      </ButtonGroup>
+
       <CounterBadge data={resumo_comparativo} value="total_perfis" label="Perfis B3" decimals={0} />
     </div>
   </div>
 </div>
 
 ```sql serie_perfil
+WITH janela AS (
+    SELECT DISTINCT trading_date
+    FROM gringolake.fct_ibov_investor_flow_daily
+    ORDER BY trading_date DESC
+    LIMIT CAST('${inputs.janela_comparativo}' AS INTEGER)
+)
 SELECT
-    trading_date,
-    investor_type_name_pt,
-    ibov_close,
-    ibov_label_points,
-    daily_net_flow_bi_brl,
-    mtd_net_flow_bi_brl,
-    cum_net_flow_bi_brl,
-    cum_net_flow_ma21_bi_brl,
-    ma21_window_obs_count,
-    purchase_share_pct,
-    flow_vs_ma21_signal,
-    investor_type_short_pt
-FROM gringolake.fct_ibov_investor_flow_daily
-WHERE investor_type_code = '${inputs.perfil_foco}'
-ORDER BY trading_date
+    f.trading_date,
+    f.investor_type_name_pt,
+    f.ibov_close,
+    f.ibov_label_points,
+    f.daily_net_flow_bi_brl,
+    f.mtd_net_flow_bi_brl,
+    f.cum_net_flow_bi_brl,
+    f.cum_net_flow_ma21_bi_brl,
+    f.ma21_window_obs_count,
+    f.purchase_share_pct,
+    f.flow_vs_ma21_signal,
+    f.investor_type_short_pt
+FROM gringolake.fct_ibov_investor_flow_daily f
+INNER JOIN janela j ON f.trading_date = j.trading_date
+WHERE f.investor_type_code = '${inputs.perfil_foco}'
+ORDER BY f.trading_date ASC
 ```
 
 ```sql todos_perfis_wide
+WITH janela AS (
+    SELECT trading_date
+    FROM gringolake.mart_ibov_vs_investors_wide
+    ORDER BY trading_date DESC
+    LIMIT CAST('${inputs.janela_comparativo}' AS INTEGER)
+)
 SELECT
-    trading_date,
-    estrang_cum_bi_brl,
-    instit_cum_bi_brl,
-    pf_cum_bi_brl
-FROM gringolake.mart_ibov_vs_investors_wide
-ORDER BY trading_date
+    w.trading_date,
+    w.estrang_cum_bi_brl,
+    w.instit_cum_bi_brl,
+    w.pf_cum_bi_brl
+FROM gringolake.mart_ibov_vs_investors_wide w
+INNER JOIN janela j ON w.trading_date = j.trading_date
+ORDER BY w.trading_date ASC
 ```
 
 <div class="terminal-grid-1">
@@ -102,14 +122,21 @@ ORDER BY trading_date
 </div>
 
 ```sql dispersao_estrang_ibov
+WITH janela AS (
+    SELECT DISTINCT trading_date
+    FROM gringolake.fct_ibov_investor_flow_daily
+    ORDER BY trading_date DESC
+    LIMIT CAST('${inputs.janela_comparativo}' AS INTEGER)
+)
 SELECT
-    trading_date,
-    ROUND(daily_net_flow_k_brl / 1000.0, 1) AS estrang_mi,
-    ibov_return_1d_pct
-FROM gringolake.fct_ibov_investor_flow_daily
-WHERE investor_type_code = 'estrangeiro'
-  AND ibov_return_1d_pct IS NOT NULL
-ORDER BY trading_date
+    f.trading_date,
+    ROUND(f.daily_net_flow_k_brl / 1000.0, 1) AS estrang_mi,
+    f.ibov_return_1d_pct
+FROM gringolake.fct_ibov_investor_flow_daily f
+INNER JOIN janela j ON f.trading_date = j.trading_date
+WHERE f.investor_type_code = 'estrangeiro'
+  AND f.ibov_return_1d_pct IS NOT NULL
+ORDER BY f.trading_date ASC
 ```
 
 ```sql participacao_volume_b3

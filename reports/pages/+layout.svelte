@@ -835,6 +835,10 @@
     --twc-base-100: 0 0% 17%;
   }
 
+  :global(.terminal-panel + .terminal-panel) {
+    margin-block-start: 20px;
+  }
+
   :global(.terminal-panel .chart-container),
   :global(.terminal-panel .chart-container > div),
   :global(.terminal-panel .bg-base-100),

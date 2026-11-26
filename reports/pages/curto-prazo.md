@@ -37,6 +37,12 @@ CROSS JOIN agg a
     </div>
 
     <div class="controls-right">
+      <ButtonGroup name=janela_curto_prazo>
+        <ButtonGroupItem valueLabel="60d" value="60" default />
+        <ButtonGroupItem valueLabel="160d" value="160" />
+        <ButtonGroupItem valueLabel="Máx" value="9999" />
+      </ButtonGroup>
+
       <ButtonGroup name=exibir_faixas>
         <ButtonGroupItem valueLabel="Faixas P.F. < MM21" value="1" default />
         <ButtonGroupItem valueLabel="Sem faixas" value="0" />
@@ -48,24 +54,31 @@ CROSS JOIN agg a
 </div>
 
 <div class="kpi-grid-4">
-  <KPITerminalCard data={pf_kpis} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa Fechamento" suffix=" pts" decimals={0} subtitle="Último pregão B3" liveDot={true} />
+  <KPITerminalCard data={pf_kpis} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa Fechamento" suffix=" pts" decimals={0} subtitle="Último pregão B3" />
   <KPITerminalCard data={pf_kpis} value="pf_cum_short_term_bi_brl" dateCol="trading_date" code="PF CUM" title="Acumulado P.F. (Janela)" prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Base = 0 no início" focalWhenPositive={true} />
   <KPITerminalCard data={pf_kpis} value="pf_cum_short_term_ma21_bi_brl" dateCol="trading_date" code="MM21" title="Média Móvel 21d (P.F.)" prefix="R$ " suffix=" bi" decimals={2} signed={true} alertCol="alerta_mm21" subtitle="Ativa com 21 pregões (ADR-006)" />
   <KPITerminalCard data={pf_kpis} value="daily_net_flow_bi_brl" dateCol="trading_date" code="PF DIA" title="Saldo Diário P.F." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Compras − Vendas" focalWhenPositive={true} />
 </div>
 
 ```sql pf_serie_completa
+WITH janela AS (
+    SELECT trading_date
+    FROM gringolake.mart_ibov_vs_pf_short_term
+    ORDER BY trading_date DESC
+    LIMIT CAST('${inputs.janela_curto_prazo}' AS INTEGER)
+)
 SELECT
-    trading_date,
-    ibov_close,
-    ibov_label_points,
-    daily_net_flow_bi_brl,
-    pf_cum_short_term_bi_brl,
-    pf_cum_short_term_ma21_bi_brl,
-    ma21_window_obs_count,
-    CASE WHEN '${inputs.exibir_faixas}' = '1' THEN is_pf_below_ma21 ELSE FALSE END AS shade_flag
-FROM gringolake.mart_ibov_vs_pf_short_term
-ORDER BY trading_date
+    m.trading_date,
+    m.ibov_close,
+    m.ibov_label_points,
+    m.daily_net_flow_bi_brl,
+    m.pf_cum_short_term_bi_brl,
+    m.pf_cum_short_term_ma21_bi_brl,
+    m.ma21_window_obs_count,
+    CASE WHEN '${inputs.exibir_faixas}' = '1' THEN m.is_pf_below_ma21 ELSE FALSE END AS shade_flag
+FROM gringolake.mart_ibov_vs_pf_short_term m
+INNER JOIN janela j ON m.trading_date = j.trading_date
+ORDER BY m.trading_date ASC
 ```
 
 <div class="terminal-grid-1">

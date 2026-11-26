@@ -11,7 +11,6 @@
   export let signed = false;
   export let icon = '';
   export let alertCol = null;
-  export let liveDot = false;
   export let focal = false;
   export let focalWhenPositive = false;
 
@@ -127,9 +126,6 @@
         {/if}
       </svg>
       <span>{title}</span>
-      {#if liveDot}
-        <span class="kpi-live-dot" aria-hidden="true"></span>
-      {/if}
     </span>
     {#if formattedDate}
       <span class="kpi-date">{formattedDate}</span>
@@ -194,15 +190,6 @@
 
   .kpi-icon.is-focal {
     color: #f2b94b;
-  }
-
-  .kpi-live-dot {
-    inline-size: 5px;
-    block-size: 5px;
-    border-radius: 50%;
-    background: #f8f8f8;
-    opacity: 0.75;
-    flex-shrink: 0;
   }
 
   .kpi-value {

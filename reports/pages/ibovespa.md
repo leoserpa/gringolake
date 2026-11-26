@@ -63,7 +63,7 @@ FROM ${ibov_filtrado}
 </div>
 
 <div class="kpi-grid-4">
-  <KPITerminalCard data={ibov_kpis} value="fechamento_atual" dateCol="ultima_data" code="IBOV" title="Fechamento Atual" suffix=" pts" decimals={0} subtitle="Último pregão B3" liveDot={true} focal={true} />
+  <KPITerminalCard data={ibov_kpis} value="fechamento_atual" dateCol="ultima_data" code="IBOV" title="Fechamento Atual" suffix=" pts" decimals={0} subtitle="Último pregão B3" focal={true} />
   <KPITerminalCard data={ibov_kpis} value="retorno_1d" dateCol="ultima_data" code="1D" title="Variação Diária" suffix="%" decimals={2} signed={true} subtitle="Retorno 1 pregão" focalWhenPositive={true} />
   <KPITerminalCard data={ibov_kpis} value="maxima_periodo" code="MAX" title="Máxima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais alto" />
   <KPITerminalCard data={ibov_kpis} value="minima_periodo" code="MIN" title="Mínima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais baixo" />
@@ -112,6 +112,7 @@ WITH mensal AS (
         CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano_num,
         CAST(EXTRACT(MONTH FROM trading_date) AS INTEGER) AS mes_num,
         strftime(trading_date, '%Y-%m') AS ym,
+        FIRST(ibov_close ORDER BY trading_date) AS first_close,
         LAST(ibov_close ORDER BY trading_date) AS close_end
     FROM gringolake.stg_b3_ibov_daily
     GROUP BY 1, 2, 3
@@ -120,7 +121,7 @@ retornos_m AS (
     SELECT
         ano_num,
         mes_num,
-        ROUND((close_end / LAG(close_end) OVER (ORDER BY ym)) - 1.0, 4) AS retorno
+        ROUND((close_end / COALESCE(LAG(close_end) OVER (ORDER BY ym), first_close)) - 1.0, 4) AS retorno
     FROM mensal
 )
 SELECT
@@ -147,75 +148,77 @@ WHERE retorno IS NOT NULL
 ORDER BY ano_num DESC, mes_num ASC
 ```
 
-<section class="terminal-panel">
-  <h2 class="terminal-panel-title"><span class="panel-index">03</span><span>Quais meses historicamente rendem mais ou menos no Ibovespa?</span></h2>
-  <p class="terminal-panel-sub">Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (2020–2026) · Passe o mouse ou clique na legenda de cores</p>
-  <Heatmap
-    data={matriz_mensal_ibov}
-    x=mes
-    y=ano
-    xSort=mes_num
-    xSortOrder=asc
-    ySort=ano_num
-    ySortOrder=desc
-    value=retorno
-    valueFmt=pct1
-    nullsZero=false
-    zeroDisplay="0.0%"
-    cellHeight=40
-    leftPadding=48
-    rightPadding=12
-    mobileValueLabels=false
-    seriesOptions={{
-      itemStyle: {
-        borderColor: '#2b2b2b',
-        borderWidth: 3,
-        borderRadius: 6
-      },
-      label: {
-        color: '#f8f8f8',
-        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-        fontSize: 11,
-        fontWeight: 600
-      }
-    }}
-    echartsOptions={{
-      backgroundColor: 'transparent',
-      tooltip: {
-        backgroundColor: '#222222',
-        borderColor: '#45454a',
-        textStyle: { color: '#f8f8f8' }
-      },
-      xAxis: {
-        splitArea: { show: false },
-        axisLabel: { color: '#d4d4d8', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', fontSize: 11.5, fontWeight: 600 }
-      },
-      yAxis: {
-        splitArea: { show: false },
-        axisLabel: { color: '#e5e5e5', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 11.5, fontWeight: 600 }
-      },
-      visualMap: [{
-        type: 'piecewise',
-        orient: 'horizontal',
-        left: 'center',
-        bottom: 0,
-        itemWidth: 14,
-        itemHeight: 10,
-        itemGap: 10,
-        textStyle: { color: '#a3a3a3', fontSize: 11, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
-        pieces: [
-          { max: -0.08, label: '< -8%', color: '#991b1b' },
-          { min: -0.08, max: -0.03, label: '-8% a -3%', color: '#c0392b' },
-          { min: -0.03, max: -0.005, label: '-3% a 0%', color: '#6b282b' },
-          { min: -0.005, max: 0.005, label: 'Neutro', color: '#35353c' },
-          { min: 0.005, max: 0.03, label: '0% a +3%', color: '#1b5e44' },
-          { min: 0.03, max: 0.08, label: '+3% a +8%', color: '#1c8c5e' },
-          { min: 0.08, label: '> +8%', color: '#22b573' }
-        ]
-      }]
-    }}
-  />
-</section>
+<div class="terminal-grid-1">
+  <section class="terminal-panel">
+    <h2 class="terminal-panel-title"><span class="panel-index">03</span><span>Quais meses historicamente rendem mais ou menos no Ibovespa?</span></h2>
+    <p class="terminal-panel-sub">Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (Jan/2020 a Nov/2026 · Dez/2026 ainda não iniciado)</p>
+    <Heatmap
+      data={matriz_mensal_ibov}
+      x=mes
+      y=ano
+      xSort=mes_num
+      xSortOrder=asc
+      ySort=ano_num
+      ySortOrder=desc
+      value=retorno
+      valueFmt=pct1
+      nullsZero=false
+      zeroDisplay="0.0%"
+      cellHeight=40
+      leftPadding=48
+      rightPadding=12
+      mobileValueLabels=false
+      seriesOptions={{
+        itemStyle: {
+          borderColor: '#2b2b2b',
+          borderWidth: 3,
+          borderRadius: 6
+        },
+        label: {
+          color: '#f8f8f8',
+          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+          fontSize: 11,
+          fontWeight: 600
+        }
+      }}
+      echartsOptions={{
+        backgroundColor: 'transparent',
+        tooltip: {
+          backgroundColor: '#222222',
+          borderColor: '#45454a',
+          textStyle: { color: '#f8f8f8' }
+        },
+        xAxis: {
+          splitArea: { show: false },
+          axisLabel: { color: '#d4d4d8', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', fontSize: 11.5, fontWeight: 600 }
+        },
+        yAxis: {
+          splitArea: { show: false },
+          axisLabel: { color: '#e5e5e5', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 11.5, fontWeight: 600 }
+        },
+        visualMap: [{
+          type: 'piecewise',
+          orient: 'horizontal',
+          left: 'center',
+          bottom: 0,
+          itemWidth: 14,
+          itemHeight: 10,
+          itemGap: 10,
+          textStyle: { color: '#a3a3a3', fontSize: 11, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
+          pieces: [
+            { max: -0.08, label: '< -8%', color: '#991b1b' },
+            { min: -0.08, max: -0.03, label: '-8% a -3%', color: '#c0392b' },
+            { min: -0.03, max: -0.005, label: '-3% a 0%', color: '#6b282b' },
+            { min: -0.005, max: 0.005, label: 'Neutro', color: '#35353c' },
+            { min: 0.005, max: 0.03, label: '0% a +3%', color: '#1b5e44' },
+            { min: 0.03, max: 0.08, label: '+3% a +8%', color: '#1c8c5e' },
+            { min: 0.08, label: '> +8%', color: '#22b573' }
+          ]
+        }]
+      }}
+    />
+  </section>
+</div>
 
 ```sql resumo_anual_ibov
 SELECT
@@ -231,16 +234,18 @@ GROUP BY trading_year
 ORDER BY trading_year DESC
 ```
 
-<section class="terminal-panel">
-  <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Como o Ibovespa fechou em cada ano desde 2020?</span></h2>
-  <p class="terminal-panel-sub">Contagem oficial de pregões, abertura, mínima, máxima e variação percentual por ano calendário</p>
-  <DataTable data={resumo_anual_ibov} rows=10>
-    <Column id=ano title="Ano" fmt=id />
-    <Column id=pregoes title="Pregões" fmt=num0 />
-    <Column id=primeiro_fechamento title="Abertura Ano" fmt=num0 />
-    <Column id=ultimo_fechamento title="Último Fech." fmt=num0 />
-    <Column id=minima title="Mínima" fmt=num0 />
-    <Column id=maxima title="Máxima" fmt=num0 />
-    <Column id=retorno_anual_pct title="Variação (%)" fmt=num2 />
-  </DataTable>
-</section>
+<div class="terminal-grid-1">
+  <section class="terminal-panel">
+    <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Como o Ibovespa fechou em cada ano desde 2020?</span></h2>
+    <p class="terminal-panel-sub">Contagem oficial de pregões, abertura, mínima, máxima e variação percentual por ano calendário</p>
+    <DataTable data={resumo_anual_ibov} rows=10>
+      <Column id=ano title="Ano" fmt=id />
+      <Column id=pregoes title="Pregões" fmt=num0 />
+      <Column id=primeiro_fechamento title="Abertura Ano" fmt=num0 />
+      <Column id=ultimo_fechamento title="Último Fech." fmt=num0 />
+      <Column id=minima title="Mínima" fmt=num0 />
+      <Column id=maxima title="Máxima" fmt=num0 />
+      <Column id=retorno_anual_pct title="Variação (%)" fmt=num2 />
+    </DataTable>
+  </section>
+</div>

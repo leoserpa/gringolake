@@ -4,7 +4,9 @@
   export let title = 'Perfis Oficiais B3';
   export let subtitle = 'Saldos diário, mensal (MTD) e acumulado contínuo em R$ bi no último pregão · MM21 ativa a partir de 21 pregões completos';
 
+  const PAGE_STEP = 50;
   let query = '';
+  let visibleLimit = PAGE_STEP;
 
   $: rawRows = Array.isArray(data)
     ? data
@@ -23,6 +25,15 @@
         );
       })
     : rawRows;
+
+  $: {
+    query;
+    rawRows;
+    visibleLimit = PAGE_STEP;
+  }
+
+  $: visibleRows = filteredRows.slice(0, visibleLimit);
+  $: hasMoreRows = filteredRows.length > visibleLimit;
 
   function formatDate(d) {
     if (!d) return '—';
@@ -135,7 +146,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each filteredRows as row}
+        {#each visibleRows as row}
           <tr>
             <th scope="row" class="mono code-col">{row.investor_type_short_pt}</th>
             <td class="ind">{row.investor_type_name_pt}</td>
@@ -157,8 +168,15 @@
   </div>
 
   <div class="exec-foot">
-    <span>Mostrando {filteredRows.length} de {rawRows.length} registros oficiais B3 (Gold)</span>
-    <span class="scroll-hint">Deslize na tabela →</span>
+    <span>Mostrando {visibleRows.length} de {filteredRows.length} registros oficiais B3 (Gold)</span>
+    <div class="exec-foot-right">
+      {#if hasMoreRows}
+        <button type="button" class="exec-more" on:click={() => (visibleLimit += PAGE_STEP)}>
+          Carregar +{Math.min(PAGE_STEP, filteredRows.length - visibleLimit)}
+        </button>
+      {/if}
+      <span class="scroll-hint">Deslize na tabela →</span>
+    </div>
   </div>
 </section>
 
@@ -364,11 +382,37 @@
     border-block-start: 1px solid #343438;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
     gap: 8px 16px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11.5px;
     color: #767676;
+  }
+
+  .exec-foot-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .exec-more {
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid #3f3f45;
+    background: #242426;
+    color: #e5e5e5;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 140ms ease, border-color 140ms ease;
+  }
+
+  .exec-more:hover {
+    background: #333337;
+    border-color: #55555b;
   }
 
   .scroll-hint {

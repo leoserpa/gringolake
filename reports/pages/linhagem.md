@@ -51,7 +51,7 @@ CROSS JOIN perfis p
 </div>
 
 <div class="kpi-grid-4">
-  <KPITerminalCard data={kpi_qualidade} value="total_pregoes_ibov" dateCol="max_ibov_date" code="IBOV" title="Pregões IBOV (Silver)" decimals={0} subtitle="Calendário oficial B3" liveDot={true} />
+  <KPITerminalCard data={kpi_qualidade} value="total_pregoes_ibov" dateCol="max_ibov_date" code="IBOV" title="Pregões IBOV (Silver)" decimals={0} subtitle="Calendário oficial B3" />
   <KPITerminalCard data={kpi_qualidade} value="pregoes_fluxo_validos" dateCol="max_flow_date" code="GOLD" title="Pregões Fluxo (Gold)" decimals={0} subtitle="Diário desacumulado" focal={true} />
   <KPITerminalCard data={kpi_qualidade} value="max_residuo_k_brl" code="ZERO-SUM" title="Resíduo Máx. Soma-Zero" prefix="R$ " suffix=" mil" decimals={2} subtitle="Tolerância ≤ R$ 20 mil" />
   <KPITerminalCard data={kpi_qualidade} value="total_perfis" code="DIM" title="Perfis Oficiais B3" decimals={0} subtitle="dim_investor_type" />

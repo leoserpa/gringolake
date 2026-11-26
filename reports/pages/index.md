@@ -49,7 +49,7 @@ CROSS JOIN agg a
 </div>
 
 <div class="kpi-grid-4">
-  <KPITerminalCard data={kpi_latest} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa" suffix=" pts" decimals={0} subtitle="Fechamento oficial B3" liveDot={true} />
+  <KPITerminalCard data={kpi_latest} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa" suffix=" pts" decimals={0} subtitle="Fechamento oficial B3" />
   <KPITerminalCard data={kpi_latest} value="estrang_cum_bi_brl" dateCol="trading_date" code="ESTRANG" title="Estrangeiro Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />
   <KPITerminalCard data={kpi_latest} value="pf_cum_bi_brl" dateCol="trading_date" code="PF" title="Pessoa Física Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />
   <KPITerminalCard data={kpi_latest} value="instit_cum_bi_brl" dateCol="trading_date" code="INSTIT" title="Institucional Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />

@@ -64,6 +64,11 @@
   $: alignedPoints = parsed.filter((p) => p.aligned).map((p) => ({ value: [p.x, p.y], date: p.date }));
   $: divergentPoints = parsed.filter((p) => !p.aligned).map((p) => ({ value: [p.x, p.y], date: p.date }));
   $: alignedPct = parsed.length > 0 ? Math.round((alignedPoints.length / parsed.length) * 100) : 0;
+  $: pointCount = parsed.length;
+  $: alignedDotSize = pointCount > 200 ? (isCompact ? 4.5 : 6) : pointCount > 60 ? (isCompact ? 6.5 : 8) : isCompact ? 9 : 11;
+  $: divergentDotSize = pointCount > 200 ? (isCompact ? 4 : 5.5) : pointCount > 60 ? (isCompact ? 6 : 7.5) : isCompact ? 8 : 10;
+  $: dotOpacity = pointCount > 200 ? 0.68 : pointCount > 60 ? 0.84 : 0.96;
+  $: dotBorderWidth = pointCount > 200 ? 0.75 : 1.5;
 
   $: config = {
     backgroundColor: 'transparent',
@@ -148,23 +153,25 @@
       {
         name: 'Mesma direção',
         type: 'scatter',
-        symbolSize: isCompact ? 9 : 11,
+        symbolSize: alignedDotSize,
         data: alignedPoints,
         itemStyle: {
           color: '#f2b94b',
+          opacity: dotOpacity,
           borderColor: '#2b2b2b',
-          borderWidth: 1.5,
+          borderWidth: dotBorderWidth,
         },
       },
       {
         name: 'Divergente',
         type: 'scatter',
-        symbolSize: isCompact ? 8 : 10,
+        symbolSize: divergentDotSize,
         data: divergentPoints,
         itemStyle: {
           color: '#9a9aa0',
+          opacity: dotOpacity,
           borderColor: '#2b2b2b',
-          borderWidth: 1.5,
+          borderWidth: dotBorderWidth,
         },
       },
     ],
