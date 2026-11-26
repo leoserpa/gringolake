@@ -10,6 +10,7 @@
 
   const navItems = [
     { label: 'Panorama', path: '/' },
+    { label: 'Fluxo Diário', path: '/fluxo-diario' },
     { label: 'Curto Prazo', path: '/curto-prazo' },
     { label: 'Comparativo', path: '/comparativo' },
     { label: 'Ibovespa', path: '/ibovespa' },

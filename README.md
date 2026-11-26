@@ -110,7 +110,7 @@ flowchart LR
 
 - **Schedule pós-SLA:** `b3_daily_eod_schedule` executa `b3_medallion_full_refresh` de **segunda a sexta às 21h (`America/Sao_Paulo`)**, 1 hora após o SLA oficial das `20:00 BRT` informado no payload do BDI da B3. Todas as datas de coleta usam explicitamente o fuso `America/Sao_Paulo` para evitar virada prematura em ambientes UTC.
 - **Lock de escrita no DuckDB:** ao conectar ferramentas de BI (Power BI, Metabase, notebooks), leia preferencialmente **`data/gold/*.parquet`** ou abra o DuckDB em modo `read_only=True` para não bloquear a execução diária das 21h.
-- **Retenção `D-21` da B3:** se a máquina ficar desligada por mais de ~21 pregões consecutivos, a API pública perde os dias mais antigos; para operação contínua sem depender do PC local, execute `uv run dg launch --job b3_medallion_full_refresh` em um servidor pequeno ou workflow agendado.
+- **Retenção `D-21` da B3 e Bot Diário (GitHub Actions):** a API pública do BDI retém apenas ~21 pregões online; o workflow [`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml) executa automaticamente de segunda a sexta às 21h BRT (`00:00 UTC` de ter–sáb), persiste os novos Parquets ZSTD da camada Bronze na branch dedicada `data-bronze` e republica o dashboard em `https://leoserpa.github.io/gringolake/`.
 
 ## Consumo para os 4 Gráficos (Camada Gold)
 

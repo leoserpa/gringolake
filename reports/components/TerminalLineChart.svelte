@@ -14,6 +14,11 @@
   export let height = '255px';
   export let showEndLabel = true;
   export let chartType = 'line';
+  export let axisCompact = false;
+  export let positiveColor = '#facc15';
+  export let negativeColor = '#525252';
+
+  $: isBar = chartType === 'bar';
 
   $: rows = Array.isArray(data)
     ? data
@@ -43,6 +48,12 @@
     return rows.length > 260 ? iso.slice(0, 4) : `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
   }
 
+  function formatTooltipDate(val) {
+    const iso = toIsoDate(val);
+    if (!iso || iso.length < 10) return iso;
+    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
+  }
+
   function formatVal(v) {
     if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
     const num = Number(v);
@@ -54,27 +65,69 @@
     return `${sign}${prefix}${formatted}${suffix}`;
   }
 
+  function formatAxisVal(v) {
+    if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+    const num = Number(v);
+    if (axisCompact && suffix.trim() === 'mi') {
+      const sign = num < 0 ? '-' : '';
+      const formatted = Math.abs(num).toLocaleString('pt-BR', {
+        maximumFractionDigits: 0,
+      });
+      return `${sign}${formatted}M`;
+    }
+    return formatVal(v);
+  }
+
+  $: barCategories = isBar
+    ? Array.from(new Set(rows.map((r) => toIsoDate(r[x])).filter(Boolean)))
+    : [];
+
   $: seriesMeta = yList
     .map((col, idx) => {
       const pts = [];
       let lastPt = null;
+      const barMap = new Map();
+
       for (const r of rows) {
         const dt = toIsoDate(r[x]);
         const raw = r[col];
         if (!dt || raw === null || raw === undefined) continue;
         const val = Number(raw);
         if (Number.isNaN(val)) continue;
-        pts.push([dt, val]);
+        if (isBar) {
+          barMap.set(dt, val);
+        } else {
+          pts.push([dt, val]);
+        }
         lastPt = { x: dt, val };
       }
-      if (!pts.length) return null;
+
+      if (isBar) {
+        for (const dt of barCategories) {
+          if (!barMap.has(dt)) {
+            pts.push(null);
+            continue;
+          }
+          const val = barMap.get(dt);
+          const isPos = val >= 0;
+          pts.push({
+            value: val,
+            itemStyle: {
+              color: isPos ? positiveColor : negativeColor,
+              borderRadius: isPos ? [3, 3, 0, 0] : [0, 0, 3, 3],
+            },
+          });
+        }
+      }
+
+      if (!lastPt) return null;
 
       const isPrimary = idx === 0;
       const color = colors[idx] || '#737373';
       const name = names[idx] || col;
       const isDashed = Boolean(dashed[idx]);
       const endText = lastPt ? formatVal(lastPt.val) : '';
-      const showSeriesEnd = showEndLabel && chartType === 'line' && Boolean(lastPt);
+      const showSeriesEnd = showEndLabel && !isBar && Boolean(lastPt);
 
       return {
         endText,
@@ -85,22 +138,25 @@
           showSymbol: false,
           smooth: false,
           connectNulls: true,
-          barMaxWidth: 16,
-          lineStyle:
-            chartType === 'line'
-              ? {
-                  color,
-                  width: isPrimary ? 2 : 1.35,
-                  type: isDashed ? 'dashed' : 'solid',
-                }
-              : undefined,
-          itemStyle:
-            chartType === 'bar'
-              ? {
-                  color: (params) => (Number(params.value?.[1]) >= 0 ? '#facc15' : '#525252'),
-                  borderRadius: [2, 2, 0, 0],
-                }
-              : { color },
+          barMaxWidth: 18,
+          barCategoryGap: '28%',
+          lineStyle: !isBar
+            ? {
+                color,
+                width: isPrimary ? 2 : 1.35,
+                type: isDashed ? 'dashed' : 'solid',
+              }
+            : undefined,
+          itemStyle: !isBar ? { color } : undefined,
+          markLine: isBar
+            ? {
+                silent: true,
+                symbol: ['none', 'none'],
+                label: { show: false },
+                lineStyle: { color: '#333333', width: 1, type: 'solid' },
+                data: [{ yAxis: 0 }],
+              }
+            : undefined,
           endLabel: showSeriesEnd
             ? {
                 show: true,
@@ -136,16 +192,16 @@
   $: builtSeries = seriesMeta.map((m) => m.series);
   $: hasLegend = builtSeries.length > 1;
   $: maxEndChars = seriesMeta.reduce((acc, m) => Math.max(acc, m.endText.length), 6);
-  $: rightPad = showEndLabel && chartType === 'line' ? Math.max(66, maxEndChars * 8 + 18) : 16;
+  $: rightPad = showEndLabel && !isBar ? Math.max(66, maxEndChars * 8 + 18) : 14;
 
   $: config = {
     backgroundColor: 'transparent',
     animationDuration: 300,
     grid: {
-      top: hasLegend ? 36 : 18,
+      top: hasLegend ? 36 : 16,
       right: rightPad,
       bottom: 24,
-      left: 10,
+      left: 8,
       containLabel: true,
     },
     legend: hasLegend
@@ -177,18 +233,24 @@
       },
       axisPointer: {
         type: 'line',
-        lineStyle: { color: '#3f3f46', width: 1, type: 'dashed' },
+        lineStyle: { color: '#525252', width: 1, type: 'dashed' },
       },
       formatter: (params) => {
         if (!Array.isArray(params) || !params.length) return '';
-        const dateStr = toIsoDate(params[0].value?.[0] || params[0].axisValueLabel);
+        const rawX = isBar ? params[0].axisValue : params[0].value?.[0] || params[0].axisValueLabel;
+        const dateStr = formatTooltipDate(rawX);
         const lines = [`<div style="color:#a6a6a6;margin-bottom:4px;">${dateStr}</div>`];
         for (const p of params) {
-          const v = Array.isArray(p.value) ? p.value[1] : p.value;
+          const v = Array.isArray(p.value)
+            ? p.value[1]
+            : p.value && typeof p.value === 'object'
+              ? p.value.value
+              : p.value;
           if (v === null || v === undefined) continue;
+          const dotColor = isBar ? (Number(v) >= 0 ? positiveColor : negativeColor) : p.color;
           lines.push(
             `<div style="display:flex;justify-content:space-between;gap:14px;">` +
-              `<span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.color};margin-right:6px;"></span>${p.seriesName}</span>` +
+              `<span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;"></span>${p.seriesName}</span>` +
               `<strong style="color:#f5f5f5;">${formatVal(v)}</strong>` +
             `</div>`
           );
@@ -196,23 +258,39 @@
         return lines.join('');
       },
     },
-    xAxis: {
-      type: 'time',
-      boundaryGap: chartType === 'bar',
-      axisLine: { lineStyle: { color: '#2a2a2a' } },
-      axisTick: { show: false },
-      splitLine: { show: false },
-      axisLabel: {
-        color: '#737373',
-        fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
-        fontSize: 10.5,
-        hideOverlap: true,
-        formatter: (val) => formatAxisDate(val),
-      },
-    },
+    xAxis: isBar
+      ? {
+          type: 'category',
+          data: barCategories,
+          boundaryGap: true,
+          axisLine: { onZero: false, lineStyle: { color: '#2a2a2a' } },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            color: '#737373',
+            fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
+            fontSize: 10.5,
+            hideOverlap: true,
+            formatter: (val) => formatAxisDate(val),
+          },
+        }
+      : {
+          type: 'time',
+          boundaryGap: false,
+          axisLine: { lineStyle: { color: '#2a2a2a' } },
+          axisTick: { show: false },
+          splitLine: { show: false },
+          axisLabel: {
+            color: '#737373',
+            fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
+            fontSize: 10.5,
+            hideOverlap: true,
+            formatter: (val) => formatAxisDate(val),
+          },
+        },
     yAxis: {
       type: 'value',
-      scale: true,
+      scale: !isBar,
       boundaryGap: ['8%', '12%'],
       axisLine: { show: false },
       axisTick: { show: false },
@@ -221,7 +299,7 @@
         color: '#737373',
         fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
         fontSize: 10.5,
-        formatter: (val) => formatVal(val),
+        formatter: (val) => formatAxisVal(val),
       },
     },
     series: builtSeries,

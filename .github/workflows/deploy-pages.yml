@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -44,13 +44,14 @@ jobs:
           cache: npm
           cache-dependency-path: reports/package-lock.json
 
-      - name: Restore Bronze B3 snapshots cache
-        uses: actions/cache/restore@v4
-        with:
-          path: data/bronze
-          key: b3-bronze-${{ github.run_id }}
-          restore-keys: |
-            b3-bronze-
+      - name: Restore Bronze B3 snapshots from data-bronze branch
+        run: |
+          if git fetch origin data-bronze:refs/remotes/origin/data-bronze 2>/dev/null; then
+            echo "Restoring persisted Bronze snapshots from origin/data-bronze..."
+            git archive origin/data-bronze data/bronze | tar -x
+          else
+            echo "No data-bronze branch found yet; bootstrapping fresh Bronze layer from B3 APIs."
+          fi
 
       - name: Install Python dependencies (locked)
         run: uv sync --locked --group dev
@@ -58,11 +59,46 @@ jobs:
       - name: Run full B3 Medallion pipeline (Bronze -> Silver -> Gold)
         run: uv run dg launch --job b3_medallion_full_refresh
 
-      - name: Save updated Bronze B3 snapshots cache
-        uses: actions/cache/save@v4
-        with:
-          path: data/bronze
-          key: b3-bronze-${{ github.run_id }}
+      - name: Persist Bronze B3 Parquet snapshots to data-bronze branch
+        run: |
+          WORKTREE_DIR="/tmp/gringolake-data-bronze"
+          rm -rf "$WORKTREE_DIR"
+
+          if git show-ref --verify --quiet refs/remotes/origin/data-bronze; then
+            git worktree add -B data-bronze "$WORKTREE_DIR" origin/data-bronze
+          else
+            git worktree add --detach "$WORKTREE_DIR" HEAD
+            git -C "$WORKTREE_DIR" checkout --orphan data-bronze
+            git -C "$WORKTREE_DIR" rm -rf --ignore-unmatch .
+          fi
+
+          mkdir -p "$WORKTREE_DIR/data/bronze"
+          rsync -a -m \
+            --exclude='raw_json/' \
+            --include='*/' \
+            --include='*.parquet' \
+            --include='.finalized' \
+            --exclude='*' \
+            data/bronze/ "$WORKTREE_DIR/data/bronze/"
+
+          cat > "$WORKTREE_DIR/README.md" <<'EOF'
+          # GringoLake — `data-bronze` Automated Snapshot Branch
+
+          This orphan branch is managed automatically by `.github/workflows/deploy-pages.yml`.
+          It stores compact ZSTD Parquet snapshots of official B3 Bronze partitions (`b3_ibov_daily` and `b3_investor_flow_mtd`) so daily runs retain full history beyond B3 BDI's rolling 21-session API retention window.
+          EOF
+
+          if [ -n "$(git -C "$WORKTREE_DIR" status --porcelain)" ]; then
+            git -C "$WORKTREE_DIR" config user.name "github-actions[bot]"
+            git -C "$WORKTREE_DIR" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git -C "$WORKTREE_DIR" add -f README.md data/bronze
+            git -C "$WORKTREE_DIR" commit -m "chore(bronze): sync B3 Bronze snapshots ($(date -u +%Y-%m-%d))"
+            git -C "$WORKTREE_DIR" push origin data-bronze
+          else
+            echo "No new Bronze Parquet changes to persist."
+          fi
+
+          git worktree remove --force "$WORKTREE_DIR"
 
       - name: Install Evidence.dev dependencies
         working-directory: reports
