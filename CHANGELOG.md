@@ -3,6 +3,11 @@
 Todas as mudanças relevantes deste projeto são documentadas neste arquivo.
 Ao registrar novas alterações ou correções de documentação, **adicione uma nova entrada datada** — nunca reescreva ou compacte entradas anteriores.
 
+## [Unreleased]
+
+### Changed
+- Adicionados metadados de licença (`GPL-3.0`) e autoria em `pyproject.toml`, badges técnicos e seção legível de **Licença e Aviso sobre Dados (B3)** no `README.md` (preservando o arquivo `LICENSE` GPLv3 verbatim).
+
 ## [0.1.0] - 2026-11-25
 
 ### Added

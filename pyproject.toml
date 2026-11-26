@@ -2,6 +2,10 @@
 name = "gringolandia"
 requires-python = ">=3.11,<3.15"
 version = "0.1.0"
+description = "Pipeline Medalhão local (Dagster + Polars + DuckDB + dbt) para análise de fluxo de investidores e Ibovespa usando fontes oficiais da B3."
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Leonardo Serpa" }]
 dependencies = [
     "dagster==1.13.31",
     "dagster-dbt>=0.29.31",

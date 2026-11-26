@@ -1,4 +1,8 @@
-# Gringolândia — Pipeline Medalhão B3 (IBOV × Fluxo de Investidores)
+# GringoLake — Pipeline Medalhão B3 (IBOV × Fluxo de Investidores)
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB.svg)](pyproject.toml)
+[![Stack: Dagster + Polars + DuckDB + dbt](https://img.shields.io/badge/stack-Dagster%20%7C%20Polars%20%7C%20DuckDB%20%7C%20dbt-0F172A.svg)](#arquitetura)
 
 Pipeline local de engenharia de dados em arquitetura **Medalhão (Bronze / Silver / Gold)** construído com **Dagster + Polars + DuckDB + dbt**, consumindo exclusivamente fontes oficiais da **B3** para alimentar gráficos comparativos entre **Ibovespa (IBOV)**, **Fluxo Acumulado por Perfil de Investidor** (Estrangeiro, Institucional, Pessoa Física, Instituições Financeiras e Outros) e **Média Móvel de 21 pregões (MM21)**.
 
@@ -131,3 +135,17 @@ Antes de abrir PR ou consolidar alterações:
 2. Valide o grafo com `uv run dg check defs`.
 3. Para mudanças arquiteturais, crie um novo ADR em `docs/decisions/` e adicione entrada datada em `CHANGELOG.md` (append-only).
 4. Verifique drift documental com `bash scripts/check_docs_drift.sh`.
+
+## Licença e Aviso sobre Dados
+
+Este projeto é distribuído sob a licença **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)** — mantida integralmente sem alterações no arquivo [`LICENSE`](LICENSE), conforme exigido pela Free Software Foundation.
+
+| Permissão / Condição | Resumo prático |
+| --- | --- |
+| **Uso comercial, estudo e modificação** | Permitidos livremente |
+| **Redistribuição e obras derivadas** | Devem manter a licença **GPL-3.0**, os avisos de copyright e disponibilizar o código-fonte |
+| **Garantia e responsabilidade** | Software fornecido *"como está"*, sem garantias |
+
+**Copyright © 2026 Leonardo Serpa.**
+
+> **Aviso sobre dados de mercado:** a licença GPL-3.0 cobre exclusivamente o código-fonte, os modelos dbt e a documentação deste repositório. Os dados financeiros ingeridos em tempo de execução são públicos e de titularidade da **B3 S.A. – Brasil, Bolsa, Balcão** (sujeitos aos termos de uso da B3). Este projeto tem finalidade estritamente técnica e analítica e **não constitui recomendação de investimento**.
