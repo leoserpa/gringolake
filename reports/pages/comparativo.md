@@ -124,15 +124,26 @@ total_dia AS (
     FROM gringolake.fct_ibov_investor_flow_daily f
     INNER JOIN ultimo u ON f.trading_date = u.max_dt
     GROUP BY f.trading_date
+),
+base AS (
+    SELECT
+        CASE f.investor_type_code
+            WHEN 'estrangeiro' THEN 'Estrangeiro'
+            WHEN 'instituicoes_financeiras' THEN 'Inst. Financeira'
+            ELSE f.investor_type_name_pt
+        END AS perfil,
+        ROUND((f.purchase_share_pct + f.sale_share_pct) / 100.0, 4) AS mtd_share,
+        ROUND((f.daily_purchases_k_brl + f.daily_sales_k_brl) / t.total_2sided_k, 4) AS daily_share
+    FROM gringolake.fct_ibov_investor_flow_daily f
+    INNER JOIN ultimo u ON f.trading_date = u.max_dt
+    INNER JOIN total_dia t ON f.trading_date = t.trading_date
 )
-SELECT
-    f.investor_type_name_pt,
-    ROUND(f.purchase_share_pct + f.sale_share_pct, 2) AS mtd_share_pct,
-    ROUND((f.daily_purchases_k_brl + f.daily_sales_k_brl) / t.total_2sided_k * 100.0, 2) AS daily_share_pct
-FROM gringolake.fct_ibov_investor_flow_daily f
-INNER JOIN ultimo u ON f.trading_date = u.max_dt
-INNER JOIN total_dia t ON f.trading_date = t.trading_date
-ORDER BY mtd_share_pct DESC
+SELECT perfil, 'Mês (BDI)' AS periodo, mtd_share AS participacao_pct, mtd_share AS sort_key
+FROM base
+UNION ALL
+SELECT perfil, 'Último Pregão' AS periodo, daily_share AS participacao_pct, mtd_share AS sort_key
+FROM base
+ORDER BY sort_key DESC, periodo ASC
 ```
 
 <div class="terminal-grid-2">
@@ -147,11 +158,54 @@ ORDER BY mtd_share_pct DESC
   </section>
 
   <section class="terminal-panel">
-    <MarketShareBarChart
+    <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Qual perfil domina o volume na B3?</span></h2>
+    <p class="terminal-panel-sub">Participação oficial no giro do mês (BDI) e no último pregão (%) · Clique na legenda ou passe o mouse</p>
+    <BarChart
       data={participacao_volume_b3}
-      panelIndex="04"
-      panelTitle="Qual perfil domina o volume na B3?"
-      panelSubtitle="Participação oficial no giro do mês (BDI) e no último pregão (%)"
+      x=perfil
+      y=participacao_pct
+      series=periodo
+      type=grouped
+      swapXY=true
+      sort=false
+      yFmt=pct1
+      labels=true
+      labelSize=11
+      chartAreaHeight=240
+      seriesOrder={['Mês (BDI)', 'Último Pregão']}
+      seriesColors={{ 'Mês (BDI)': '#f2b94b', 'Último Pregão': '#8a8a93' }}
+      seriesOptions={{
+        itemStyle: { borderRadius: [0, 5, 5, 0] },
+        label: {
+          color: '#e5e5e5',
+          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+          fontSize: 11,
+          distance: 6
+        }
+      }}
+      echartsOptions={{
+        backgroundColor: 'transparent',
+        grid: {
+          left: 8,
+          right: 46,
+          containLabel: true
+        },
+        tooltip: {
+          backgroundColor: '#222222',
+          borderColor: '#45454a',
+          textStyle: { color: '#f8f8f8' }
+        },
+        legend: {
+          textStyle: { color: '#a3a3a3' }
+        },
+        xAxis: {
+          splitLine: { lineStyle: { color: '#333338' } },
+          axisLabel: { color: '#8a8a93' }
+        },
+        yAxis: {
+          axisLabel: { color: '#e5e5e5', fontSize: 12 }
+        }
+      }}
     />
   </section>
 </div>

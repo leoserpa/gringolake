@@ -70,7 +70,7 @@
     animationDuration: 300,
     grid: {
       top: isCompact ? 34 : 38,
-      right: isCompact ? 10 : 14,
+      right: isCompact ? 22 : 30,
       bottom: 30,
       left: isCompact ? 6 : 10,
       containLabel: true,
