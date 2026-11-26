@@ -103,10 +103,10 @@
 
   onMount(() => {
     try {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('evidence-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'light');
+      localStorage.setItem('evidence-theme', 'light');
     } catch {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
 
     syncNavLayout(true);
@@ -132,7 +132,7 @@
 </script>
 
 <svelte:head>
-  <meta name="color-scheme" content="dark" />
+  <meta name="color-scheme" content="light" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -164,11 +164,11 @@
       <div bind:this={headerInnerEl} class="header-inner">
         <a class="site-brand" href={`${base}/`}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="1" y="1" width="22" height="22" rx="6" fill="#0F0F0F" stroke="#2A2A2A" stroke-width="1.2" />
-            <path d="M4.5 17.5C7 16 9.5 19 12 17.5C14.5 16 17 19 19.5 17.5" stroke="#525252" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M4.5 14C7 12.6 9.5 15.2 12 13.8C14.5 12.4 17 14.8 19.5 13.4" stroke="#A6A6A6" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M5 10.8L9.2 8.2L12.6 10L18.2 6.4" stroke="#FACC15" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
-            <circle cx="18.4" cy="6.3" r="2" fill="#FACC15" />
+            <rect x="1" y="1" width="22" height="22" rx="6" fill="#FFFFFF" stroke="#E4E4E7" stroke-width="1.2" />
+            <path d="M4.5 17.5C7 16 9.5 19 12 17.5C14.5 16 17 19 19.5 17.5" stroke="#CBD5E1" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M4.5 14C7 12.6 9.5 15.2 12 13.8C14.5 12.4 17 14.8 19.5 13.4" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M5 10.8L9.2 8.2L12.6 10L18.2 6.4" stroke="#D97706" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="18.4" cy="6.3" r="2" fill="#D97706" />
           </svg>
           <span class="brand-name">Gringo<span class="brand-accent">Lake</span></span>
         </a>
@@ -240,28 +240,28 @@
 
 <style>
   :global(:root),
-  :global(html[data-theme='dark']) {
-    color-scheme: dark;
-    accent-color: #facc15;
-    --gl-canvas: #0f0f0f;
-    --gl-surface: #161616;
-    --gl-elevated: #212121;
-    --gl-border: #2a2a2a;
-    --gl-divider: #202020;
-    --gl-text: #f5f5f5;
-    --gl-text-secondary: #a6a6a6;
-    --gl-text-muted: #737373;
-    --gl-text-dim: #575757;
-    --gl-accent: #facc15;
+  :global(html[data-theme='light']) {
+    color-scheme: light;
+    accent-color: #d97706;
+    --gl-canvas: #f5f5f4;
+    --gl-surface: #ffffff;
+    --gl-elevated: #fafaf9;
+    --gl-border: #e4e4e7;
+    --gl-divider: #f4f4f5;
+    --gl-text: #18181b;
+    --gl-text-secondary: #52525b;
+    --gl-text-muted: #71717a;
+    --gl-text-dim: #a1a1aa;
+    --gl-accent: #d97706;
     --target-size: 24px;
-    --base-100: #0f0f0f;
-    --base-200: #161616;
-    --base-300: #2e2e2e;
-    --base-content: #cbcbcb;
-    --base-content-muted: #7c7c7c;
-    --base-heading: #f9f9f9;
-    --primary: #facc15;
-    --twc-primary: 47.9 95.8% 53.1%;
+    --base-100: #ffffff;
+    --base-200: #f5f5f4;
+    --base-300: #e4e4e7;
+    --base-content: #27272a;
+    --base-content-muted: #71717a;
+    --base-heading: #18181b;
+    --primary: #d97706;
+    --twc-primary: 32.1 94.6% 43.7%;
   }
 
   @media (pointer: coarse) {
@@ -273,8 +273,8 @@
   :global(html),
   :global(body) {
     margin: 0;
-    background-color: #0f0f0f !important;
-    color: #f5f5f5 !important;
+    background-color: #f5f5f4 !important;
+    color: #18181b !important;
     font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -285,7 +285,7 @@
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
-    background-color: #0f0f0f !important;
+    background-color: #f5f5f4 !important;
     overflow: visible !important;
   }
 
@@ -299,7 +299,7 @@
   :global(h3) {
     font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
     letter-spacing: -0.018em;
-    color: #f5f5f5;
+    color: #18181b;
     text-wrap: balance;
   }
 
@@ -325,17 +325,17 @@
   /* ==================== FULL-WIDTH SHELL & STICKY 58px HEADER ==================== */
   .gl-app-shell {
     min-block-size: 100dvh;
-    background: #0f0f0f;
-    color: #f5f5f5;
+    background: #f5f5f4;
+    color: #18181b;
   }
 
   .site-header {
     position: sticky;
     inset-block-start: 0;
     z-index: 40;
-    background: rgba(22, 22, 22, 0.96);
+    background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(8px);
-    border-block-end: 1px solid #2a2a2a;
+    border-block-end: 1px solid #e4e4e7;
     padding-block-start: env(safe-area-inset-top, 0px);
     padding-inline-start: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-left, 0px));
     padding-inline-end: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-right, 0px));
@@ -369,19 +369,19 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 15.5px;
     font-weight: 700;
-    color: #f5f5f5;
+    color: #18181b;
     letter-spacing: -0.02em;
   }
 
   .brand-accent {
-    color: #facc15;
+    color: #d97706;
   }
 
   .site-brand:focus-visible,
   .menu-button:focus-visible,
   .repo-link:focus-visible,
   .site-menu a:focus-visible {
-    outline: 2px solid #facc15;
+    outline: 2px solid #d97706;
     outline-offset: 2px;
     border-radius: 6px;
   }
@@ -407,14 +407,14 @@
     min-inline-size: max(36px, var(--target-size));
     padding: 0;
     border-radius: 6px;
-    border: 1px solid #2a2a2a;
-    background: #212121;
-    color: #f5f5f5;
+    border: 1px solid #e4e4e7;
+    background: #ffffff;
+    color: #18181b;
     cursor: pointer;
   }
 
   .menu-button:hover {
-    background: #2a2a2a;
+    background: #f4f4f5;
   }
 
   .site-menu {
@@ -432,13 +432,13 @@
     list-style: none;
     overflow: auto;
     border-radius: 8px;
-    border: 1px solid #2a2a2a;
-    background: #161616;
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.6);
+    border: 1px solid #e4e4e7;
+    background: #ffffff;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
   }
 
   .site-menu::backdrop {
-    background: rgba(0, 0, 0, 0.45);
+    background: rgba(15, 23, 42, 0.25);
   }
 
   @supports not selector(:popover-open) {
@@ -456,7 +456,7 @@
     min-block-size: max(40px, var(--target-size));
     padding: 6px 12px;
     border-radius: 6px;
-    color: #a6a6a6;
+    color: #52525b;
     text-decoration: none;
     font-size: 13px;
     font-weight: 400;
@@ -464,15 +464,15 @@
   }
 
   .site-menu a:hover {
-    background: #212121;
-    color: #f5f5f5;
+    background: #f4f4f5;
+    color: #18181b;
   }
 
   .site-menu a[aria-current='page'] {
-    background: #212121;
-    color: #f5f5f5;
+    background: #fffbeb;
+    color: #18181b;
     font-weight: 600;
-    border-inline-start-color: #facc15;
+    border-inline-start-color: #d97706;
   }
 
   .site-header.is-wide .menu-button {
@@ -504,7 +504,7 @@
     min-block-size: 58px;
     padding: 0 10px;
     font-size: 12.5px;
-    color: #a6a6a6;
+    color: #52525b;
     border-inline-start: 0;
     border-block-end: 2px solid transparent;
     border-radius: 0;
@@ -512,14 +512,14 @@
 
   .site-header.is-wide .site-menu a:hover {
     background: transparent;
-    color: #f5f5f5;
+    color: #18181b;
   }
 
   .site-header.is-wide .site-menu a[aria-current='page'] {
     background: transparent;
-    color: #f5f5f5;
+    color: #18181b;
     font-weight: 600;
-    border-block-end-color: #facc15;
+    border-block-end-color: #d97706;
   }
 
   .site-header.is-measuring * {
@@ -539,18 +539,18 @@
   }
 
   .prov-source {
-    color: #f5f5f5;
+    color: #18181b;
     font-weight: 500;
   }
 
   .prov-sep {
-    color: #575757;
+    color: #d4d4d8;
   }
 
   .prov-engine {
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 11px;
-    color: #737373;
+    color: #71717a;
   }
 
   .repo-link {
@@ -559,13 +559,13 @@
     justify-content: center;
     min-block-size: var(--target-size);
     min-inline-size: var(--target-size);
-    color: #737373;
+    color: #71717a;
     text-decoration: none;
     margin-inline-start: 4px;
   }
 
   .repo-link:hover {
-    color: #f5f5f5;
+    color: #18181b;
   }
 
   @media (max-width: 720px) {
@@ -615,7 +615,7 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: clamp(20px, 2vw, 24px);
     font-weight: 700;
-    color: #f5f5f5;
+    color: #18181b;
     margin: 0;
     line-height: 1.2;
     letter-spacing: -0.02em;
@@ -624,7 +624,7 @@
   :global(.page-subtitle) {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 12.5px;
-    color: #737373;
+    color: #71717a;
     margin: 0;
     line-height: 1.4;
   }
@@ -652,28 +652,29 @@
     min-block-size: 32px;
     padding: 5px 12px;
     border-radius: 6px;
-    background: #161616;
-    border: 1px solid #2a2a2a;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 11px;
     font-weight: 500;
-    color: #a6a6a6;
+    color: #52525b;
     white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   }
 
   :global(.status-chip-accent) {
-    color: #facc15;
+    color: #b45309;
     font-weight: 600;
   }
 
-  /* ==================== BUTTON GROUPS & DROPDOWNS (YELLOW ACCENT) ==================== */
+  /* ==================== BUTTON GROUPS & DROPDOWNS (AMBER ACCENT) ==================== */
   :global(.controls-bar [role='group']) {
-    background: #161616 !important;
-    border: 1px solid #2a2a2a !important;
+    background: #ffffff !important;
+    border: 1px solid #e4e4e7 !important;
     border-radius: 6px !important;
     height: auto !important;
     min-block-size: max(34px, var(--target-size));
-    box-shadow: none !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
     margin-bottom: 0 !important;
   }
 
@@ -683,29 +684,29 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    border-color: #2a2a2a !important;
-    background-color: #161616 !important;
-    color: #737373 !important;
+    border-color: #e4e4e7 !important;
+    background-color: #ffffff !important;
+    color: #52525b !important;
     transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   :global(.controls-bar [role='group'] button:hover) {
-    background-color: #212121 !important;
-    color: #f5f5f5 !important;
+    background-color: #fafaf9 !important;
+    color: #18181b !important;
   }
 
   :global(.controls-bar [role='group'] button.text-primary),
   :global(.controls-bar [role='group'] button.bg-base-200) {
-    background-color: #212121 !important;
-    color: #facc15 !important;
+    background-color: #fffbeb !important;
+    color: #b45309 !important;
     font-weight: 600 !important;
   }
 
   :global(.controls-bar button[role='combobox']) {
     min-block-size: max(34px, var(--target-size));
-    background-color: #161616 !important;
-    border-color: #2a2a2a !important;
-    color: #f5f5f5 !important;
+    background-color: #ffffff !important;
+    border-color: #e4e4e7 !important;
+    color: #18181b !important;
     font-size: 12px !important;
   }
 
@@ -747,13 +748,14 @@
   :global(.terminal-panel) {
     display: flex;
     flex-direction: column;
-    background: #161616;
-    border: 1px solid #2a2a2a;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
     border-radius: 10px;
     padding: 20px 22px;
     min-inline-size: 0;
-    --base-100: #161616;
-    --twc-base-100: 0 0% 8.6%;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    --base-100: #ffffff;
+    --twc-base-100: 0 0% 100%;
   }
 
   :global(.terminal-panel .chart-container),
@@ -767,7 +769,7 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 14.5px;
     font-weight: 600;
-    color: #f5f5f5;
+    color: #18181b;
     margin: 0 0 3px 0;
     line-height: 1.3;
   }
@@ -775,7 +777,7 @@
   :global(.terminal-panel-sub) {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 11.5px;
-    color: #737373;
+    color: #71717a;
     margin: 0 0 12px 0;
     line-height: 1.35;
   }
@@ -798,22 +800,22 @@
   :global(.terminal-panel:not(.exec-explorer) thead th) {
     position: sticky;
     inset-block-start: 0;
-    background: #161616 !important;
+    background: #ffffff !important;
     font-family: 'IBM Plex Mono', ui-monospace, monospace !important;
     font-size: 10.5px !important;
     font-weight: 600 !important;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: #737373 !important;
-    border-bottom: 1px solid #202020 !important;
+    color: #71717a !important;
+    border-bottom: 1px solid #e4e4e7 !important;
     padding-block: 9px !important;
     white-space: nowrap;
   }
 
   :global(.terminal-panel:not(.exec-explorer) tbody td) {
     font-size: 12px !important;
-    color: #d4d4d4 !important;
-    border-bottom: 1px solid #202020 !important;
+    color: #27272a !important;
+    border-bottom: 1px solid #f4f4f5 !important;
     padding-block: 8px !important;
     white-space: nowrap;
   }
@@ -826,13 +828,13 @@
   .gl-footer {
     margin-block-start: 28px;
     padding-block-start: 16px;
-    border-block-start: 1px solid #202020;
+    border-block-start: 1px solid #e4e4e7;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 8px 16px;
     font-size: 11px;
-    color: #575757;
+    color: #71717a;
   }
 
   /* ==================== RESPONSIVENESS ==================== */

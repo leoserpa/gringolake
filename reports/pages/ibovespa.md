@@ -59,13 +59,13 @@ FROM ${ibov_filtrado}
 <div class="terminal-grid-1">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Evolução do Ibovespa no Horizonte Selecionado (pontos)</h2>
-    <p class="terminal-panel-sub">Fechamento oficial diário da B3 (amarelo) · Calendário oficial utilizado na desacumulação MTD do BDI</p>
+    <p class="terminal-panel-sub">Fechamento oficial diário da B3 (dourado) · Calendário oficial utilizado na desacumulação MTD do BDI</p>
     <TerminalLineChart
       data={ibov_filtrado}
       x="trading_date"
       y="ibov_close"
       names={['Ibovespa']}
-      colors={['#facc15']}
+      colors={['#d97706']}
       suffix=" pts"
       decimals={0}
       height="320px"

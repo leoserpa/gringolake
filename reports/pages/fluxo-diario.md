@@ -70,7 +70,7 @@ ORDER BY f.trading_date ASC
 <div class="terminal-grid-2">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Estrangeiro (Gringo)</h2>
-    <p class="terminal-panel-sub">Como ler: barras amarelas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
+    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
       x="trading_date"
@@ -89,7 +89,7 @@ ORDER BY f.trading_date ASC
 
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Pessoa Física (PF)</h2>
-    <p class="terminal-panel-sub">Como ler: barras amarelas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
+    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
       x="trading_date"
@@ -110,7 +110,7 @@ ORDER BY f.trading_date ASC
 <div class="terminal-grid-2">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Institucional (Fundos)</h2>
-    <p class="terminal-panel-sub">Como ler: barras amarelas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
+    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
       x="trading_date"
@@ -129,7 +129,7 @@ ORDER BY f.trading_date ASC
 
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Inst. Financeira</h2>
-    <p class="terminal-panel-sub">Como ler: barras amarelas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
+    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
       x="trading_date"

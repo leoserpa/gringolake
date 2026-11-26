@@ -1,6 +1,6 @@
 appearance:
-  default: dark
-  switcher: true
+  default: light
+  switcher: false
 
 deployment:
   basePath: /gringolake
@@ -9,11 +9,11 @@ theme:
   colorPalettes:
     default:
       light:
-        - "#ca8a04"
-        - "#737373"
-        - "#a3a3a3"
-        - "#525252"
-        - "#d4d4d4"
+        - "#d97706"
+        - "#475569"
+        - "#9ca3af"
+        - "#64748b"
+        - "#cbd5e1"
       dark:
         - "#facc15"
         - "#d4d4d4"
@@ -22,25 +22,25 @@ theme:
         - "#525252"
   colors:
     primary:
-      light: "#ca8a04"
+      light: "#d97706"
       dark: "#facc15"
     accent:
-      light: "#525252"
+      light: "#475569"
       dark: "#a3a3a3"
     base:
-      light: "#ffffff"
+      light: "#f5f5f4"
       dark: "#0f0f0f"
     info:
-      light: "#ca8a04"
+      light: "#d97706"
       dark: "#facc15"
     positive:
-      light: "#ca8a04"
+      light: "#d97706"
       dark: "#facc15"
     warning:
-      light: "#737373"
+      light: "#71717a"
       dark: "#a3a3a3"
     negative:
-      light: "#525252"
+      light: "#64748b"
       dark: "#737373"
 
 plugins:

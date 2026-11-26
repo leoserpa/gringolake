@@ -170,21 +170,21 @@
     inline-size: min(240px, 100%);
     padding: 6px 12px;
     border-radius: 6px;
-    border: 1px solid #2a2a2a;
-    background: #0f0f0f;
-    color: #f5f5f5;
+    border: 1px solid #e4e4e7;
+    background: #fafafa;
+    color: #18181b;
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 12px;
   }
 
   .exec-search::placeholder {
-    color: #575757;
+    color: #a1a1aa;
   }
 
   .exec-search:focus-visible,
   .exec-export:focus-visible,
   .exec-table-scroll:focus-visible {
-    outline: 2px solid #facc15;
+    outline: 2px solid #d97706;
     outline-offset: 2px;
   }
 
@@ -192,9 +192,9 @@
     min-block-size: max(34px, var(--target-size));
     padding: 6px 14px;
     border-radius: 6px;
-    border: 1px solid #2a2a2a;
-    background: #212121;
-    color: #f5f5f5;
+    border: 1px solid #e4e4e7;
+    background: #ffffff;
+    color: #18181b;
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
@@ -203,7 +203,7 @@
   }
 
   .exec-export:hover {
-    background: #2a2a2a;
+    background: #f4f4f5;
   }
 
   .exec-table-scroll {
@@ -226,9 +226,9 @@
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: #737373;
-    border-block-end: 1px solid #202020;
-    background: #161616;
+    color: #71717a;
+    border-block-end: 1px solid #e4e4e7;
+    background: #ffffff;
     position: sticky;
     inset-block-start: 0;
   }
@@ -236,7 +236,8 @@
   .exec-table tbody td {
     padding: 10px 10px;
     font-size: 12px;
-    border-block-end: 1px solid #202020;
+    color: #27272a;
+    border-block-end: 1px solid #f4f4f5;
     white-space: nowrap;
   }
 
@@ -247,7 +248,7 @@
   .exec-table .ind {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-weight: 500;
-    color: #f5f5f5;
+    color: #18181b;
   }
 
   .exec-table .mono {
@@ -256,7 +257,7 @@
   }
 
   .exec-table .muted {
-    color: #737373;
+    color: #71717a;
   }
 
   .exec-table .num {
@@ -265,28 +266,28 @@
 
   .exec-table .val {
     font-weight: 600;
-    color: #f5f5f5;
+    color: #18181b;
   }
 
   .exec-table tbody td.status {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 11.5px;
     font-weight: 400;
-    color: #737373;
+    color: #71717a;
   }
 
   .exec-table tbody td.status.is-alert {
     font-weight: 600 !important;
-    color: #facc15 !important;
+    color: #b45309 !important;
   }
 
   .exec-foot {
     margin-block-start: 12px;
     padding-block-start: 10px;
-    border-block-start: 1px solid #202020;
+    border-block-start: 1px solid #f4f4f5;
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 11px;
-    color: #575757;
+    color: #71717a;
   }
 
   @media (max-width: 640px) {

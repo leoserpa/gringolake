@@ -56,7 +56,7 @@ ORDER BY trading_date
 <div class="terminal-grid-1">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">IBOV × Fluxo Acumulado e MM21 — Perfil Selecionado</h2>
-    <p class="terminal-panel-sub">Acumulado em R$ bilhões (amarelo) + MM21 (tracejada) no eixo esquerdo · Fechamento oficial do IBOV (prata) no eixo direito</p>
+    <p class="terminal-panel-sub">Acumulado em R$ bilhões (dourado) + MM21 (tracejada) no eixo esquerdo · Fechamento oficial do IBOV (grafite) no eixo direito</p>
     <TerminalDualAxisChart
       data={serie_perfil}
       flowCol="cum_net_flow_bi_brl"
@@ -75,13 +75,13 @@ ORDER BY trading_date
 <div class="terminal-grid-1">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Contraparte de Mercado — Estrangeiro × Institucional × Pessoa Física (R$ bi)</h2>
-    <p class="terminal-panel-sub">Evolução conjunta dos 3 maiores grupos da B3 (destaque amarelo em Estrangeiro, tons neutros em Institucional e Pessoa Física)</p>
+    <p class="terminal-panel-sub">Evolução conjunta dos 3 maiores grupos da B3 (destaque dourado em Estrangeiro, tons neutros em Pessoa Física e Institucional)</p>
     <TerminalLineChart
       data={todos_perfis_wide}
       x="trading_date"
       y={['estrang_cum_bi_brl', 'pf_cum_bi_brl', 'instit_cum_bi_brl']}
       names={['Estrangeiro', 'Pessoa Física', 'Institucional']}
-      colors={['#facc15', '#d4d4d4', '#737373']}
+      colors={['#d97706', '#475569', '#9ca3af']}
       prefix="R$ "
       suffix=" bi"
       decimals={2}

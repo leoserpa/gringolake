@@ -12,9 +12,9 @@
   export let extremaCol = null;
   export let shadeCol = null;
   export let height = '270px';
-  export let flowColor = '#facc15';
-  export let ibovColor = '#d4d4d4';
-  export let maColor = '#737373';
+  export let flowColor = '#d97706';
+  export let ibovColor = '#475569';
+  export let maColor = '#9ca3af';
   export let zoom = false;
 
   $: rows = Array.isArray(data)
@@ -118,7 +118,7 @@
       showSymbol: false,
       smooth: false,
       connectNulls: true,
-      lineStyle: { color: flowColor, width: 2.1 },
+      lineStyle: { color: flowColor, width: 2.2 },
       itemStyle: { color: flowColor },
       markPoint:
         lastFlowIdx >= 0
@@ -127,7 +127,7 @@
               symbolSize: 8,
               silent: true,
               label: { show: false },
-              itemStyle: { color: flowColor, borderColor: '#161616', borderWidth: 2 },
+              itemStyle: { color: flowColor, borderColor: '#ffffff', borderWidth: 2 },
               data: [{ coord: [dates[lastFlowIdx], flowData[lastFlowIdx]] }],
             }
           : undefined,
@@ -136,8 +136,8 @@
           ? {
               silent: true,
               itemStyle: {
-                color: 'rgba(250, 204, 21, 0.065)',
-                borderColor: 'rgba(250, 204, 21, 0.22)',
+                color: 'rgba(217, 119, 6, 0.08)',
+                borderColor: 'rgba(217, 119, 6, 0.24)',
                 borderWidth: 1,
               },
               data: shadeAreas,
@@ -154,7 +154,7 @@
             showSymbol: false,
             smooth: false,
             connectNulls: true,
-            lineStyle: { color: maColor, width: 1.35, type: 'dashed' },
+            lineStyle: { color: maColor, width: 1.4, type: 'dashed' },
             itemStyle: { color: maColor },
           },
         ]
@@ -167,7 +167,7 @@
       showSymbol: false,
       smooth: false,
       connectNulls: true,
-      lineStyle: { color: ibovColor, width: 1.55 },
+      lineStyle: { color: ibovColor, width: 1.6 },
       itemStyle: { color: ibovColor },
       markPoint:
         ibovExtremaPoints.length > 0
@@ -175,15 +175,15 @@
               symbol: 'circle',
               symbolSize: 6,
               silent: true,
-              itemStyle: { color: '#f5f5f5', borderColor: '#161616', borderWidth: 1.5 },
+              itemStyle: { color: '#475569', borderColor: '#ffffff', borderWidth: 1.5 },
               label: {
                 show: true,
                 position: 'top',
                 distance: 6,
                 formatter: (p) => p.data.value,
-                color: '#f5f5f5',
-                backgroundColor: '#212121',
-                borderColor: '#2a2a2a',
+                color: '#18181b',
+                backgroundColor: '#ffffff',
+                borderColor: '#d4d4d8',
                 borderWidth: 1,
                 borderRadius: 4,
                 padding: [2, 5],
@@ -216,7 +216,7 @@
       itemHeight: 8,
       itemGap: 14,
       textStyle: {
-        color: '#a6a6a6',
+        color: '#52525b',
         fontFamily: 'IBM Plex Sans, system-ui, sans-serif',
         fontSize: 11,
         padding: [0, 0, 0, 3],
@@ -224,29 +224,30 @@
     },
     tooltip: {
       trigger: 'axis',
-      backgroundColor: '#212121',
-      borderColor: '#2a2a2a',
+      backgroundColor: '#ffffff',
+      borderColor: '#e4e4e7',
       borderWidth: 1,
+      extraCssText: 'box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);',
       textStyle: {
-        color: '#f5f5f5',
+        color: '#18181b',
         fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
         fontSize: 11,
       },
       axisPointer: {
         type: 'line',
-        lineStyle: { color: '#3f3f46', width: 1, type: 'dashed' },
+        lineStyle: { color: '#d4d4d8', width: 1, type: 'dashed' },
       },
       formatter: (params) => {
         if (!Array.isArray(params) || !params.length) return '';
         const dateStr = params[0].axisValueLabel || '';
-        const lines = [`<div style="color:#a6a6a6;margin-bottom:4px;">${dateStr}</div>`];
+        const lines = [`<div style="color:#71717a;margin-bottom:4px;">${dateStr}</div>`];
         for (const p of params) {
           if (p.value === null || p.value === undefined) continue;
           const formatted = p.seriesName === ibovName ? `${formatPts(p.value)} pts` : formatBi(p.value);
           lines.push(
             `<div style="display:flex;justify-content:space-between;gap:14px;">` +
-              `<span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.color};margin-right:6px;"></span>${p.seriesName}</span>` +
-              `<strong style="color:#f5f5f5;">${formatted}</strong>` +
+              `<span style="color:#52525b;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${p.color};margin-right:6px;"></span>${p.seriesName}</span>` +
+              `<strong style="color:#18181b;">${formatted}</strong>` +
             `</div>`
           );
         }
@@ -261,11 +262,11 @@
             xAxisIndex: 0,
             height: 18,
             bottom: 4,
-            borderColor: '#2a2a2a',
-            backgroundColor: '#0f0f0f',
-            fillerColor: 'rgba(250, 204, 21, 0.14)',
-            handleStyle: { color: '#facc15', borderColor: '#facc15' },
-            textStyle: { color: '#737373', fontFamily: 'IBM Plex Mono, monospace', fontSize: 10 },
+            borderColor: '#e4e4e7',
+            backgroundColor: '#f5f5f4',
+            fillerColor: 'rgba(217, 119, 6, 0.14)',
+            handleStyle: { color: '#d97706', borderColor: '#d97706' },
+            textStyle: { color: '#71717a', fontFamily: 'IBM Plex Mono, monospace', fontSize: 10 },
           },
         ]
       : undefined,
@@ -273,11 +274,11 @@
       type: 'category',
       data: dates,
       boundaryGap: false,
-      axisLine: { lineStyle: { color: '#2a2a2a' } },
+      axisLine: { lineStyle: { color: '#e4e4e7' } },
       axisTick: { show: false },
       splitLine: { show: false },
       axisLabel: {
-        color: '#737373',
+        color: '#71717a',
         fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
         fontSize: 10,
         hideOverlap: true,
@@ -289,7 +290,7 @@
         type: 'value',
         name: 'R$ bi',
         nameTextStyle: {
-          color: '#737373',
+          color: '#71717a',
           fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
           fontSize: 10,
           padding: [0, 0, 0, -8],
@@ -298,9 +299,9 @@
         boundaryGap: ['10%', '14%'],
         axisLine: { show: false },
         axisTick: { show: false },
-        splitLine: { lineStyle: { color: '#202020' } },
+        splitLine: { lineStyle: { color: '#f4f4f5' } },
         axisLabel: {
-          color: '#737373',
+          color: '#71717a',
           fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
           fontSize: 10,
           formatter: (v) => formatBiAxis(v),
@@ -314,7 +315,7 @@
         axisTick: { show: false },
         splitLine: { show: false },
         axisLabel: {
-          color: '#737373',
+          color: '#71717a',
           fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
           fontSize: 10,
           formatter: (v) => formatPts(v),

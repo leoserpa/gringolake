@@ -5,7 +5,7 @@
   export let x = 'trading_date';
   export let y = [];
   export let names = [];
-  export let colors = ['#facc15', '#a3a3a3', '#737373', '#525252'];
+  export let colors = ['#d97706', '#475569', '#9ca3af', '#cbd5e1'];
   export let dashed = [];
   export let prefix = '';
   export let suffix = '';
@@ -15,8 +15,8 @@
   export let showEndLabel = true;
   export let chartType = 'line';
   export let axisCompact = false;
-  export let positiveColor = '#facc15';
-  export let negativeColor = '#525252';
+  export let positiveColor = '#d97706';
+  export let negativeColor = '#94a3b8';
 
   $: isBar = chartType === 'bar';
 
@@ -153,7 +153,7 @@
                 silent: true,
                 symbol: ['none', 'none'],
                 label: { show: false },
-                lineStyle: { color: '#333333', width: 1, type: 'solid' },
+                lineStyle: { color: '#d4d4d8', width: 1, type: 'solid' },
                 data: [{ yAxis: 0 }],
               }
             : undefined,
@@ -163,7 +163,7 @@
                 distance: 10,
                 verticalAlign: 'middle',
                 formatter: () => endText,
-                color: isPrimary ? color : '#a6a6a6',
+                color: isPrimary ? color : '#52525b',
                 fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
                 fontWeight: isPrimary ? 700 : 500,
                 fontSize: isPrimary ? 11 : 10,
@@ -178,7 +178,7 @@
                 label: { show: false },
                 itemStyle: {
                   color,
-                  borderColor: '#161616',
+                  borderColor: '#ffffff',
                   borderWidth: isPrimary ? 2 : 1.5,
                 },
                 data: [{ coord: [lastPt.x, lastPt.val] }],
@@ -214,7 +214,7 @@
           itemHeight: 8,
           itemGap: 14,
           textStyle: {
-            color: '#a6a6a6',
+            color: '#52525b',
             fontFamily: 'IBM Plex Sans, system-ui, sans-serif',
             fontSize: 11,
             padding: [0, 0, 0, 3],
@@ -223,23 +223,24 @@
       : { show: false },
     tooltip: {
       trigger: 'axis',
-      backgroundColor: '#212121',
-      borderColor: '#2a2a2a',
+      backgroundColor: '#ffffff',
+      borderColor: '#e4e4e7',
       borderWidth: 1,
+      extraCssText: 'box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);',
       textStyle: {
-        color: '#f5f5f5',
+        color: '#18181b',
         fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
         fontSize: 11,
       },
       axisPointer: {
         type: 'line',
-        lineStyle: { color: '#525252', width: 1, type: 'dashed' },
+        lineStyle: { color: '#d4d4d8', width: 1, type: 'dashed' },
       },
       formatter: (params) => {
         if (!Array.isArray(params) || !params.length) return '';
         const rawX = isBar ? params[0].axisValue : params[0].value?.[0] || params[0].axisValueLabel;
         const dateStr = formatTooltipDate(rawX);
-        const lines = [`<div style="color:#a6a6a6;margin-bottom:4px;">${dateStr}</div>`];
+        const lines = [`<div style="color:#71717a;margin-bottom:4px;">${dateStr}</div>`];
         for (const p of params) {
           const v = Array.isArray(p.value)
             ? p.value[1]
@@ -250,8 +251,8 @@
           const dotColor = isBar ? (Number(v) >= 0 ? positiveColor : negativeColor) : p.color;
           lines.push(
             `<div style="display:flex;justify-content:space-between;gap:14px;">` +
-              `<span><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;"></span>${p.seriesName}</span>` +
-              `<strong style="color:#f5f5f5;">${formatVal(v)}</strong>` +
+              `<span style="color:#52525b;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;"></span>${p.seriesName}</span>` +
+              `<strong style="color:#18181b;">${formatVal(v)}</strong>` +
             `</div>`
           );
         }
@@ -263,11 +264,11 @@
           type: 'category',
           data: barCategories,
           boundaryGap: true,
-          axisLine: { onZero: false, lineStyle: { color: '#2a2a2a' } },
+          axisLine: { onZero: false, lineStyle: { color: '#e4e4e7' } },
           axisTick: { show: false },
           splitLine: { show: false },
           axisLabel: {
-            color: '#737373',
+            color: '#71717a',
             fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
             fontSize: 10.5,
             hideOverlap: true,
@@ -277,11 +278,11 @@
       : {
           type: 'time',
           boundaryGap: false,
-          axisLine: { lineStyle: { color: '#2a2a2a' } },
+          axisLine: { lineStyle: { color: '#e4e4e7' } },
           axisTick: { show: false },
           splitLine: { show: false },
           axisLabel: {
-            color: '#737373',
+            color: '#71717a',
             fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
             fontSize: 10.5,
             hideOverlap: true,
@@ -294,9 +295,9 @@
       boundaryGap: ['8%', '12%'],
       axisLine: { show: false },
       axisTick: { show: false },
-      splitLine: { lineStyle: { color: '#202020' } },
+      splitLine: { lineStyle: { color: '#f4f4f5' } },
       axisLabel: {
-        color: '#737373',
+        color: '#71717a',
         fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
         fontSize: 10.5,
         formatter: (val) => formatAxisVal(val),

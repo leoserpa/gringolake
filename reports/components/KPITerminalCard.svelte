@@ -96,8 +96,8 @@
 
 <style>
   .kpi-card {
-    background: #161616;
-    border: 1px solid #2a2a2a;
+    background: #ffffff;
+    border: 1px solid #e4e4e7;
     border-radius: 10px;
     padding: 16px 18px;
     display: flex;
@@ -106,6 +106,7 @@
     gap: 8px;
     min-block-size: 104px;
     min-inline-size: 0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
   }
 
   .kpi-head {
@@ -119,7 +120,7 @@
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
-    color: #a6a6a6;
+    color: #52525b;
     line-height: 1.25;
   }
 
@@ -134,14 +135,14 @@
     font-family: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
     font-size: clamp(20px, 1.9vw, 25px);
     font-weight: 700;
-    color: #f5f5f5;
+    color: #18181b;
     line-height: 1.15;
     letter-spacing: -0.025em;
     font-variant-numeric: tabular-nums;
   }
 
   .kpi-value.is-alert {
-    color: #facc15;
+    color: #b45309;
   }
 
   .kpi-sub {
@@ -152,14 +153,14 @@
     gap: 2px 8px;
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     font-size: 11px;
-    color: #737373;
+    color: #71717a;
     line-height: 1.35;
   }
 
   .kpi-date {
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 10.5px;
-    color: #636363;
+    color: #a1a1aa;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }

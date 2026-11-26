@@ -78,7 +78,7 @@ ORDER BY trading_date
 <div class="terminal-grid-1">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Saldo Líquido Diário de Pessoa Física na B3 (R$ bi)</h2>
-    <p class="terminal-panel-sub">Entradas líquidas diárias (amarelo) vs. saídas líquidas diárias (cinza) derivadas por desacumulação MTD</p>
+    <p class="terminal-panel-sub">Entradas líquidas diárias (dourado) vs. saídas líquidas diárias (cinza) derivadas por desacumulação MTD</p>
     <TerminalLineChart
       data={pf_serie_completa}
       x="trading_date"

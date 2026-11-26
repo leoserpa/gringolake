@@ -92,7 +92,7 @@ ORDER BY w.trading_date
 <div class="terminal-grid-2">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Relação: IBOV × Pessoa Física (Curto Prazo)</h2>
-    <p class="terminal-panel-sub">Acumulado P.F. rebased na janela (amarelo) e MM21 (tracejada) no eixo esquerdo · IBOV (prata) no direito · Faixas indicam P.F. abaixo da MM21</p>
+    <p class="terminal-panel-sub">Acumulado P.F. rebased na janela (dourado) e MM21 (tracejada) no eixo esquerdo · IBOV (grafite) no direito · Faixas indicam P.F. abaixo da MM21</p>
     <TerminalDualAxisChart
       data={serie_curto_prazo}
       flowCol="pf_cum_short_term_bi_brl"
@@ -109,7 +109,7 @@ ORDER BY w.trading_date
 
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Comparativo: IBOV × Pessoa Física (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado contínuo de Pessoa Física (amarelo) + MM21 (tracejada) contra fechamento do IBOV (prata)</p>
+    <p class="terminal-panel-sub">Fluxo líquido acumulado contínuo de Pessoa Física (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
       flowCol="pf_cum_bi_brl"
@@ -127,7 +127,7 @@ ORDER BY w.trading_date
 <div class="terminal-grid-2">
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Comparativo: IBOV × Institucional (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado de Investidores Institucionais (amarelo) + MM21 (tracejada) contra fechamento do IBOV (prata)</p>
+    <p class="terminal-panel-sub">Fluxo líquido acumulado de Investidores Institucionais (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
       flowCol="instit_cum_bi_brl"
@@ -143,7 +143,7 @@ ORDER BY w.trading_date
 
   <section class="terminal-panel">
     <h2 class="terminal-panel-title">Comparativo: IBOV × Investidor Estrangeiro (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado do capital estrangeiro na B3 (amarelo) + MM21 (tracejada) contra fechamento do IBOV (prata)</p>
+    <p class="terminal-panel-sub">Fluxo líquido acumulado do capital estrangeiro na B3 (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
       flowCol="estrang_cum_bi_brl"
@@ -180,5 +180,5 @@ ORDER BY f.display_order
 <FlowExplorerTable
   data={explorador_perfis}
   title="Explorador Executivo — Os 5 Perfis Oficiais da B3 no Último Pregão"
-  subtitle="Saldos líquidos diário, mensal (MTD) e acumulado em R$ bilhões · Destaque amarelo nos perfis acima da MM21"
+  subtitle="Saldos líquidos diário, mensal (MTD) e acumulado em R$ bilhões · Destaque dourado nos perfis acima da MM21"
 />
