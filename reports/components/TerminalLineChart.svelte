@@ -5,18 +5,27 @@
   export let x = 'trading_date';
   export let y = [];
   export let names = [];
-  export let colors = ['#d97706', '#475569', '#9ca3af', '#cbd5e1'];
+  export let colors = ['#f2b94b', '#e5e5e5', '#8a8a91', '#5c5c62'];
   export let dashed = [];
   export let prefix = '';
   export let suffix = '';
   export let decimals = 2;
   export let signed = false;
-  export let height = '255px';
+  export let height = '275px';
   export let showEndLabel = true;
   export let chartType = 'line';
   export let axisCompact = false;
-  export let positiveColor = '#d97706';
-  export let negativeColor = '#94a3b8';
+  export let positiveColor = '#f2b94b';
+  export let negativeColor = '#5c5c62';
+  export let focal = false;
+  export let panelIndex = '';
+  export let panelTitle = '';
+  export let panelSubtitle = '';
+
+  let chartWidth = 0;
+  $: isCompact = chartWidth > 0 && chartWidth < 460;
+  $: resolvedHeight = isCompact ? '230px' : height;
+  $: effectiveEndLabel = showEndLabel && !isCompact;
 
   $: isBar = chartType === 'bar';
 
@@ -65,15 +74,38 @@
     return `${sign}${prefix}${formatted}${suffix}`;
   }
 
+  function formatHeaderReadout(v) {
+    if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
+    const num = Number(v);
+    const epsilon = 0.5 * Math.pow(10, -decimals);
+    const normalized = Math.abs(num) < epsilon ? 0 : num;
+    const sign = normalized < 0 ? '-' : signed && normalized > 0 ? '+' : '';
+    const formatted = Math.abs(normalized).toLocaleString('pt-BR', {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return `${sign}${prefix}${formatted}${suffix}`;
+  }
+
   function formatAxisVal(v) {
     if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
     const num = Number(v);
+    if (axisCompact && suffix.trim() === 'bi') {
+      if (Math.abs(num) < 0.005) return '0';
+      const sign = num < 0 ? '-' : '';
+      const formatted = Math.abs(num).toLocaleString('pt-BR', {
+        minimumFractionDigits: Math.abs(num) < 1 ? 1 : 0,
+        maximumFractionDigits: 1,
+      });
+      return `${sign}${formatted} bi`;
+    }
     if (axisCompact && suffix.trim() === 'mi') {
+      if (Math.abs(num) < 0.5) return '0';
       const sign = num < 0 ? '-' : '';
       const formatted = Math.abs(num).toLocaleString('pt-BR', {
         maximumFractionDigits: 0,
       });
-      return `${sign}${formatted}M`;
+      return `${sign}${formatted} mi`;
     }
     return formatVal(v);
   }
@@ -114,7 +146,7 @@
             value: val,
             itemStyle: {
               color: isPos ? positiveColor : negativeColor,
-              borderRadius: isPos ? [3, 3, 0, 0] : [0, 0, 3, 3],
+              borderRadius: isPos ? [7, 7, 3, 3] : [3, 3, 7, 7],
             },
           });
         }
@@ -123,27 +155,29 @@
       if (!lastPt) return null;
 
       const isPrimary = idx === 0;
-      const color = colors[idx] || '#737373';
+      const color = colors[idx] || '#767676';
       const name = names[idx] || col;
       const isDashed = Boolean(dashed[idx]);
       const endText = lastPt ? formatVal(lastPt.val) : '';
-      const showSeriesEnd = showEndLabel && !isBar && Boolean(lastPt);
+      const showSeriesEnd = effectiveEndLabel && !isBar && Boolean(lastPt);
 
       return {
+        lastVal: lastPt.val,
         endText,
         series: {
           name,
           type: chartType,
           data: pts,
           showSymbol: false,
-          smooth: false,
+          smooth: isBar ? false : 0.25,
           connectNulls: true,
-          barMaxWidth: 18,
-          barCategoryGap: '28%',
+          barMaxWidth: 22,
+          barCategoryGap: '26%',
           lineStyle: !isBar
             ? {
                 color,
-                width: isPrimary ? 2 : 1.35,
+                width: isPrimary ? 2.4 : 1.5,
+                cap: 'round',
                 type: isDashed ? 'dashed' : 'solid',
               }
             : undefined,
@@ -153,20 +187,20 @@
                 silent: true,
                 symbol: ['none', 'none'],
                 label: { show: false },
-                lineStyle: { color: '#d4d4d8', width: 1, type: 'solid' },
+                lineStyle: { color: '#424248', width: 1, type: 'solid' },
                 data: [{ yAxis: 0 }],
               }
             : undefined,
           endLabel: showSeriesEnd
             ? {
                 show: true,
-                distance: 10,
+                distance: 8,
                 verticalAlign: 'middle',
                 formatter: () => endText,
-                color: isPrimary ? color : '#52525b',
-                fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
-                fontWeight: isPrimary ? 700 : 500,
-                fontSize: isPrimary ? 11 : 10,
+                color: isPrimary ? color : '#a3a3a3',
+                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                fontWeight: isPrimary ? 600 : 500,
+                fontSize: isPrimary ? 10.5 : 10,
               }
             : { show: false },
           labelLayout: showSeriesEnd ? { moveOverlap: 'shiftY' } : undefined,
@@ -178,7 +212,7 @@
                 label: { show: false },
                 itemStyle: {
                   color,
-                  borderColor: '#ffffff',
+                  borderColor: '#2b2b2b',
                   borderWidth: isPrimary ? 2 : 1.5,
                 },
                 data: [{ coord: [lastPt.x, lastPt.val] }],
@@ -189,58 +223,73 @@
     })
     .filter(Boolean);
 
+  $: primaryLastVal = seriesMeta.length === 1 ? seriesMeta[0].lastVal : null;
+  $: readoutColor =
+    primaryLastVal !== null && signed
+      ? focal || primaryLastVal > 0
+        ? '#f2b94b'
+        : '#e5e5e5'
+      : '#f2b94b';
+
   $: builtSeries = seriesMeta.map((m) => m.series);
   $: hasLegend = builtSeries.length > 1;
   $: maxEndChars = seriesMeta.reduce((acc, m) => Math.max(acc, m.endText.length), 6);
-  $: rightPad = showEndLabel && !isBar ? Math.max(66, maxEndChars * 8 + 18) : 14;
+  $: rightPad = effectiveEndLabel && !isBar ? Math.max(68, maxEndChars * 8 + 14) : isCompact ? 14 : 10;
 
   $: config = {
     backgroundColor: 'transparent',
-    animationDuration: 300,
+    animationDuration: 320,
     grid: {
-      top: hasLegend ? 36 : 16,
+      top: hasLegend ? (isCompact ? 34 : 38) : 20,
       right: rightPad,
       bottom: 24,
-      left: 8,
+      left: isCompact ? 4 : 6,
       containLabel: true,
     },
     legend: hasLegend
       ? {
           show: true,
           top: 0,
-          left: 'center',
-          icon: 'circle',
-          itemWidth: 8,
-          itemHeight: 8,
-          itemGap: 14,
+          left: 0,
+          type: 'scroll',
+          icon: 'roundRect',
+          itemWidth: 11,
+          itemHeight: 3,
+          itemGap: 16,
+          pageIconColor: '#a3a3a3',
+          pageTextStyle: { color: '#767676' },
           textStyle: {
-            color: '#52525b',
+            color: '#a3a3a3',
             fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
             fontSize: 11,
-            padding: [0, 0, 0, 3],
+            padding: [0, 0, 0, 4],
           },
         }
       : { show: false },
     tooltip: {
       trigger: 'axis',
-      backgroundColor: '#ffffff',
-      borderColor: '#e4e4e7',
+      confine: true,
+      backgroundColor: '#222222',
+      borderColor: '#45454a',
       borderWidth: 1,
-      extraCssText: 'box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);',
+      extraCssText: 'border-radius: 16px; padding: 10px 14px; box-shadow: 0 14px 36px rgba(0, 0, 0, 0.48);',
       textStyle: {
-        color: '#18181b',
-        fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
+        color: '#f8f8f8',
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
         fontSize: 11,
       },
       axisPointer: {
-        type: 'line',
-        lineStyle: { color: '#d4d4d8', width: 1, type: 'dashed' },
+        type: isBar ? 'shadow' : 'line',
+        lineStyle: { color: '#55555b', width: 1, type: 'dashed' },
+        shadowStyle: { color: 'rgba(255, 255, 255, 0.04)' },
       },
       formatter: (params) => {
         if (!Array.isArray(params) || !params.length) return '';
         const rawX = isBar ? params[0].axisValue : params[0].value?.[0] || params[0].axisValueLabel;
         const dateStr = formatTooltipDate(rawX);
-        const lines = [`<div style="color:#71717a;margin-bottom:4px;">${dateStr}</div>`];
+        const lines = [
+          `<div style="color:#a3a3a3;margin-bottom:6px;font-family:Plus Jakarta Sans,sans-serif;font-weight:600;font-size:11px;">${dateStr}</div>`,
+        ];
         for (const p of params) {
           const v = Array.isArray(p.value)
             ? p.value[1]
@@ -250,9 +299,9 @@
           if (v === null || v === undefined) continue;
           const dotColor = isBar ? (Number(v) >= 0 ? positiveColor : negativeColor) : p.color;
           lines.push(
-            `<div style="display:flex;justify-content:space-between;gap:14px;">` +
-              `<span style="color:#52525b;"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${dotColor};margin-right:6px;"></span>${p.seriesName}</span>` +
-              `<strong style="color:#18181b;">${formatVal(v)}</strong>` +
+            `<div style="display:flex;justify-content:space-between;align-items:center;gap:16px;line-height:1.55;">` +
+              `<span style="color:#a3a3a3;font-family:Plus Jakarta Sans,sans-serif;"><span style="display:inline-block;width:7px;height:7px;border-radius:999px;background:${dotColor};margin-right:7px;"></span>${p.seriesName}</span>` +
+              `<strong style="color:#f8f8f8;">${formatVal(v)}</strong>` +
             `</div>`
           );
         }
@@ -264,13 +313,14 @@
           type: 'category',
           data: barCategories,
           boundaryGap: true,
-          axisLine: { onZero: false, lineStyle: { color: '#e4e4e7' } },
+          axisLine: { show: false },
           axisTick: { show: false },
           splitLine: { show: false },
           axisLabel: {
-            color: '#71717a',
-            fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
-            fontSize: 10.5,
+            color: '#767676',
+            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+            fontSize: isCompact ? 9 : 10,
+            margin: 10,
             hideOverlap: true,
             formatter: (val) => formatAxisDate(val),
           },
@@ -278,13 +328,14 @@
       : {
           type: 'time',
           boundaryGap: false,
-          axisLine: { lineStyle: { color: '#e4e4e7' } },
+          axisLine: { lineStyle: { color: '#3a3a3f' } },
           axisTick: { show: false },
           splitLine: { show: false },
           axisLabel: {
-            color: '#71717a',
-            fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
-            fontSize: 10.5,
+            color: '#767676',
+            fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+            fontSize: isCompact ? 9 : 10,
+            margin: 10,
             hideOverlap: true,
             formatter: (val) => formatAxisDate(val),
           },
@@ -292,14 +343,14 @@
     yAxis: {
       type: 'value',
       scale: !isBar,
-      boundaryGap: ['8%', '12%'],
+      boundaryGap: ['10%', '14%'],
       axisLine: { show: false },
       axisTick: { show: false },
-      splitLine: { lineStyle: { color: '#f4f4f5' } },
+      splitLine: { show: false },
       axisLabel: {
-        color: '#71717a',
-        fontFamily: 'IBM Plex Mono, ui-monospace, monospace',
-        fontSize: 10.5,
+        color: '#767676',
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: isCompact ? 9 : 10,
         formatter: (val) => formatAxisVal(val),
       },
     },
@@ -308,12 +359,64 @@
 </script>
 
 <div class="terminal-line-wrap">
-  <ECharts {data} {config} {height} />
+  {#if panelTitle}
+    <div class="line-head-row">
+      <h2 class="terminal-panel-title" style="margin: 0;">
+        {#if panelIndex}
+          <span class="panel-index">{panelIndex}</span>
+        {/if}
+        <span>{panelTitle}</span>
+      </h2>
+      {#if primaryLastVal !== null}
+        <span class="line-live-readout" style={`color: ${readoutColor};`}>
+          {formatHeaderReadout(primaryLastVal)}
+        </span>
+      {/if}
+    </div>
+    {#if panelSubtitle}
+      <p class="terminal-panel-sub">{panelSubtitle}</p>
+    {/if}
+  {/if}
+  <div class="line-chart-box" bind:clientWidth={chartWidth}>
+    {#if chartWidth > 0}
+      <ECharts {data} {config} height={resolvedHeight} width="100%" />
+    {/if}
+  </div>
 </div>
 
 <style>
   .terminal-line-wrap {
     inline-size: 100%;
+    max-inline-size: 100%;
     min-inline-size: 0;
+  }
+
+  .line-chart-box {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    overflow: hidden;
+  }
+
+  .line-head-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin-block-end: 4px;
+  }
+
+  .line-live-readout {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .line-live-readout {
+      font-size: 13px;
+    }
   }
 </style>

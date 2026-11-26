@@ -43,7 +43,7 @@ with_ma21 as (
         avg(pf_cum_short_term_k_brl) over (
             order by trading_date
             rows between 20 preceding and current row
-        ) as pf_cum_short_term_ma21_k_brl,
+        ) as raw_pf_cum_short_term_ma21_k_brl,
         count(*) over (
             order by trading_date
             rows between 20 preceding and current row
@@ -61,9 +61,20 @@ select
     daily_net_flow_bi_brl,
     pf_cum_short_term_k_brl,
     pf_cum_short_term_bi_brl,
-    round(pf_cum_short_term_ma21_k_brl, 4) as pf_cum_short_term_ma21_k_brl,
-    round(pf_cum_short_term_ma21_k_brl / 1000000.0, 6) as pf_cum_short_term_ma21_bi_brl,
-    (pf_cum_short_term_k_brl < pf_cum_short_term_ma21_k_brl) as is_pf_below_ma21,
+    -- ADR-006: strict 21-trading-day SMA; NULL and is_pf_below_ma21=false during warm-up.
+    case
+        when ma21_window_obs_count = 21 then round(raw_pf_cum_short_term_ma21_k_brl, 4)
+        else null
+    end as pf_cum_short_term_ma21_k_brl,
+    case
+        when ma21_window_obs_count = 21 then round(raw_pf_cum_short_term_ma21_k_brl / 1000000.0, 6)
+        else null
+    end as pf_cum_short_term_ma21_bi_brl,
+    case
+        when ma21_window_obs_count = 21 then (pf_cum_short_term_k_brl < raw_pf_cum_short_term_ma21_k_brl)
+        else false
+    end as is_pf_below_ma21,
+    cast(ma21_window_obs_count as integer) as ma21_window_obs_count,
     (ma21_window_obs_count = 21) as has_full_ma21_window
 from with_ma21
 order by trading_date

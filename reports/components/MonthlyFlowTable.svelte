@@ -1,8 +1,8 @@
 <script>
   export let data = [];
-  export let title = 'Fluxo Mensal Consolidado por Tipo de Investidor × Retorno do Ibovespa';
-  export let subtitle =
-    'Como ler: compare quem comprou e quem vendeu em cada mês (saldo oficial MTD da B3) lado a lado com a alta ou queda do Ibovespa';
+  export let panelIndex = '05';
+  export let title = 'Consolidado Mensal × Retorno do Ibovespa';
+  export let subtitle = 'Último saldo MTD oficial de cada mês em R$ bi · Entradas líquidas positivas destacadas em âmbar';
 
   $: rows = Array.isArray(data)
     ? data
@@ -19,23 +19,13 @@
 
   function formatFlowFromKBrl(kVal) {
     if (kVal === null || kVal === undefined || Number.isNaN(Number(kVal))) return '—';
-    const numK = Number(kVal);
-    const absK = Math.abs(numK);
-    const sign = numK < 0 ? '-' : numK > 0 ? '+' : '';
-
-    if (absK >= 1_000_000) {
-      const bi = absK / 1_000_000;
-      return `${sign}R$ ${bi.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} bi`;
-    }
-
-    const mi = absK / 1_000;
-    return `${sign}R$ ${mi.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })} mi`;
+    const numBi = Number(kVal) / 1_000_000;
+    const normalized = Math.abs(numBi) < 0.005 ? 0 : numBi;
+    const sign = normalized < 0 ? '-' : normalized > 0 ? '+' : '';
+    return `${sign}R$ ${Math.abs(normalized).toLocaleString('pt-BR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })} bi`;
   }
 
   function formatPct(v) {
@@ -87,17 +77,26 @@
   }
 </script>
 
-<section class="terminal-panel monthly-panel" aria-label={title}>
+<section class="terminal-panel monthly-panel" aria-labelledby="monthly-flow-title">
   <div class="monthly-head">
-    <div>
-      <h2 class="terminal-panel-title">{title}</h2>
-      <p class="terminal-panel-sub" style="margin-block-end: 0;">{subtitle}</p>
+    <div class="monthly-title-block">
+      <h2 id="monthly-flow-title" class="terminal-panel-title" style="margin: 0 0 4px 0;">
+        {#if panelIndex}
+          <span class="panel-index">{panelIndex}</span>
+        {/if}
+        <span>{title}</span>
+      </h2>
+      {#if subtitle}
+        <p class="terminal-panel-sub" style="margin: 0;">{subtitle}</p>
+      {/if}
     </div>
 
-    <button type="button" class="monthly-export" on:click={exportCsv}>Exportar CSV</button>
+    <div class="monthly-right">
+      <button type="button" class="monthly-export" on:click={exportCsv}>Exportar CSV</button>
+    </div>
   </div>
 
-  <div class="monthly-scroll" role="region" tabindex="0" aria-label={title}>
+  <div class="monthly-scroll" role="region" tabindex="0" aria-labelledby="monthly-flow-title">
     <table class="monthly-table">
       <thead>
         <tr>
@@ -113,7 +112,7 @@
       <tbody>
         {#each rows as row}
           <tr>
-            <td class="mono mes-col">{row.mes}</td>
+            <th scope="row" class="mono mes-col">{row.mes}</th>
             <td class="mono muted">{formatDateShort(row.ate_pregao)}</td>
             <td class={`mono num ${signClass(row.estrang_k_brl)}`}>{formatFlowFromKBrl(row.estrang_k_brl)}</td>
             <td class={`mono num ${signClass(row.instit_k_brl)}`}>{formatFlowFromKBrl(row.instit_k_brl)}</td>
@@ -127,14 +126,14 @@
   </div>
 
   <div class="monthly-foot">
-    <span>Base oficial B3 (último saldo MTD disponível em cada mês · retorno IBOV calculado fechamento/fechamento mensal)</span>
+    <span>Saldo MTD oficial da B3 no último pregão de cada mês · Histórico ampliado automaticamente às 21h BRT</span>
     <span>{rows.length} {rows.length === 1 ? 'mês' : 'meses'} disponíveis</span>
   </div>
 </section>
 
 <style>
   .monthly-panel {
-    margin-block-end: 18px;
+    margin-block-end: 20px;
   }
 
   .monthly-head {
@@ -143,91 +142,135 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px 16px;
-    margin-block-end: 14px;
+    margin-block-end: 18px;
+  }
+
+  .monthly-title-block {
+    min-inline-size: 0;
+    flex: 1 1 280px;
+  }
+
+  .monthly-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
   }
 
   .monthly-export {
-    min-block-size: max(34px, var(--target-size));
-    padding: 6px 14px;
-    border-radius: 6px;
-    border: 1px solid #e4e4e7;
-    background: #ffffff;
-    color: #18181b;
+    min-block-size: max(36px, var(--target-size));
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid #45454a;
+    background: #343434;
+    color: #f8f8f8;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    transition: background-color 0.16s ease, border-color 0.16s ease;
   }
 
   .monthly-export:hover {
-    background: #f4f4f5;
+    background: #3e3e42;
+    border-color: #5a5a60;
   }
 
   .monthly-export:focus-visible,
   .monthly-scroll:focus-visible {
-    outline: 2px solid #d97706;
+    outline: 2px solid #f2b94b;
     outline-offset: 2px;
   }
 
   .monthly-scroll {
     max-inline-size: 100%;
-    max-block-size: 420px;
+    max-block-size: 460px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    container-type: inline-size;
   }
 
   .monthly-table {
     inline-size: 100%;
-    min-inline-size: 720px;
-    border-collapse: collapse;
+    min-inline-size: 700px;
+    border-collapse: separate;
+    border-spacing: 0;
+    --label-2: 'Até Pregão';
+    --label-3: 'Estrangeiro';
+    --label-4: 'Institucional';
+    --label-5: 'Pessoa Física';
+    --label-6: 'Inst. Financeira';
+    --label-7: 'Ibovespa Mês';
   }
 
   .monthly-table thead th {
     position: sticky;
     inset-block-start: 0;
-    z-index: 1;
-    background: #ffffff;
+    z-index: 2;
+    background: #2b2b2b;
     text-align: left;
     padding: 10px 12px;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 10.5px;
     font-weight: 600;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #71717a;
-    border-block-end: 1px solid #e4e4e7;
+    color: #767676;
+    border-block-end: 1px solid #3a3a3f;
     white-space: nowrap;
   }
 
+  .monthly-table thead th:first-child {
+    padding-inline-start: 0;
+  }
+
+  .monthly-table thead th:last-child {
+    padding-inline-end: 0;
+  }
+
+  .monthly-table tbody th,
   .monthly-table tbody td {
-    padding: 11px 12px;
+    padding: 14px 12px;
     font-size: 12.5px;
-    border-block-end: 1px solid #f4f4f5;
+    border-block-end: 1px solid #343438;
     white-space: nowrap;
+    background: #2b2b2b;
   }
 
+  .monthly-table tbody th.mes-col {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    text-align: left;
+    padding-inline-start: 0;
+    font-weight: 600;
+    color: #f8f8f8;
+  }
+
+  .monthly-table tbody td:last-child {
+    padding-inline-end: 0;
+  }
+
+  .monthly-table tbody tr:hover th,
   .monthly-table tbody tr:hover td {
-    background: #fafaf9;
+    background: #323236;
   }
 
+  .monthly-table tbody tr:last-child th,
   .monthly-table tbody tr:last-child td {
     border-block-end: 0;
   }
 
   .monthly-table .mono {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
     font-variant-numeric: tabular-nums;
   }
 
-  .monthly-table .mes-col {
-    font-weight: 600;
-    color: #18181b;
-  }
-
   .monthly-table .muted {
-    color: #71717a;
-    font-size: 11.5px;
+    color: #8a8a91;
+    font-size: 12px;
   }
 
   .monthly-table .num {
@@ -235,16 +278,17 @@
     font-weight: 600;
   }
 
+  /* Strict Knaflic single-accent rule: warm amber for positive inflows, calm neutral for outflows */
   .monthly-table .pos {
-    color: #15803d;
+    color: #f2b94b;
   }
 
   .monthly-table .neg {
-    color: #b91c1c;
+    color: #e5e5e5;
   }
 
   .monthly-table .neutral {
-    color: #71717a;
+    color: #767676;
   }
 
   .monthly-table .ibov-col {
@@ -252,15 +296,99 @@
   }
 
   .monthly-foot {
-    margin-block-start: 12px;
-    padding-block-start: 10px;
-    border-block-start: 1px solid #f4f4f5;
+    margin-block-start: 14px;
+    padding-block-start: 12px;
+    border-block-start: 1px solid #343438;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 8px 16px;
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 11px;
-    color: #71717a;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11.5px;
+    color: #767676;
+  }
+
+  @container (width < 600px) {
+    .monthly-table,
+    .monthly-table tbody,
+    .monthly-table tr {
+      display: block;
+      min-inline-size: 0;
+      inline-size: 100%;
+    }
+
+    .monthly-table thead {
+      display: none;
+    }
+
+    .monthly-table tr {
+      border: 1px solid #363636;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #262626;
+      margin-block-end: 12px;
+    }
+
+    .monthly-table tr:last-child {
+      margin-block-end: 0;
+    }
+
+    .monthly-table tbody th.mes-col {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 1;
+      display: block;
+      padding: 11px 14px;
+      background: #303034;
+      border-block-end: 1px solid #3a3a3f;
+      font-size: 13px;
+    }
+
+    .monthly-table tbody td {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      font-size: 12px;
+      background: #262626;
+      border-block-end: 1px solid #323236;
+      text-align: right;
+    }
+
+    .monthly-table tbody td:last-child {
+      padding-inline-end: 14px;
+      border-block-end: 0;
+    }
+
+    .monthly-table tbody td::before {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: #a3a3a3;
+      text-align: left;
+    }
+
+    .monthly-table tbody td:nth-child(2)::before { content: var(--label-2); }
+    .monthly-table tbody td:nth-child(3)::before { content: var(--label-3); }
+    .monthly-table tbody td:nth-child(4)::before { content: var(--label-4); }
+    .monthly-table tbody td:nth-child(5)::before { content: var(--label-5); }
+    .monthly-table tbody td:nth-child(6)::before { content: var(--label-6); }
+    .monthly-table tbody td:nth-child(7)::before { content: var(--label-7); }
+  }
+
+  @media (max-width: 640px) {
+    .monthly-scroll {
+      max-block-size: none;
+      overflow: visible;
+    }
+
+    .monthly-right {
+      inline-size: 100%;
+    }
+
+    .monthly-export {
+      inline-size: 100%;
+    }
   }
 </style>

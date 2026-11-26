@@ -87,17 +87,18 @@ Todas as tabelas Silver e Gold existem de forma espelhada em `data/warehouse/gri
 | `daily_net_flow_k_brl` / `daily_net_flow_bi_brl` | `DOUBLE` | Saldo líquido do pregão em R$ mil / R$ bilhões |
 | `cum_net_flow_k_brl` / `cum_net_flow_bi_brl` | `DOUBLE` | Saldo líquido acumulado contínuo na série |
 | `cum_net_flow_ytd_bi_brl` | `DOUBLE` | Saldo líquido acumulado no ano (YTD) em R$ bilhões |
-| `cum_net_flow_ma21_k_brl` / `cum_net_flow_ma21_bi_brl` | `DOUBLE` | Média móvel simples de 21 pregões sobre o acumulado (`ROWS BETWEEN 20 PRECEDING AND CURRENT ROW`) |
-| `flow_vs_ma21_spread_bi_brl` | `DOUBLE` | Diferença `cum_net_flow_bi_brl - cum_net_flow_ma21_bi_brl` |
-| `flow_vs_ma21_signal` | `STRING` | `'acima_mm21'` ou `'abaixo_mm21'` |
+| `cum_net_flow_ma21_k_brl` / `cum_net_flow_ma21_bi_brl` | `DOUBLE` | Média móvel simples estrita de 21 pregões sobre o acumulado (`ROWS BETWEEN 20 PRECEDING AND CURRENT ROW`); retorna `NULL` quando `ma21_window_obs_count < 21` ([ADR-006](decisions/006-strict-ma21-full-window-and-unified-brl-billions.md)) |
+| `flow_vs_ma21_spread_bi_brl` | `DOUBLE` | Diferença `cum_net_flow_bi_brl - cum_net_flow_ma21_bi_brl` (`NULL` quando `< 21` pregões) |
+| `flow_vs_ma21_signal` | `STRING` | `'acima_mm21'`, `'abaixo_mm21'` ou `'em_formacao'` (quando `< 21` pregões) |
+| `ma21_window_obs_count` | `INTEGER` | Contagem de pregões presentes na janela móvel atual (`1` a `21`) |
 | `has_full_ma21_window` | `BOOLEAN` | `true` quando já existem 21 pregões completos na janela da MM21 |
 
 ### `gold.mart_ibov_vs_investors_wide`
 - **Chave primária:** `trading_date` (1 linha por pregão)
-- **Uso:** Gráficos comparativos **`COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)`**.
-- **Colunas:** `trading_date`, `trading_month`, `trading_year`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `has_full_ma21_window`, além dos trios `*_daily_bi_brl`, `*_cum_bi_brl` e `*_cum_ma21_bi_brl` para os 5 perfis (`estrang`, `instit`, `pf`, `inst_fin`, `outros`) e `*_cum_k_brl` para os 3 perfis principais.
+- **Uso:** Gráficos comparativos **`IBOVESPA × perfis oficiais da B3 (R$ bilhões)`**.
+- **Colunas:** `trading_date`, `trading_month`, `trading_year`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `ma21_window_obs_count`, `has_full_ma21_window`, além dos trios `*_daily_bi_brl`, `*_cum_bi_brl` e `*_cum_ma21_bi_brl` para os 5 perfis (`estrang`, `instit`, `pf`, `inst_fin`, `outros`) e `*_cum_k_brl` para os 3 perfis principais.
 
 ### `gold.mart_ibov_vs_pf_short_term`
 - **Chave primária:** `trading_date` (últimos `160` pregões configuráveis via `var short_term_trading_days`)
 - **Uso:** Gráfico **`Relação: IBOV x P.F. (CURTO PRAZO)`**.
-- **Colunas:** `trading_date`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `daily_net_flow_k_brl`, `daily_net_flow_bi_brl`, `pf_cum_short_term_k_brl`, `pf_cum_short_term_bi_brl` (rebased no início da janela), `pf_cum_short_term_ma21_k_brl`, `pf_cum_short_term_ma21_bi_brl`, `is_pf_below_ma21`, `has_full_ma21_window`.
+- **Colunas:** `trading_date`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `daily_net_flow_k_brl`, `daily_net_flow_bi_brl`, `pf_cum_short_term_k_brl`, `pf_cum_short_term_bi_brl` (rebased no início da janela), `pf_cum_short_term_ma21_k_brl`, `pf_cum_short_term_ma21_bi_brl` (`NULL` quando `< 21` pregões), `is_pf_below_ma21` (`false` durante aquecimento), `ma21_window_obs_count`, `has_full_ma21_window`.

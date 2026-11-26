@@ -167,8 +167,16 @@ def test_medallion_end_to_end_offline_dbt_build(tmp_path: Path) -> None:
         assert pf_df.height == 24
         assert wide_df["has_full_ma21_window"].to_list()[:20] == [False] * 20
         assert wide_df["has_full_ma21_window"].to_list()[20:] == [True] * 4
+        assert wide_df["ma21_window_obs_count"].to_list()[:20] == list(range(1, 21))
+        assert wide_df["ma21_window_obs_count"].to_list()[20:] == [21] * 4
+        # ADR-006: MA21 must be strictly NULL during warm-up (< 21 sessions) and non-null from day 21+
+        assert wide_df["estrang_cum_ma21_bi_brl"].to_list()[:20] == [None] * 20
+        assert all(v is not None for v in wide_df["estrang_cum_ma21_bi_brl"].to_list()[20:])
         assert pf_df["has_full_ma21_window"].to_list()[:20] == [False] * 20
         assert pf_df["has_full_ma21_window"].to_list()[20:] == [True] * 4
+        assert pf_df["pf_cum_short_term_ma21_bi_brl"].to_list()[:20] == [None] * 20
+        assert all(v is not None for v in pf_df["pf_cum_short_term_ma21_bi_brl"].to_list()[20:])
+        assert pf_df["is_pf_below_ma21"].to_list()[:20] == [False] * 20
 
         db_wide_cnt = con.execute("SELECT count(*) FROM gold.mart_ibov_vs_investors_wide").fetchone()[0]
         assert db_wide_cnt == wide_df.height

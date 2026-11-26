@@ -2,28 +2,6 @@
 title: Ibovespa Histórico — GringoLake
 ---
 
-<div class="page-hero">
-  <div class="page-title-group">
-    <h1 class="page-title">Ibovespa (IBOV) — Série Histórica Oficial B3</h1>
-    <p class="page-subtitle">Fechamentos diários oficiais extraídos diretamente da API GetPortfolioDay da B3 (calendário base do Lakehouse)</p>
-  </div>
-
-  <div class="controls-bar">
-    <div class="controls-left">
-      <ButtonGroup name=horizonte_ibov>
-        <ButtonGroupItem valueLabel="1 Ano" value="365" />
-        <ButtonGroupItem valueLabel="2 Anos" value="730" />
-        <ButtonGroupItem valueLabel="5 Anos" value="1825" default />
-        <ButtonGroupItem valueLabel="Máx (2020+)" value="36500" />
-      </ButtonGroup>
-    </div>
-
-    <div class="controls-right">
-      <span class="status-chip"><span class="status-chip-accent">Silver</span> · stg_b3_ibov_daily</span>
-    </div>
-  </div>
-</div>
-
 ```sql ibov_filtrado
 WITH limite AS (
     SELECT MAX(trading_date) AS max_dt FROM gringolake.stg_b3_ibov_daily
@@ -41,6 +19,7 @@ ORDER BY s.trading_date
 
 ```sql ibov_kpis
 SELECT
+    COUNT(*) AS pregoes_janela,
     MAX(trading_date) AS ultima_data,
     LAST(ibov_close ORDER BY trading_date) AS fechamento_atual,
     LAST(ibov_return_1d_pct ORDER BY trading_date) AS retorno_1d,
@@ -49,26 +28,49 @@ SELECT
 FROM ${ibov_filtrado}
 ```
 
+<div class="page-hero">
+  <p class="page-eyebrow">GRINGOLAKE · IBOVESPA OFICIAL</p>
+
+  <div class="page-head-row">
+    <div class="page-title-group">
+      <h1 class="page-title">Ibovespa Histórico</h1>
+      <p class="page-subtitle">Fechamento oficial diário da B3 (GetPortfolioDay) utilizado como calendário âncora da desacumulação MTD</p>
+    </div>
+
+    <div class="controls-right">
+      <ButtonGroup name=horizonte_ibov>
+        <ButtonGroupItem valueLabel="1 Ano" value="365" />
+        <ButtonGroupItem valueLabel="2 Anos" value="730" />
+        <ButtonGroupItem valueLabel="5 Anos" value="1825" default />
+        <ButtonGroupItem valueLabel="Máx (2020+)" value="36500" />
+      </ButtonGroup>
+
+      <CounterBadge data={ibov_kpis} value="pregoes_janela" label="Pregões" decimals={0} />
+    </div>
+  </div>
+</div>
+
 <div class="kpi-grid-4">
-  <KPITerminalCard data={ibov_kpis} value="fechamento_atual" dateCol="ultima_data" code="IBOV" title="Fechamento Atual" suffix=" pts" decimals={0} subtitle="Último pregão B3" icon="trend" />
-  <KPITerminalCard data={ibov_kpis} value="retorno_1d" dateCol="ultima_data" code="1D" title="Variação Diária" suffix="%" decimals={2} signed={true} subtitle="Retorno 1 pregão" icon="activity" />
-  <KPITerminalCard data={ibov_kpis} value="maxima_periodo" code="MAX" title="Máxima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais alto" icon="trend" />
-  <KPITerminalCard data={ibov_kpis} value="minima_periodo" code="MIN" title="Mínima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais baixo" icon="trend" />
+  <KPITerminalCard data={ibov_kpis} value="fechamento_atual" dateCol="ultima_data" code="IBOV" title="Fechamento Atual" suffix=" pts" decimals={0} subtitle="Último pregão B3" liveDot={true} focal={true} />
+  <KPITerminalCard data={ibov_kpis} value="retorno_1d" dateCol="ultima_data" code="1D" title="Variação Diária" suffix="%" decimals={2} signed={true} subtitle="Retorno 1 pregão" focalWhenPositive={true} />
+  <KPITerminalCard data={ibov_kpis} value="maxima_periodo" code="MAX" title="Máxima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais alto" />
+  <KPITerminalCard data={ibov_kpis} value="minima_periodo" code="MIN" title="Mínima na Janela" suffix=" pts" decimals={0} subtitle="Fechamento mais baixo" />
 </div>
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Evolução do Ibovespa no Horizonte Selecionado (pontos)</h2>
-    <p class="terminal-panel-sub">Fechamento oficial diário da B3 (dourado) · Calendário oficial utilizado na desacumulação MTD do BDI</p>
     <TerminalLineChart
       data={ibov_filtrado}
+      panelIndex="01"
+      panelTitle="Evolução do Ibovespa no Horizonte Selecionado"
+      panelSubtitle="Pontos de fechamento oficial diário da B3 (stg_b3_ibov_daily)"
       x="trading_date"
       y="ibov_close"
       names={['Ibovespa']}
-      colors={['#d97706']}
+      colors={['#f2b94b']}
       suffix=" pts"
       decimals={0}
-      height="320px"
+      height="350px"
     />
   </section>
 </div>
@@ -88,7 +90,7 @@ ORDER BY trading_year DESC
 ```
 
 <section class="terminal-panel">
-  <h2 class="terminal-panel-title">Resumo Anual do Ibovespa (B3 Oficial)</h2>
+  <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>Resumo Anual do Ibovespa (B3 Oficial)</span></h2>
   <p class="terminal-panel-sub">Contagem oficial de pregões, extremos de fechamento e variação percentual por ano calendário</p>
   <DataTable data={resumo_anual_ibov} rows=10>
     <Column id=ano title="Ano" fmt=id />

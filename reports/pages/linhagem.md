@@ -2,23 +2,6 @@
 title: Linhagem e Qualidade — GringoLake
 ---
 
-<div class="page-hero">
-  <div class="page-title-group">
-    <h1 class="page-title">Qualidade de Dados e Linhagem Medalhão</h1>
-    <p class="page-subtitle">Auditoria da desacumulação MTD → Diário, cobertura de pregões e invariante contábil soma-zero da B3</p>
-  </div>
-
-  <div class="controls-bar">
-    <div class="controls-left">
-      <span class="status-chip"><span class="status-chip-accent">Stack</span> · Dagster + Polars + DuckDB + dbt</span>
-      <span class="status-chip"><span class="status-chip-accent">Fontes</span> · 100% B3 Oficial</span>
-    </div>
-    <div class="controls-right">
-      <span class="status-chip"><span class="status-chip-accent">Schedule</span> · Seg–Sex 21:00 BRT</span>
-    </div>
-  </div>
-</div>
-
 ```sql kpi_qualidade
 WITH ibov_stats AS (
     SELECT COUNT(*) AS total_pregoes_ibov, MAX(trading_date) AS max_ibov_date
@@ -52,11 +35,26 @@ CROSS JOIN zero_sum z
 CROSS JOIN perfis p
 ```
 
+<div class="page-hero">
+  <p class="page-eyebrow">GRINGOLAKE · LINHAGEM &amp; QUALIDADE</p>
+
+  <div class="page-head-row">
+    <div class="page-title-group">
+      <h1 class="page-title">Qualidade &amp; Linhagem Medalhão</h1>
+      <p class="page-subtitle">Auditoria do pipeline Dagster + Polars + DuckDB + dbt · Execução diária Seg–Sex às 21h BRT</p>
+    </div>
+
+    <div class="controls-right">
+      <CounterBadge data={kpi_qualidade} value="max_residuo_k_brl" label="Resíduo Máx." suffix="k" decimals={1} />
+    </div>
+  </div>
+</div>
+
 <div class="kpi-grid-4">
-  <KPITerminalCard data={kpi_qualidade} value="total_pregoes_ibov" dateCol="max_ibov_date" code="IBOV" title="Pregões IBOV (Silver)" decimals={0} subtitle="Calendário oficial B3" icon="trend" />
-  <KPITerminalCard data={kpi_qualidade} value="pregoes_fluxo_validos" dateCol="max_flow_date" code="GOLD" title="Pregões Fluxo (Gold)" decimals={0} subtitle="Diário desacumulado" icon="flow" />
-  <KPITerminalCard data={kpi_qualidade} value="max_residuo_k_brl" code="ZERO-SUM" title="Resíduo Máx. Soma-Zero" prefix="R$ " suffix=" mil" decimals={2} subtitle="Tolerância ≤ R$ 20 mil" icon="activity" />
-  <KPITerminalCard data={kpi_qualidade} value="total_perfis" code="DIM" title="Perfis Oficiais B3" decimals={0} subtitle="dim_investor_type" icon="users" />
+  <KPITerminalCard data={kpi_qualidade} value="total_pregoes_ibov" dateCol="max_ibov_date" code="IBOV" title="Pregões IBOV (Silver)" decimals={0} subtitle="Calendário oficial B3" liveDot={true} />
+  <KPITerminalCard data={kpi_qualidade} value="pregoes_fluxo_validos" dateCol="max_flow_date" code="GOLD" title="Pregões Fluxo (Gold)" decimals={0} subtitle="Diário desacumulado" focal={true} />
+  <KPITerminalCard data={kpi_qualidade} value="max_residuo_k_brl" code="ZERO-SUM" title="Resíduo Máx. Soma-Zero" prefix="R$ " suffix=" mil" decimals={2} subtitle="Tolerância ≤ R$ 20 mil" />
+  <KPITerminalCard data={kpi_qualidade} value="total_perfis" code="DIM" title="Perfis Oficiais B3" decimals={0} subtitle="dim_investor_type" />
 </div>
 
 ```sql auditoria_derivacao
@@ -85,7 +83,7 @@ ORDER BY trading_date DESC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Métodos de Desacumulação MTD → Diário (Silver)</h2>
+    <h2 class="terminal-panel-title"><span class="panel-index">01</span><span>Métodos de Desacumulação MTD → Diário (Silver)</span></h2>
     <p class="terminal-panel-sub">Distribuição dos pregões em int_b3_investor_flow_daily conforme ADR-003</p>
     <DataTable data={auditoria_derivacao} rows=10>
       <Column id=metodo_derivacao title="Método" />
@@ -97,7 +95,7 @@ ORDER BY trading_date DESC
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Auditoria Diária do Invariante Soma-Zero (B3)</h2>
+    <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>Auditoria Diária do Invariante Soma-Zero (B3)</span></h2>
     <p class="terminal-panel-sub">Soma de compras vs. vendas das 5 categorias em cada pregão (resíduo esperado próximo de zero)</p>
     <DataTable data={auditoria_soma_zero} rows=10>
       <Column id=pregao title="Pregão" />

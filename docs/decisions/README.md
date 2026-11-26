@@ -19,3 +19,4 @@ Proposed -> Accepted -> (Superseded by ADR-XXX | Deprecated)
 | [ADR-003](003-mtd-deaccumulation-using-ibov-calendar.md) | Desacumular o fluxo MTD do BDI usando o calendário oficial de pregões do Ibovespa | Accepted | 2026-11-25 |
 | [ADR-004](004-dual-storage-duckdb-and-zstd-parquet.md) | Materialização dupla em DuckDB e Parquet ZSTD com resolução absoluta de caminhos no Dagster | Accepted | 2026-11-25 |
 | [ADR-005](005-multi-layer-data-quality-and-zero-sum-invariant.md) | Estratégia de qualidade em três camadas com invariante contábil de soma zero da B3 | Accepted | 2026-11-25 |
+| [ADR-006](006-strict-ma21-full-window-and-unified-brl-billions.md) | Rigor estatístico na MM21 (janela cheia obrigatória) e padronização monetária em R$ bilhões | Accepted | 2026-11-26 |

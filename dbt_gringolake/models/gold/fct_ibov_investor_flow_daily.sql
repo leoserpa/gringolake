@@ -108,7 +108,7 @@ moving_averages as (
             partition by investor_type_code
             order by trading_date
             rows between 20 preceding and current row
-        ) as cum_net_flow_ma21_k_brl,
+        ) as raw_cum_net_flow_ma21_k_brl,
         count(*) over (
             partition by investor_type_code
             order by trading_date
@@ -143,13 +143,27 @@ select
     cum_net_flow_k_brl,
     cum_net_flow_bi_brl,
     cum_net_flow_ytd_bi_brl,
-    round(cum_net_flow_ma21_k_brl, 4) as cum_net_flow_ma21_k_brl,
-    round(cum_net_flow_ma21_k_brl / 1000000.0, 6) as cum_net_flow_ma21_bi_brl,
-    round((cum_net_flow_k_brl - cum_net_flow_ma21_k_brl) / 1000000.0, 6) as flow_vs_ma21_spread_bi_brl,
+    -- ADR-006: strict 21-trading-day SMA; emit NULL during warm-up (< 21 sessions)
+    -- so partial expanding means never generate fabricated crossover signals.
     case
-        when cum_net_flow_k_brl >= cum_net_flow_ma21_k_brl then 'acima_mm21'
+        when ma21_window_obs_count = 21 then round(raw_cum_net_flow_ma21_k_brl, 4)
+        else null
+    end as cum_net_flow_ma21_k_brl,
+    case
+        when ma21_window_obs_count = 21 then round(raw_cum_net_flow_ma21_k_brl / 1000000.0, 6)
+        else null
+    end as cum_net_flow_ma21_bi_brl,
+    case
+        when ma21_window_obs_count = 21
+            then round((cum_net_flow_k_brl - raw_cum_net_flow_ma21_k_brl) / 1000000.0, 6)
+        else null
+    end as flow_vs_ma21_spread_bi_brl,
+    case
+        when ma21_window_obs_count < 21 then 'em_formacao'
+        when cum_net_flow_k_brl >= raw_cum_net_flow_ma21_k_brl then 'acima_mm21'
         else 'abaixo_mm21'
     end as flow_vs_ma21_signal,
+    cast(ma21_window_obs_count as integer) as ma21_window_obs_count,
     (ma21_window_obs_count = 21) as has_full_ma21_window
 from moving_averages
 order by trading_date, display_order

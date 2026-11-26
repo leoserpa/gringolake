@@ -11,11 +11,17 @@
   export let signed = false;
   export let icon = 'trend';
   export let alertCol = null;
+  export let liveDot = false;
+  export let focal = false;
+  export let focalWhenPositive = false;
+  export let badge = '';
 
   $: row = data && data.length > 0 ? data[0] : null;
   $: rawVal = row && value ? row[value] : null;
   $: rawDate = row && dateCol ? row[dateCol] : '';
+  $: numVal = rawVal !== null && rawVal !== undefined && !Number.isNaN(Number(rawVal)) ? Number(rawVal) : null;
   $: isAlert = Boolean(row && alertCol && Number(row[alertCol]) === 1);
+  $: isFocal = focal || isAlert || (focalWhenPositive && numVal !== null && numVal > 0);
 
   function formatValue(v) {
     if (v === null || v === undefined) return '—';
@@ -35,59 +41,37 @@
 
   function formatDate(d) {
     if (!d) return '';
-    if (d instanceof Date) return d.toISOString().slice(0, 10);
-    return String(d).slice(0, 10);
+    const iso = d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
+    if (iso.length < 10) return iso;
+    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
   }
 
   $: formattedDate = rawDate ? formatDate(rawDate) : '';
 </script>
 
-<div class="kpi-card" data-code={code || undefined}>
+<div class="kpi-card" class:is-focal-card={isFocal && badge} data-code={code || undefined} data-icon={icon || undefined}>
   <div class="kpi-head">
-    <span class="kpi-label">{title}</span>
-    <span class="kpi-icon" aria-hidden="true">
-      {#if icon === 'dollar'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      {:else if icon === 'activity'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      {:else if icon === 'bank'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      {:else if icon === 'globe'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="9.5" stroke="#737373" stroke-width="1.6" />
-          <path d="M2.5 12h19M12 2.5a14 14 0 0 1 3.8 9.5 14 14 0 0 1-3.8 9.5 14 14 0 0 1-3.8-9.5 14 14 0 0 1 3.8-9.5z" stroke="#737373" stroke-width="1.6" />
-        </svg>
-      {:else if icon === 'flow'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M7 16V4m0 0-4 4m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      {:else if icon === 'users'}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 7a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      {:else}
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M3 3v18h18" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="m19 9-5 5-4-4-3 3" stroke="#737373" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+    <span class="kpi-label">
+      {#if liveDot}
+        <span class="kpi-live-dot" aria-hidden="true"></span>
       {/if}
+      <span>{title}</span>
     </span>
+    {#if badge}
+      <span class="kpi-pill-badge">{badge}</span>
+    {:else if formattedDate}
+      <span class="kpi-date">{formattedDate}</span>
+    {/if}
   </div>
 
-  <div class="kpi-value" class:is-alert={isAlert}>{formatValue(rawVal)}</div>
+  <div class="kpi-value" class:is-focal={isFocal}>{formatValue(rawVal)}</div>
 
-  {#if subtitle || formattedDate}
+  {#if subtitle || (badge && formattedDate)}
     <div class="kpi-sub">
       {#if subtitle}
         <span>{subtitle}</span>
       {/if}
-      {#if formattedDate}
+      {#if badge && formattedDate}
         <span class="kpi-date">{formattedDate}</span>
       {/if}
     </div>
@@ -96,17 +80,27 @@
 
 <style>
   .kpi-card {
-    background: #ffffff;
-    border: 1px solid #e4e4e7;
-    border-radius: 10px;
-    padding: 16px 18px;
+    background: #2b2b2b;
+    border: 1px solid #363636;
+    border-radius: 24px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    padding: 20px 22px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 8px;
-    min-block-size: 104px;
+    gap: 10px;
+    min-block-size: 118px;
     min-inline-size: 0;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    box-sizing: border-box;
+    transition: border-color 0.18s ease, background-color 0.18s ease;
+  }
+
+  .kpi-card:hover {
+    border-color: #45454a;
+  }
+
+  .kpi-card.is-focal-card {
+    border-color: rgba(242, 185, 75, 0.34);
   }
 
   .kpi-head {
@@ -117,32 +111,53 @@
   }
 
   .kpi-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    color: #52525b;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #a3a3a3;
     line-height: 1.25;
   }
 
-  .kpi-icon {
+  .kpi-live-dot {
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: #f8f8f8;
+    flex-shrink: 0;
+  }
+
+  .kpi-pill-badge {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(242, 185, 75, 0.14);
+    color: #f2b94b;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
   }
 
   .kpi-value {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    font-size: clamp(20px, 1.9vw, 25px);
+    font-size: clamp(22px, 2vw, 28px);
     font-weight: 700;
-    color: #18181b;
-    line-height: 1.15;
-    letter-spacing: -0.025em;
+    color: #f8f8f8;
+    line-height: 1.12;
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
-  .kpi-value.is-alert {
-    color: #b45309;
+  .kpi-value.is-focal {
+    color: #f2b94b;
   }
 
   .kpi-sub {
@@ -152,23 +167,42 @@
     justify-content: space-between;
     gap: 2px 8px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 11px;
-    color: #71717a;
+    font-size: 12px;
+    color: #767676;
     line-height: 1.35;
   }
 
   .kpi-date {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 10.5px;
-    color: #a1a1aa;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #767676;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 640px) {
     .kpi-card {
-      padding: 13px 14px;
-      min-block-size: 92px;
+      border-radius: 20px;
+      padding: 15px 16px;
+      min-block-size: 98px;
+      gap: 7px;
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .kpi-value {
+      font-size: clamp(17px, 4.7vw, 22px);
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+    }
+
+    .kpi-date {
+      font-size: 10px;
     }
   }
 </style>

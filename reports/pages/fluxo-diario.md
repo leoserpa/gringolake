@@ -2,48 +2,58 @@
 title: Fluxo Diário — GringoLake
 ---
 
-<div class="page-hero">
-  <div class="page-title-group">
-    <h1 class="page-title">Entradas e Saídas Diárias na B3 — Fluxo por Perfil</h1>
-    <p class="page-subtitle">Saldo líquido diário (Compras − Vendas) em R$ milhões derivado por desacumulação MTD oficial da B3 (SharesInvesVolum D+2)</p>
-  </div>
-
-  <div class="controls-bar">
-    <div class="controls-left">
-      <ButtonGroup name=janela_pregoes>
-        <ButtonGroupItem valueLabel="Últimos 20 pregões" value="20" />
-        <ButtonGroupItem valueLabel="Últimos 60 pregões" value="60" default />
-        <ButtonGroupItem valueLabel="Máx" value="9999" />
-      </ButtonGroup>
-    </div>
-
-    <div class="controls-right">
-      <span class="status-chip"><span class="status-chip-accent">Base Gold</span> · fct_ibov_investor_flow_daily (R$ mi)</span>
-    </div>
-  </div>
-</div>
-
 ```sql kpis_dia_recente
 WITH ultimo AS (
     SELECT MAX(trading_date) AS max_dt
     FROM gringolake.fct_ibov_investor_flow_daily
+),
+zero_sum AS (
+    SELECT MAX(ABS(daily_sum)) AS max_residuo_k
+    FROM (
+        SELECT trading_date, SUM(daily_net_flow_k_brl) AS daily_sum
+        FROM gringolake.fct_ibov_investor_flow_daily
+        GROUP BY trading_date
+    )
 )
 SELECT
     f.trading_date,
     MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS estrang_mi,
     MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS pf_mi,
     MAX(CASE WHEN f.investor_type_code = 'institucional' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS instit_mi,
-    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS inst_fin_mi
+    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS inst_fin_mi,
+    MAX(z.max_residuo_k) AS max_residuo_k
 FROM gringolake.fct_ibov_investor_flow_daily f
 INNER JOIN ultimo u ON f.trading_date = u.max_dt
+CROSS JOIN zero_sum z
 GROUP BY f.trading_date
 ```
 
+<div class="page-hero">
+  <p class="page-eyebrow">GRINGOLAKE · FLUXO DIÁRIO AUDITADO</p>
+
+  <div class="page-head-row">
+    <div class="page-title-group">
+      <h1 class="page-title">Entradas e Saídas Diárias na B3</h1>
+      <p class="page-subtitle">Saldo líquido isolado por pregão em R$ milhões derivado por desacumulação oficial MTD (ADR-003)</p>
+    </div>
+
+    <div class="controls-right">
+      <ButtonGroup name=janela_pregoes>
+        <ButtonGroupItem valueLabel="20d" value="20" />
+        <ButtonGroupItem valueLabel="60d" value="60" default />
+        <ButtonGroupItem valueLabel="Máx" value="9999" />
+      </ButtonGroup>
+
+      <CounterBadge data={kpis_dia_recente} value="max_residuo_k" label="Resíduo (R$ mil)" decimals={1} />
+    </div>
+  </div>
+</div>
+
 <div class="kpi-grid-4">
-  <KPITerminalCard data={kpis_dia_recente} value="estrang_mi" dateCol="trading_date" code="ESTRANG" title="Estrangeiro (Gringo)" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo diário · último pregão" icon="globe" />
-  <KPITerminalCard data={kpis_dia_recente} value="pf_mi" dateCol="trading_date" code="PF" title="Pessoa Física (PF)" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo diário · último pregão" icon="users" />
-  <KPITerminalCard data={kpis_dia_recente} value="instit_mi" dateCol="trading_date" code="INSTIT" title="Institucional (Fundos)" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo diário · último pregão" icon="bank" />
-  <KPITerminalCard data={kpis_dia_recente} value="inst_fin_mi" dateCol="trading_date" code="INST FIN" title="Inst. Financeira" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo diário · último pregão" icon="flow" />
+  <KPITerminalCard data={kpis_dia_recente} value="estrang_mi" dateCol="trading_date" code="ESTRANG" title="Estrangeiro" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo líquido diário" focalWhenPositive={true} />
+  <KPITerminalCard data={kpis_dia_recente} value="pf_mi" dateCol="trading_date" code="PF" title="Pessoa Física" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo líquido diário" focalWhenPositive={true} />
+  <KPITerminalCard data={kpis_dia_recente} value="instit_mi" dateCol="trading_date" code="INSTIT" title="Institucional" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo líquido diário" focalWhenPositive={true} />
+  <KPITerminalCard data={kpis_dia_recente} value="inst_fin_mi" dateCol="trading_date" code="INST FIN" title="Inst. Financeira" prefix="R$ " suffix=" mi" decimals={1} signed={true} subtitle="Saldo líquido diário" focalWhenPositive={true} />
 </div>
 
 ```sql fluxo_diario_4_perfis
@@ -69,10 +79,11 @@ ORDER BY f.trading_date ASC
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Estrangeiro (Gringo)</h2>
-    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
+      panelIndex="01"
+      panelTitle="Estrangeiro"
+      panelSubtitle="Âmbar = compra líquida · Grafite = saída líquida (R$ mi)"
       x="trading_date"
       y="estrang_mi"
       names={['Estrangeiro']}
@@ -82,16 +93,17 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="255px"
+      height="275px"
       showEndLabel={false}
     />
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Pessoa Física (PF)</h2>
-    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
+      panelIndex="02"
+      panelTitle="Pessoa Física"
+      panelSubtitle="Âmbar = compra líquida · Grafite = saída líquida (R$ mi)"
       x="trading_date"
       y="pf_mi"
       names={['Pessoa Física']}
@@ -101,7 +113,7 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="255px"
+      height="275px"
       showEndLabel={false}
     />
   </section>
@@ -109,10 +121,11 @@ ORDER BY f.trading_date ASC
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Institucional (Fundos)</h2>
-    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
+      panelIndex="03"
+      panelTitle="Institucional"
+      panelSubtitle="Âmbar = compra líquida · Grafite = saída líquida (R$ mi)"
       x="trading_date"
       y="instit_mi"
       names={['Institucional']}
@@ -122,16 +135,17 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="255px"
+      height="275px"
       showEndLabel={false}
     />
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Entradas e Saídas Diárias · Inst. Financeira</h2>
-    <p class="terminal-panel-sub">Como ler: barras douradas = dia de compra líquida na B3; barras cinzas = dia de saque/venda líquida (em R$ milhões)</p>
     <TerminalLineChart
       data={fluxo_diario_4_perfis}
+      panelIndex="04"
+      panelTitle="Inst. Financeira"
+      panelSubtitle="Âmbar = compra líquida · Grafite = saída líquida (R$ mi)"
       x="trading_date"
       y="inst_fin_mi"
       names={['Inst. Financeira']}
@@ -141,50 +155,11 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="255px"
+      height="275px"
       showEndLabel={false}
     />
   </section>
 </div>
-
-```sql fluxo_mensal_ibov
-WITH last_flow AS (
-    SELECT
-        strftime(trading_date, '%Y-%m') AS mes,
-        investor_type_code,
-        LAST(mtd_net_flow_k_brl ORDER BY trading_date) AS mtd_k_brl,
-        MAX(trading_date) AS max_dt
-    FROM gringolake.int_b3_investor_flow_daily
-    GROUP BY 1, 2
-),
-ibov_m AS (
-    SELECT
-        strftime(trading_date, '%Y-%m') AS mes,
-        LAST(ibov_close ORDER BY trading_date) AS close_end
-    FROM gringolake.stg_b3_ibov_daily
-    GROUP BY 1
-),
-ibov_ret AS (
-    SELECT
-        mes,
-        ROUND(((close_end / LAG(close_end) OVER (ORDER BY mes)) - 1.0) * 100.0, 2) AS ibov_month_pct
-    FROM ibov_m
-)
-SELECT
-    f.mes,
-    MAX(f.max_dt) AS ate_pregao,
-    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN f.mtd_k_brl END) AS estrang_k_brl,
-    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN f.mtd_k_brl END) AS instit_k_brl,
-    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN f.mtd_k_brl END) AS pf_k_brl,
-    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN f.mtd_k_brl END) AS inst_fin_k_brl,
-    MAX(i.ibov_month_pct) AS ibov_month_pct
-FROM last_flow f
-LEFT JOIN ibov_ret i ON f.mes = i.mes
-GROUP BY f.mes
-ORDER BY f.mes DESC
-```
-
-<MonthlyFlowTable data={fluxo_mensal_ibov} />
 
 ```sql tabela_fluxo_diario
 SELECT
@@ -201,8 +176,8 @@ ORDER BY trading_date DESC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Histórico Diário por Perfil — B3 (R$ milhões)</h2>
-    <p class="terminal-panel-sub">Soma das 5 categorias oficiais da B3 fecha em zero a cada pregão (mercado soma-zero) · Histórico cresce automaticamente a cada pregão útil via bot diário</p>
+    <h2 class="terminal-panel-title"><span class="panel-index">05</span><span>Histórico Diário por Perfil (R$ milhões)</span></h2>
+    <p class="terminal-panel-sub">Soma das 5 categorias oficiais da B3 fecha em zero a cada pregão (tolerância ≤ R$ 20 mil) · Atualização às 21h BRT</p>
     <DataTable data={tabela_fluxo_diario} rows=15 search=false>
       <Column id=pregao title="Pregão" />
       <Column id=ibov_close title="IBOV (pts)" fmt="#,##0" />

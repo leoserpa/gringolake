@@ -5,6 +5,11 @@ Ao registrar novas alterações ou correções de documentação, **adicione uma
 
 ## [Unreleased]
 
+### Changed (2026-11-26)
+- **Rigor estatístico da MM21 ([ADR-006](docs/decisions/006-strict-ma21-full-window-and-unified-brl-billions.md)):** `fct_ibov_investor_flow_daily` e `mart_ibov_vs_pf_short_term` passam a retornar `NULL` nas colunas de MM21, `flow_vs_ma21_signal = 'em_formacao'` e `is_pf_below_ma21 = false` enquanto `ma21_window_obs_count < 21`, impedindo sinais direcionais fabricados por médias parciais. Adicionados `ma21_window_obs_count` na camada Gold, o teste singular `assert_ma21_window_integrity` e testes unitários dbt de aquecimento + janela deslizante de 21/22 pregões.
+- **Padronização monetária de mesa bancária no dashboard ([ADR-006](docs/decisions/006-strict-ma21-full-window-and-unified-brl-billions.md)):** acumulados e consolidado mensal (`Panorama`, `Curto Prazo`, `Comparativo` e `MonthlyFlowTable`) 100% em **`R$ bi`** (2 casas decimais); fluxo diário isolado (`Fluxo Diário` — KPIs, gráficos, eixos Y e tabela diária) 100% em **`R$ mi`** (1 casa decimal), sem mistura de unidades no mesmo gráfico ou tabela; auditoria soma-zero explicitamente em **`R$ mil`**.
+- **Identidade visual Atelier Graphite no Evidence.dev (`reports/`):** fundo grafite fosco `#222222`, cards arredondados `#2B2B2B` (`28px`/`24px`), acento focal único `#F2B94B` (Tufte/Knaflic), tipografia `Plus Jakarta Sans` + `JetBrains Mono`, barra de navegação flutuante em cápsula, `CounterBadge` dinâmico e responsividade mobile completa.
+
 ### Fixed
 - **Virada de ano no cache do IBOV:** adicionado marcador `.finalized` em `b3_market_data_component.py` para impedir que um ano encerrado parcialmente em dezembro seja pulado permanentemente após 1º de janeiro.
 - **Timezone seguro em ambientes UTC:** substituído `date.today()` por `datetime.now(ZoneInfo("America/Sao_Paulo")).date()` em `b3_market_data_component.py`.

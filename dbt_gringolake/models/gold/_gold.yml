@@ -19,7 +19,7 @@ models:
     description: >
       Tabela fato Gold no grão (trading_date x investor_type_code) combinando o fechamento oficial
       do Ibovespa com fluxo diário líquido, fluxo acumulado e Média Móvel de 21 pregões (MM21)
-      por tipo de investidor na B3.
+      estrita (NULL quando há menos de 21 pregões, conforme ADR-006) por tipo de investidor na B3.
     columns:
       - name: fact_ibov_flow_sk
         description: "Chave primária determinística da fato (trading_date + investor_type_code)."
@@ -47,20 +47,27 @@ models:
         data_tests:
           - not_null
       - name: cum_net_flow_ma21_bi_brl
-        description: "Média móvel simples de 21 pregões sobre o fluxo líquido acumulado (R$ bilhões)."
+        description: "Média móvel simples estrita de 21 pregões sobre o fluxo líquido acumulado (R$ bilhões); NULL quando ma21_window_obs_count < 21 (ADR-006)."
+      - name: ma21_window_obs_count
+        description: "Número de pregões disponíveis na janela móvel atual (1 a 21)."
+        data_tests:
+          - not_null
+      - name: has_full_ma21_window
+        description: "Indica se o perfil atingiu 21 pregões completos para o cálculo da MM21."
         data_tests:
           - not_null
       - name: flow_vs_ma21_signal
-        description: "Sinal direcional do acumulado em relação à média móvel de 21 pregões."
+        description: "Sinal direcional do acumulado em relação à MM21 estrita ('em_formacao' quando < 21 pregões)."
         data_tests:
+          - not_null
           - accepted_values:
               arguments:
-                values: ["acima_mm21", "abaixo_mm21"]
+                values: ["acima_mm21", "abaixo_mm21", "em_formacao"]
 
   - name: mart_ibov_vs_investors_wide
     description: >
       Mart analítico em formato wide (1 linha por pregão) pronto para os gráficos comparativos
-      'COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)' em ferramentas de BI.
+      IBOVESPA × perfis oficiais de investidores da B3 em R$ bilhões.
     columns:
       - name: trading_date
         description: "Data oficial do pregão (chave primária)."
@@ -71,6 +78,10 @@ models:
         description: "Fechamento oficial do Ibovespa em pontos."
         data_tests:
           - not_null
+      - name: ma21_window_obs_count
+        description: "Menor contagem de pregões na janela da MM21 entre os perfis na data (1 a 21)."
+        data_tests:
+          - not_null
       - name: has_full_ma21_window
         description: "Indica se todas as categorias já possuem 21 pregões completos na janela da MM21."
         data_tests:
@@ -79,7 +90,7 @@ models:
   - name: mart_ibov_vs_pf_short_term
     description: >
       Mart analítico de curto prazo (últimos 160 pregões, rebased na janela) pronto para o gráfico
-      'Relação: IBOV x P.F. (CURTO PRAZO)' com acumulado de Pessoa Física, MM21 e flag de cruzamento.
+      'Relação: IBOV x P.F. (CURTO PRAZO)' com acumulado de Pessoa Física, MM21 estrita (ADR-006) e flag de cruzamento.
     columns:
       - name: trading_date
         description: "Data oficial do pregão (chave primária)."
@@ -91,7 +102,9 @@ models:
         data_tests:
           - not_null
       - name: pf_cum_short_term_ma21_bi_brl
-        description: "Média móvel de 21 pregões sobre o acumulado de curto prazo de PF (R$ bilhões)."
+        description: "Média móvel estrita de 21 pregões sobre o acumulado de curto prazo de PF (R$ bilhões); NULL durante aquecimento (< 21 pregões)."
+      - name: ma21_window_obs_count
+        description: "Número de pregões disponíveis na janela móvel de curto prazo (1 a 21)."
         data_tests:
           - not_null
       - name: has_full_ma21_window
@@ -100,10 +113,10 @@ models:
           - not_null
 
 unit_tests:
-  - name: test_fct_ibov_investor_flow_daily_cumulative_and_ma21
+  - name: test_fct_ibov_investor_flow_daily_warmup_suppresses_ma21
     description: >
-      Valida soma acumulada, média móvel e sinal acima/abaixo da MM21 em série diária controlada
-      de Pessoa Física cruzada com fechamentos oficiais do IBOV.
+      Valida ADR-006 na fase de aquecimento (< 21 pregões): o acumulado contínuo é calculado
+      normalmente, mas a MM21 e o spread permanecem NULL e o sinal retorna 'em_formacao'.
     model: fct_ibov_investor_flow_daily
     given:
       - input: ref('int_b3_investor_flow_daily')
@@ -121,6 +134,89 @@ unit_tests:
           - {investor_type_code: 'pessoa_fisica', investor_type_name_pt: 'Pessoa Física', investor_type_short_pt: 'P.F.', display_order: 3}
     expect:
       rows:
-        - {trading_date: '2026-11-03', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 1.0, cum_net_flow_ma21_bi_brl: 1.0, flow_vs_ma21_signal: 'acima_mm21'}
-        - {trading_date: '2026-11-04', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 3.0, cum_net_flow_ma21_bi_brl: 2.0, flow_vs_ma21_signal: 'acima_mm21'}
-        - {trading_date: '2026-11-05', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 0.0, cum_net_flow_ma21_bi_brl: 1.333333, flow_vs_ma21_signal: 'abaixo_mm21'}
+        - {trading_date: '2026-11-03', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 1.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 1, has_full_ma21_window: false}
+        - {trading_date: '2026-11-04', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 3.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 2, has_full_ma21_window: false}
+        - {trading_date: '2026-11-05', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 0.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 3, has_full_ma21_window: false}
+
+  - name: test_fct_ibov_investor_flow_daily_full_21d_ma21_and_crossover
+    description: >
+      Valida a transição exata no 21º pregão e a janela deslizante no 22º pregão:
+      nos 21 primeiros dias (+1 bi/dia), o acumulado vai de 1 a 21 (média exata = 11.0 bi, acima_mm21);
+      no 22º pregão (-20 bi), o acumulado cai para 1.0 bi enquanto a janela [2..21, 1] soma 231 (média exata = 11.0 bi, abaixo_mm21).
+    model: fct_ibov_investor_flow_daily
+    given:
+      - input: ref('int_b3_investor_flow_daily')
+        rows:
+          - {trading_date: '2026-10-01', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-05', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'month_start_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 2000000.0, mtd_sales_k_brl: 1000000.0, mtd_net_flow_k_brl: 1000000.0, mtd_net_flow_bi_brl: 1.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-02', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-06', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 4000000.0, mtd_sales_k_brl: 2000000.0, mtd_net_flow_k_brl: 2000000.0, mtd_net_flow_bi_brl: 2.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-05', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-07', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 6000000.0, mtd_sales_k_brl: 3000000.0, mtd_net_flow_k_brl: 3000000.0, mtd_net_flow_bi_brl: 3.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-06', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-08', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 8000000.0, mtd_sales_k_brl: 4000000.0, mtd_net_flow_k_brl: 4000000.0, mtd_net_flow_bi_brl: 4.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-07', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-09', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 10000000.0, mtd_sales_k_brl: 5000000.0, mtd_net_flow_k_brl: 5000000.0, mtd_net_flow_bi_brl: 5.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-08', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-12', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 12000000.0, mtd_sales_k_brl: 6000000.0, mtd_net_flow_k_brl: 6000000.0, mtd_net_flow_bi_brl: 6.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-09', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-13', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 14000000.0, mtd_sales_k_brl: 7000000.0, mtd_net_flow_k_brl: 7000000.0, mtd_net_flow_bi_brl: 7.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-13', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-15', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 16000000.0, mtd_sales_k_brl: 8000000.0, mtd_net_flow_k_brl: 8000000.0, mtd_net_flow_bi_brl: 8.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-14', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-16', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 18000000.0, mtd_sales_k_brl: 9000000.0, mtd_net_flow_k_brl: 9000000.0, mtd_net_flow_bi_brl: 9.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-15', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-19', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 20000000.0, mtd_sales_k_brl: 10000000.0, mtd_net_flow_k_brl: 10000000.0, mtd_net_flow_bi_brl: 10.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-16', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-20', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 22000000.0, mtd_sales_k_brl: 11000000.0, mtd_net_flow_k_brl: 11000000.0, mtd_net_flow_bi_brl: 11.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-19', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-21', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 24000000.0, mtd_sales_k_brl: 12000000.0, mtd_net_flow_k_brl: 12000000.0, mtd_net_flow_bi_brl: 12.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-20', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-22', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 26000000.0, mtd_sales_k_brl: 13000000.0, mtd_net_flow_k_brl: 13000000.0, mtd_net_flow_bi_brl: 13.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-21', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-23', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 28000000.0, mtd_sales_k_brl: 14000000.0, mtd_net_flow_k_brl: 14000000.0, mtd_net_flow_bi_brl: 14.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-22', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-26', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 30000000.0, mtd_sales_k_brl: 15000000.0, mtd_net_flow_k_brl: 15000000.0, mtd_net_flow_bi_brl: 15.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-23', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-27', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 32000000.0, mtd_sales_k_brl: 16000000.0, mtd_net_flow_k_brl: 16000000.0, mtd_net_flow_bi_brl: 16.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-26', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-28', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 34000000.0, mtd_sales_k_brl: 17000000.0, mtd_net_flow_k_brl: 17000000.0, mtd_net_flow_bi_brl: 17.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-27', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-29', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 36000000.0, mtd_sales_k_brl: 18000000.0, mtd_net_flow_k_brl: 18000000.0, mtd_net_flow_bi_brl: 18.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-28', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-10-30', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 38000000.0, mtd_sales_k_brl: 19000000.0, mtd_net_flow_k_brl: 19000000.0, mtd_net_flow_bi_brl: 19.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-29', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-11-03', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 40000000.0, mtd_sales_k_brl: 20000000.0, mtd_net_flow_k_brl: 20000000.0, mtd_net_flow_bi_brl: 20.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-10-30', trading_month: '2026-10-01', trading_year: 2026, publication_date: '2026-11-04', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 1000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 42000000.0, mtd_sales_k_brl: 21000000.0, mtd_net_flow_k_brl: 21000000.0, mtd_net_flow_bi_brl: 21.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-11-03', trading_month: '2026-11-01', trading_year: 2026, publication_date: '2026-11-05', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'month_start_exact', daily_purchases_k_brl: 1000000.0, daily_sales_k_brl: 21000000.0, daily_net_flow_k_brl: -20000000.0, daily_net_flow_bi_brl: -20.0, mtd_purchases_k_brl: 1000000.0, mtd_sales_k_brl: 21000000.0, mtd_net_flow_k_brl: -20000000.0, mtd_net_flow_bi_brl: -20.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+      - input: ref('stg_b3_ibov_daily')
+        rows:
+          - {trading_date: '2026-10-01', ibov_close: 160000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-02', ibov_close: 160500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-05', ibov_close: 161000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-06', ibov_close: 161500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-07', ibov_close: 162000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-08', ibov_close: 162500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-09', ibov_close: 163000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-13', ibov_close: 163500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-14', ibov_close: 164000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-15', ibov_close: 164500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-16', ibov_close: 165000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-19', ibov_close: 165500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-20', ibov_close: 166000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-21', ibov_close: 166500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-22', ibov_close: 167000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-23', ibov_close: 167500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-26', ibov_close: 168000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-27', ibov_close: 168500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-28', ibov_close: 169000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-29', ibov_close: 169500.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-10-30', ibov_close: 170000.0, ibov_return_1d_pct: 0.1}
+          - {trading_date: '2026-11-03', ibov_close: 168000.0, ibov_return_1d_pct: -1.18}
+      - input: ref('dim_investor_type')
+        rows:
+          - {investor_type_code: 'pessoa_fisica', investor_type_name_pt: 'Pessoa Física', investor_type_short_pt: 'P.F.', display_order: 3}
+    expect:
+      rows:
+        - {trading_date: '2026-10-01', cum_net_flow_bi_brl: 1.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 1, has_full_ma21_window: false}
+        - {trading_date: '2026-10-02', cum_net_flow_bi_brl: 2.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 2, has_full_ma21_window: false}
+        - {trading_date: '2026-10-05', cum_net_flow_bi_brl: 3.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 3, has_full_ma21_window: false}
+        - {trading_date: '2026-10-06', cum_net_flow_bi_brl: 4.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 4, has_full_ma21_window: false}
+        - {trading_date: '2026-10-07', cum_net_flow_bi_brl: 5.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 5, has_full_ma21_window: false}
+        - {trading_date: '2026-10-08', cum_net_flow_bi_brl: 6.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 6, has_full_ma21_window: false}
+        - {trading_date: '2026-10-09', cum_net_flow_bi_brl: 7.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 7, has_full_ma21_window: false}
+        - {trading_date: '2026-10-13', cum_net_flow_bi_brl: 8.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 8, has_full_ma21_window: false}
+        - {trading_date: '2026-10-14', cum_net_flow_bi_brl: 9.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 9, has_full_ma21_window: false}
+        - {trading_date: '2026-10-15', cum_net_flow_bi_brl: 10.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 10, has_full_ma21_window: false}
+        - {trading_date: '2026-10-16', cum_net_flow_bi_brl: 11.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 11, has_full_ma21_window: false}
+        - {trading_date: '2026-10-19', cum_net_flow_bi_brl: 12.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 12, has_full_ma21_window: false}
+        - {trading_date: '2026-10-20', cum_net_flow_bi_brl: 13.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 13, has_full_ma21_window: false}
+        - {trading_date: '2026-10-21', cum_net_flow_bi_brl: 14.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 14, has_full_ma21_window: false}
+        - {trading_date: '2026-10-22', cum_net_flow_bi_brl: 15.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 15, has_full_ma21_window: false}
+        - {trading_date: '2026-10-23', cum_net_flow_bi_brl: 16.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 16, has_full_ma21_window: false}
+        - {trading_date: '2026-10-26', cum_net_flow_bi_brl: 17.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 17, has_full_ma21_window: false}
+        - {trading_date: '2026-10-27', cum_net_flow_bi_brl: 18.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 18, has_full_ma21_window: false}
+        - {trading_date: '2026-10-28', cum_net_flow_bi_brl: 19.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 19, has_full_ma21_window: false}
+        - {trading_date: '2026-10-29', cum_net_flow_bi_brl: 20.0, cum_net_flow_ma21_bi_brl: null, flow_vs_ma21_signal: 'em_formacao', ma21_window_obs_count: 20, has_full_ma21_window: false}
+        - {trading_date: '2026-10-30', cum_net_flow_bi_brl: 21.0, cum_net_flow_ma21_bi_brl: 11.0, flow_vs_ma21_signal: 'acima_mm21', ma21_window_obs_count: 21, has_full_ma21_window: true}
+        - {trading_date: '2026-11-03', cum_net_flow_bi_brl: 1.0, cum_net_flow_ma21_bi_brl: 11.0, flow_vs_ma21_signal: 'abaixo_mm21', ma21_window_obs_count: 21, has_full_ma21_window: true}

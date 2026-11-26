@@ -2,72 +2,63 @@
 title: Panorama — GringoLake
 ---
 
-<div class="page-hero">
-  <div class="page-title-group">
-    <h1 class="page-title">Panorama de Fluxo na B3 — IBOV × Investidores</h1>
-    <p class="page-subtitle">Ibovespa oficial · Participação dos Investidores (BDI SharesInvesVolum) · Acumulado e Média Móvel de 21 pregões</p>
-  </div>
+```sql kpi_latest
+WITH agg AS (
+    SELECT COUNT(*) AS total_pregoes
+    FROM gringolake.mart_ibov_vs_investors_wide
+),
+ultimo AS (
+    SELECT
+        trading_date,
+        ibov_close,
+        ibov_return_1d_pct,
+        estrang_cum_bi_brl,
+        pf_cum_bi_brl,
+        instit_cum_bi_brl,
+        inst_fin_cum_bi_brl
+    FROM gringolake.mart_ibov_vs_investors_wide
+    ORDER BY trading_date DESC
+    LIMIT 1
+)
+SELECT
+    u.*,
+    a.total_pregoes
+FROM ultimo u
+CROSS JOIN agg a
+```
 
-  <div class="controls-bar">
-    <div class="controls-left">
+<div class="page-hero">
+  <p class="page-eyebrow">GRINGOLAKE · B3 OFICIAL</p>
+
+  <div class="page-head-row">
+    <div class="page-title-group">
+      <h1 class="page-title">Fluxo de Capital na B3</h1>
+      <p class="page-subtitle">Acumulado contínuo dos pregões válidos (BDI D+2) em R$ bilhões comparado ao Ibovespa</p>
+    </div>
+
+    <div class="controls-right">
       <ButtonGroup name=janela_panorama>
-        <ButtonGroupItem valueLabel="30 dias" value="30" />
-        <ButtonGroupItem valueLabel="Curto Prazo (160d)" value="240" default />
+        <ButtonGroupItem valueLabel="30d" value="45" />
+        <ButtonGroupItem valueLabel="160d" value="240" default />
         <ButtonGroupItem valueLabel="Máx" value="36500" />
       </ButtonGroup>
 
       <ButtonGroup name=exibir_extremos>
-        <ButtonGroupItem valueLabel="Com topos/fundos" value="1" default />
+        <ButtonGroupItem valueLabel="Extremos" value="1" default />
         <ButtonGroupItem valueLabel="Limpo" value="0" />
       </ButtonGroup>
-    </div>
 
-    <div class="controls-right">
-      <span class="status-chip"><span class="status-chip-accent">Atualização útil</span> · 21:00 BRT (pós-SLA B3)</span>
+      <CounterBadge data={kpi_latest} value="total_pregoes" label="Pregões" decimals={0} />
     </div>
   </div>
 </div>
 
-```sql kpi_latest
-SELECT
-    trading_date,
-    ibov_close,
-    ibov_return_1d_pct,
-    estrang_cum_bi_brl,
-    instit_cum_bi_brl,
-    pf_cum_bi_brl,
-    pf_cum_ma21_bi_brl,
-    round(pf_cum_bi_brl - pf_cum_ma21_bi_brl, 2) AS pf_spread_mm21,
-    CASE WHEN pf_cum_bi_brl < pf_cum_ma21_bi_brl THEN 1 ELSE 0 END AS pf_abaixo_mm21
-FROM gringolake.mart_ibov_vs_investors_wide
-ORDER BY trading_date DESC
-LIMIT 1
-```
-
-<div class="kpi-grid-5">
-  <KPITerminalCard data={kpi_latest} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa Fechamento" suffix=" pts" decimals={0} subtitle="B3 GetPortfolioDay" icon="trend" />
-  <KPITerminalCard data={kpi_latest} value="estrang_cum_bi_brl" dateCol="trading_date" code="ESTRANG" title="Estrangeiro Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="BDI SharesInvesVolum" icon="globe" />
-  <KPITerminalCard data={kpi_latest} value="instit_cum_bi_brl" dateCol="trading_date" code="INSTIT" title="Institucional Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Fundos e previdência" icon="bank" />
-  <KPITerminalCard data={kpi_latest} value="pf_cum_bi_brl" dateCol="trading_date" code="PF" title="Pessoa Física Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Investidores individuais" icon="users" />
-  <KPITerminalCard data={kpi_latest} value="pf_spread_mm21" dateCol="trading_date" code="MM21" title="Spread P.F. vs MM21" prefix="R$ " suffix=" bi" decimals={2} signed={true} alertCol="pf_abaixo_mm21" subtitle="Acumulado menos MM21" icon="activity" />
+<div class="kpi-grid-4">
+  <KPITerminalCard data={kpi_latest} value="ibov_close" dateCol="trading_date" code="IBOV" title="Ibovespa" suffix=" pts" decimals={0} subtitle="Fechamento oficial B3" liveDot={true} />
+  <KPITerminalCard data={kpi_latest} value="estrang_cum_bi_brl" dateCol="trading_date" code="ESTRANG" title="Estrangeiro Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />
+  <KPITerminalCard data={kpi_latest} value="pf_cum_bi_brl" dateCol="trading_date" code="PF" title="Pessoa Física Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />
+  <KPITerminalCard data={kpi_latest} value="instit_cum_bi_brl" dateCol="trading_date" code="INSTIT" title="Institucional Acum." prefix="R$ " suffix=" bi" decimals={2} signed={true} subtitle="Acumulado na série (BDI)" focalWhenPositive={true} />
 </div>
-
-```sql serie_curto_prazo
-WITH limite AS (
-    SELECT MAX(trading_date) AS max_dt FROM gringolake.mart_ibov_vs_pf_short_term
-)
-SELECT
-    m.trading_date,
-    m.ibov_close,
-    CASE WHEN '${inputs.exibir_extremos}' = '1' THEN m.ibov_label_points ELSE NULL END AS ibov_label_points,
-    m.pf_cum_short_term_bi_brl,
-    m.pf_cum_short_term_ma21_bi_brl,
-    m.is_pf_below_ma21
-FROM gringolake.mart_ibov_vs_pf_short_term m
-CROSS JOIN limite l
-WHERE date_diff('day', m.trading_date, l.max_dt) <= CAST('${inputs.janela_panorama}' AS INTEGER)
-ORDER BY m.trading_date
-```
 
 ```sql serie_comparativa
 WITH limite AS (
@@ -77,12 +68,15 @@ SELECT
     w.trading_date,
     w.ibov_close,
     CASE WHEN '${inputs.exibir_extremos}' = '1' THEN w.ibov_label_points ELSE NULL END AS ibov_label_points,
+    w.ma21_window_obs_count,
+    w.estrang_cum_bi_brl,
+    w.estrang_cum_ma21_bi_brl,
     w.pf_cum_bi_brl,
     w.pf_cum_ma21_bi_brl,
     w.instit_cum_bi_brl,
     w.instit_cum_ma21_bi_brl,
-    w.estrang_cum_bi_brl,
-    w.estrang_cum_ma21_bi_brl
+    w.inst_fin_cum_bi_brl,
+    w.inst_fin_cum_ma21_bi_brl
 FROM gringolake.mart_ibov_vs_investors_wide w
 CROSS JOIN limite l
 WHERE date_diff('day', w.trading_date, l.max_dt) <= CAST('${inputs.janela_panorama}' AS INTEGER)
@@ -91,69 +85,77 @@ ORDER BY w.trading_date
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Relação: IBOV × Pessoa Física (Curto Prazo)</h2>
-    <p class="terminal-panel-sub">Acumulado P.F. rebased na janela (dourado) e MM21 (tracejada) no eixo esquerdo · IBOV (grafite) no direito · Faixas indicam P.F. abaixo da MM21</p>
     <TerminalDualAxisChart
-      data={serie_curto_prazo}
-      flowCol="pf_cum_short_term_bi_brl"
-      flowName="Acum. P.F."
-      maCol="pf_cum_short_term_ma21_bi_brl"
-      maName="MM 21 (P.F.)"
+      data={serie_comparativa}
+      panelIndex="01"
+      panelTitle="IBOV × Estrangeiro"
+      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      flowCol="estrang_cum_bi_brl"
+      flowName="Estrangeiro"
+      maCol="estrang_cum_ma21_bi_brl"
+      maObsCol="ma21_window_obs_count"
+      maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       extremaCol="ibov_label_points"
-      shadeCol="is_pf_below_ma21"
-      height="265px"
+      focal={true}
+      height="285px"
     />
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Comparativo: IBOV × Pessoa Física (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado contínuo de Pessoa Física (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
+      panelIndex="02"
+      panelTitle="IBOV × Pessoa Física"
+      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
       flowCol="pf_cum_bi_brl"
       flowName="Pessoa Física"
       maCol="pf_cum_ma21_bi_brl"
-      maName="MM 21 (P.F.)"
+      maObsCol="ma21_window_obs_count"
+      maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       extremaCol="ibov_label_points"
-      height="265px"
+      height="285px"
     />
   </section>
 </div>
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Comparativo: IBOV × Institucional (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado de Investidores Institucionais (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
+      panelIndex="03"
+      panelTitle="IBOV × Institucional"
+      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
       flowCol="instit_cum_bi_brl"
       flowName="Institucional"
       maCol="instit_cum_ma21_bi_brl"
-      maName="MM 21 (Instit.)"
+      maObsCol="ma21_window_obs_count"
+      maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       extremaCol="ibov_label_points"
-      height="265px"
+      height="285px"
     />
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title">Comparativo: IBOV × Investidor Estrangeiro (R$ bi)</h2>
-    <p class="terminal-panel-sub">Fluxo líquido acumulado do capital estrangeiro na B3 (dourado) + MM21 (tracejada) contra fechamento do IBOV (grafite)</p>
     <TerminalDualAxisChart
       data={serie_comparativa}
-      flowCol="estrang_cum_bi_brl"
-      flowName="Estrangeiro"
-      maCol="estrang_cum_ma21_bi_brl"
-      maName="MM 21 (Estrang.)"
+      panelIndex="04"
+      panelTitle="IBOV × Inst. Financeira"
+      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      flowCol="inst_fin_cum_bi_brl"
+      flowName="Inst. Financeira"
+      maCol="inst_fin_cum_ma21_bi_brl"
+      maObsCol="ma21_window_obs_count"
+      maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       extremaCol="ibov_label_points"
-      height="265px"
+      height="285px"
     />
   </section>
 </div>
@@ -195,7 +197,7 @@ GROUP BY f.mes
 ORDER BY f.mes DESC
 ```
 
-<MonthlyFlowTable data={fluxo_mensal_ibov} />
+<MonthlyFlowTable data={fluxo_mensal_ibov} panelIndex="05" />
 
 ```sql explorador_perfis
 WITH ultimo_pregao AS (
@@ -218,6 +220,7 @@ ORDER BY f.display_order
 
 <FlowExplorerTable
   data={explorador_perfis}
-  title="Explorador Executivo — Os 5 Perfis Oficiais da B3 no Último Pregão"
-  subtitle="Saldos líquidos diário, mensal (MTD) e acumulado em R$ bilhões · Destaque dourado nos perfis acima da MM21"
+  panelIndex="06"
+  title="Perfis Oficiais B3"
+  subtitle="Saldos diário, mensal (MTD) e acumulado contínuo em R$ bi no último pregão · MM21 ativa com 21 pregões completos"
 />

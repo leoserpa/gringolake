@@ -13,6 +13,7 @@ with fact_flow as (
         cum_net_flow_ma21_bi_brl,
         cum_net_flow_k_brl,
         cum_net_flow_ma21_k_brl,
+        ma21_window_obs_count,
         has_full_ma21_window
     from {{ ref('fct_ibov_investor_flow_daily') }}
 )
@@ -25,6 +26,7 @@ select
     max(ibov_return_1d_pct) as ibov_return_1d_pct,
     max(ibov_local_extrema_type) as ibov_local_extrema_type,
     max(ibov_label_points) as ibov_label_points,
+    min(ma21_window_obs_count) as ma21_window_obs_count,
     bool_and(has_full_ma21_window) as has_full_ma21_window,
 
     -- Investidor Estrangeiro (ESTRANG)
