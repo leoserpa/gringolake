@@ -1,5 +1,5 @@
 ---
-title: Comparativo Multi-Perfil — GringoLake Terminal
+title: Comparativo Multi-Perfil — GringoLake
 ---
 
 <div class="page-hero">

@@ -1,5 +1,5 @@
 ---
-title: Curto Prazo (IBOV × P.F.) — GringoLake Terminal
+title: Curto Prazo (IBOV × P.F.) — GringoLake
 ---
 
 <div class="page-hero">

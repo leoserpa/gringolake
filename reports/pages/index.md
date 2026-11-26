@@ -1,5 +1,5 @@
 ---
-title: Panorama — GringoLake Terminal
+title: Panorama — GringoLake
 ---
 
 <div class="page-hero">

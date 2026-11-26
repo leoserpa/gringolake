@@ -133,6 +133,7 @@
 <svelte:head>
   <meta name="color-scheme" content="dark" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
   <link
@@ -143,7 +144,7 @@
 
 <EvidenceDefaultLayout
   {data}
-  title="GringoLake Terminal"
+  title="GringoLake"
   fullWidth={true}
   hideSidebar={true}
   hideHeader={true}
@@ -161,13 +162,14 @@
     >
       <div bind:this={headerInnerEl} class="header-inner">
         <a class="site-brand" href={`${base}/`}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="13" width="4" height="7" rx="1" fill="#F5F5F5" />
-            <rect x="10" y="8" width="4" height="12" rx="1" fill="#A6A6A6" />
-            <rect x="17" y="4" width="4" height="16" rx="1" fill="#FACC15" />
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="22" height="22" rx="6" fill="#0F0F0F" stroke="#2A2A2A" stroke-width="1.2" />
+            <path d="M4.5 17.5C7 16 9.5 19 12 17.5C14.5 16 17 19 19.5 17.5" stroke="#525252" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M4.5 14C7 12.6 9.5 15.2 12 13.8C14.5 12.4 17 14.8 19.5 13.4" stroke="#A6A6A6" stroke-width="1.5" stroke-linecap="round" />
+            <path d="M5 10.8L9.2 8.2L12.6 10L18.2 6.4" stroke="#FACC15" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="18.4" cy="6.3" r="2" fill="#FACC15" />
           </svg>
-          <span class="brand-name">GringoLake</span>
-          <span class="brand-tag">TERMINAL</span>
+          <span class="brand-name">Gringo<span class="brand-accent">Lake</span></span>
         </a>
 
         <nav class="site-nav" aria-label="Navegação principal">
@@ -229,7 +231,7 @@
 
       <footer class="gl-footer">
         <span>Fonte: B3 S.A. (GetPortfolioDay IBOV · BDI SharesInvesVolum D+2) · Atualização útil pós-SLA 21:00 BRT</span>
-        <span>GringoLake Terminal · GNU GPL v3.0</span>
+        <span>GringoLake · GNU GPL v3.0</span>
       </footer>
     </div>
   </div>
@@ -364,18 +366,14 @@
 
   .brand-name {
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 15.5px;
     font-weight: 700;
     color: #f5f5f5;
     letter-spacing: -0.02em;
   }
 
-  .brand-tag {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 10.5px;
-    font-weight: 700;
+  .brand-accent {
     color: #facc15;
-    letter-spacing: 0.06em;
   }
 
   .site-brand:focus-visible,

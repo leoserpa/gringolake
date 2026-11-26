@@ -22,6 +22,7 @@ Ao registrar novas alterações ou correções de documentação, **adicione uma
 - Novos testes unitários em `tests/test_b3_component_logic.py` e `tests/test_parquet_store.py`.
 
 ### Changed
+- Criada marca visual própria em SVG (`reports/static/favicon.svg` e navbar: camadas do lago Medalhão + curva de fluxo dourada) e removida a etiqueta `Terminal` de todos os títulos, cabeçalho, rodapé e badges do dashboard.
 - Padronizados pacote Python (`src/gringolake`), projeto dbt (`dbt_gringolake`), banco analítico (`data/warehouse/gringolake.duckdb`), variáveis de ambiente (`GRINGOLAKE_*`) e toda a documentação para alinhar 100% com o nome do repositório GitHub (`leoserpa/gringolake`).
 - Adicionados metadados de licença (`GPL-3.0`) e autoria em `pyproject.toml`, badges técnicos e seção legível de **Licença e Aviso sobre Dados (B3)** no `README.md` (preservando o arquivo `LICENSE` GPLv3 verbatim).
 

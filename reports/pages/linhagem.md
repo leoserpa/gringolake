@@ -1,5 +1,5 @@
 ---
-title: Linhagem e Qualidade — GringoLake Terminal
+title: Linhagem e Qualidade — GringoLake
 ---
 
 <div class="page-hero">

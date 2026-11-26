@@ -1,5 +1,5 @@
 ---
-title: Ibovespa Histórico — GringoLake Terminal
+title: Ibovespa Histórico — GringoLake
 ---
 
 <div class="page-hero">
