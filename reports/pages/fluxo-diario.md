@@ -70,7 +70,8 @@ SELECT
     MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS pf_mi,
     MAX(CASE WHEN f.investor_type_code = 'institucional' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS instit_mi,
     MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS inst_fin_mi,
-    MAX(CASE WHEN f.investor_type_code = 'outros' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS outros_mi
+    MAX(CASE WHEN f.investor_type_code = 'outros' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS outros_mi,
+    ROUND(SUM(f.daily_purchases_k_brl) / 1000000.0, 2) AS volume_total_bi
 FROM gringolake.fct_ibov_investor_flow_daily f
 INNER JOIN datas_janela d ON f.trading_date = d.trading_date
 GROUP BY f.trading_date
@@ -161,6 +162,28 @@ ORDER BY f.trading_date ASC
   </section>
 </div>
 
+<div class="terminal-grid-1">
+  <section class="terminal-panel">
+    <TerminalLineChart
+      data={fluxo_diario_4_perfis}
+      panelIndex="05"
+      panelTitle="Volume Financeiro Total da B3 (R$ bi)"
+      panelSubtitle="Giro financeiro diário somando os 5 perfis (1 ponta, BDI) · Âmbar = pregões ≥ 1,4× média da janela"
+      x="trading_date"
+      y="volume_total_bi"
+      names={['Volume Total B3']}
+      prefix="R$ "
+      suffix=" bi"
+      decimals={1}
+      chartType="bar"
+      axisCompact={true}
+      highlightAboveAvg={true}
+      height="250px"
+      showEndLabel={false}
+    />
+  </section>
+</div>
+
 ```sql tabela_fluxo_diario
 SELECT
     strftime(trading_date, '%Y-%m-%d') AS pregao,
@@ -176,7 +199,7 @@ ORDER BY trading_date DESC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">05</span><span>Histórico Diário por Perfil (R$ milhões)</span></h2>
+    <h2 class="terminal-panel-title"><span class="panel-index">06</span><span>Histórico Diário por Perfil (R$ milhões)</span></h2>
     <p class="terminal-panel-sub">Soma das 5 categorias oficiais da B3 fecha em zero a cada pregão (tolerância ≤ R$ 20 mil) · Atualização às 21h BRT</p>
     <DataTable data={tabela_fluxo_diario} rows=15 search=false>
       <Column id=pregao title="Pregão" />

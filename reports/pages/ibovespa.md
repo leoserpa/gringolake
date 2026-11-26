@@ -5,16 +5,28 @@ title: Ibovespa Histórico — GringoLake
 ```sql ibov_filtrado
 WITH limite AS (
     SELECT MAX(trading_date) AS max_dt FROM gringolake.stg_b3_ibov_daily
+),
+janela AS (
+    SELECT
+        s.trading_date,
+        s.trading_year,
+        s.ibov_close,
+        s.ibov_return_1d_pct
+    FROM gringolake.stg_b3_ibov_daily s
+    CROSS JOIN limite l
+    WHERE date_diff('day', s.trading_date, l.max_dt) <= CAST('${inputs.horizonte_ibov}' AS INTEGER)
 )
 SELECT
-    s.trading_date,
-    s.trading_year,
-    s.ibov_close,
-    s.ibov_return_1d_pct
-FROM gringolake.stg_b3_ibov_daily s
-CROSS JOIN limite l
-WHERE date_diff('day', s.trading_date, l.max_dt) <= CAST('${inputs.horizonte_ibov}' AS INTEGER)
-ORDER BY s.trading_date
+    trading_date,
+    trading_year,
+    ibov_close,
+    ibov_return_1d_pct,
+    ROUND(
+        ((ibov_close / MAX(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) - 1.0) * 100.0,
+        2
+    ) AS drawdown_pct
+FROM janela
+ORDER BY trading_date
 ```
 
 ```sql ibov_kpis
@@ -75,6 +87,82 @@ FROM ${ibov_filtrado}
   </section>
 </div>
 
+<div class="terminal-grid-1">
+  <section class="terminal-panel">
+    <TerminalLineChart
+      data={ibov_filtrado}
+      panelIndex="02"
+      panelTitle="Drawdown Histórico do Ibovespa (%)"
+      panelSubtitle="Queda percentual a partir da máxima acumulada na janela selecionada (0% = topo da janela)"
+      x="trading_date"
+      y="drawdown_pct"
+      names={['Drawdown IBOV']}
+      colors={['#f2b94b']}
+      suffix="%"
+      decimals={2}
+      signed={true}
+      height="250px"
+    />
+  </section>
+</div>
+
+```sql matriz_mensal_ibov
+WITH mensal AS (
+    SELECT
+        CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano,
+        CAST(EXTRACT(MONTH FROM trading_date) AS INTEGER) AS mes,
+        strftime(trading_date, '%Y-%m') AS ym,
+        LAST(ibov_close ORDER BY trading_date) AS close_end
+    FROM gringolake.stg_b3_ibov_daily
+    GROUP BY 1, 2, 3
+),
+retornos_m AS (
+    SELECT
+        ano,
+        mes,
+        ROUND(((close_end / LAG(close_end) OVER (ORDER BY ym)) - 1.0) * 100.0, 2) AS ret_pct
+    FROM mensal
+),
+anual_base AS (
+    SELECT
+        CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano,
+        FIRST(ibov_close ORDER BY trading_date) AS first_close,
+        LAST(ibov_close ORDER BY trading_date) AS last_close
+    FROM gringolake.stg_b3_ibov_daily
+    GROUP BY 1
+),
+anual_ret AS (
+    SELECT
+        ano,
+        ROUND(
+            ((last_close / COALESCE(LAG(last_close) OVER (ORDER BY ano), first_close)) - 1.0) * 100.0,
+            2
+        ) AS ano_pct
+    FROM anual_base
+)
+SELECT
+    r.ano,
+    MAX(CASE WHEN r.mes = 1 THEN r.ret_pct END) AS m01,
+    MAX(CASE WHEN r.mes = 2 THEN r.ret_pct END) AS m02,
+    MAX(CASE WHEN r.mes = 3 THEN r.ret_pct END) AS m03,
+    MAX(CASE WHEN r.mes = 4 THEN r.ret_pct END) AS m04,
+    MAX(CASE WHEN r.mes = 5 THEN r.ret_pct END) AS m05,
+    MAX(CASE WHEN r.mes = 6 THEN r.ret_pct END) AS m06,
+    MAX(CASE WHEN r.mes = 7 THEN r.ret_pct END) AS m07,
+    MAX(CASE WHEN r.mes = 8 THEN r.ret_pct END) AS m08,
+    MAX(CASE WHEN r.mes = 9 THEN r.ret_pct END) AS m09,
+    MAX(CASE WHEN r.mes = 10 THEN r.ret_pct END) AS m10,
+    MAX(CASE WHEN r.mes = 11 THEN r.ret_pct END) AS m11,
+    MAX(CASE WHEN r.mes = 12 THEN r.ret_pct END) AS m12,
+    MAX(a.ano_pct) AS ano_pct
+FROM retornos_m r
+LEFT JOIN anual_ret a ON r.ano = a.ano
+GROUP BY r.ano
+ORDER BY r.ano DESC
+```
+
+<IbovMonthlyMatrix data={matriz_mensal_ibov} panelIndex="03" />
+
 ```sql resumo_anual_ibov
 SELECT
     trading_year AS ano,
@@ -90,7 +178,7 @@ ORDER BY trading_year DESC
 ```
 
 <section class="terminal-panel">
-  <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>Resumo Anual do Ibovespa (B3 Oficial)</span></h2>
+  <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Resumo Anual do Ibovespa (B3 Oficial)</span></h2>
   <p class="terminal-panel-sub">Contagem oficial de pregões, extremos de fechamento e variação percentual por ano calendário</p>
   <DataTable data={resumo_anual_ibov} rows=10>
     <Column id=ano title="Ano" fmt=id />

@@ -17,6 +17,7 @@
   export let axisCompact = false;
   export let positiveColor = '#f2b94b';
   export let negativeColor = '#5c5c62';
+  export let highlightAboveAvg = false;
   export let focal = false;
   export let panelIndex = '';
   export let panelTitle = '';
@@ -123,7 +124,13 @@
         lastPt = { x: dt, val };
       }
 
+      let barAvg = null;
       if (isBar) {
+        if (highlightAboveAvg && barMap.size > 0) {
+          let sum = 0;
+          for (const v of barMap.values()) sum += v;
+          barAvg = sum / barMap.size;
+        }
         for (const dt of barCategories) {
           if (!barMap.has(dt)) {
             pts.push(null);
@@ -131,10 +138,17 @@
           }
           const val = barMap.get(dt);
           const isPos = val >= 0;
+          const barColor = highlightAboveAvg
+            ? val >= barAvg * 1.4
+              ? positiveColor
+              : negativeColor
+            : isPos
+              ? positiveColor
+              : negativeColor;
           pts.push({
             value: val,
             itemStyle: {
-              color: isPos ? positiveColor : negativeColor,
+              color: barColor,
               borderRadius: isPos ? [7, 7, 3, 3] : [3, 3, 7, 7],
             },
           });
@@ -175,9 +189,23 @@
             ? {
                 silent: true,
                 symbol: ['none', 'none'],
-                label: { show: false },
-                lineStyle: { color: '#424248', width: 1, type: 'solid' },
-                data: [{ yAxis: 0 }],
+                label:
+                  highlightAboveAvg && barAvg !== null
+                    ? {
+                        show: true,
+                        position: 'insideEndTop',
+                        formatter: () => `Média ${formatVal(barAvg)}`,
+                        color: '#a3a3a3',
+                        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+                        fontSize: 10,
+                      }
+                    : { show: false },
+                lineStyle: {
+                  color: highlightAboveAvg ? '#5c5c62' : '#424248',
+                  width: 1,
+                  type: highlightAboveAvg ? 'dashed' : 'solid',
+                },
+                data: [{ yAxis: highlightAboveAvg && barAvg !== null ? barAvg : 0 }],
               }
             : undefined,
           endLabel: showSeriesEnd
