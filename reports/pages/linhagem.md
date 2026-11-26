@@ -83,8 +83,8 @@ ORDER BY trading_date DESC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">01</span><span>Métodos de Desacumulação MTD → Diário (Silver)</span></h2>
-    <p class="terminal-panel-sub">Distribuição dos pregões em int_b3_investor_flow_daily conforme ADR-003</p>
+    <h2 class="terminal-panel-title"><span class="panel-index">01</span><span>Como cada pregão foi desacumulado do MTD para diário?</span></h2>
+    <p class="terminal-panel-sub">Distribuição dos métodos oficiais em int_b3_investor_flow_daily conforme ADR-003</p>
     <DataTable data={auditoria_derivacao} rows=10>
       <Column id=metodo_derivacao title="Método" />
       <Column id=pregoes title="Pregões" fmt=num0 />
@@ -95,8 +95,8 @@ ORDER BY trading_date DESC
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>Auditoria Diária do Invariante Soma-Zero (B3)</span></h2>
-    <p class="terminal-panel-sub">Soma de compras vs. vendas das 5 categorias em cada pregão (resíduo esperado próximo de zero)</p>
+    <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>As compras e vendas da B3 fecham em soma-zero todo dia?</span></h2>
+    <p class="terminal-panel-sub">Auditoria contábil diária das 5 categorias oficiais (resíduo esperado ≤ R$ 20 mil)</p>
     <DataTable data={auditoria_soma_zero} rows=10>
       <Column id=pregao title="Pregão" />
       <Column id=perfis title="Perfis" fmt=num0 />

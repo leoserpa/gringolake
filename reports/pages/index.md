@@ -33,7 +33,7 @@ CROSS JOIN agg a
   <div class="page-head-row">
     <div class="page-title-group">
       <h1 class="page-title">Fluxo de Capital na B3</h1>
-      <p class="page-subtitle">Acumulado contínuo dos pregões válidos (BDI D+2) em R$ bilhões comparado ao Ibovespa</p>
+      <p class="page-subtitle">Quem está comprando e vendendo na bolsa · Acumulado oficial B3 (BDI D+2) em R$ bi vs. Ibovespa</p>
     </div>
 
     <div class="controls-right">
@@ -82,8 +82,8 @@ ORDER BY w.trading_date
     <TerminalDualAxisChart
       data={serie_comparativa}
       panelIndex="01"
-      panelTitle="IBOV × Estrangeiro"
-      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      panelTitle="Os estrangeiros estão comprando ou vendendo?"
+      panelSubtitle="Fluxo estrangeiro acumulado (âmbar, R$ bi) vs. Ibovespa (grafite)"
       flowCol="estrang_cum_bi_brl"
       flowName="Estrangeiro"
       maCol="estrang_cum_ma21_bi_brl"
@@ -100,8 +100,8 @@ ORDER BY w.trading_date
     <TerminalDualAxisChart
       data={serie_comparativa}
       panelIndex="02"
-      panelTitle="IBOV × Pessoa Física"
-      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      panelTitle="Como a Pessoa Física está posicionada na B3?"
+      panelSubtitle="Fluxo acumulado da Pessoa Física (âmbar, R$ bi) vs. Ibovespa (grafite)"
       flowCol="pf_cum_bi_brl"
       flowName="Pessoa Física"
       maCol="pf_cum_ma21_bi_brl"
@@ -119,8 +119,8 @@ ORDER BY w.trading_date
     <TerminalDualAxisChart
       data={serie_comparativa}
       panelIndex="03"
-      panelTitle="IBOV × Institucional"
-      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      panelTitle="O institucional está entrando ou saindo?"
+      panelSubtitle="Fluxo institucional acumulado (âmbar, R$ bi) vs. Ibovespa (grafite)"
       flowCol="instit_cum_bi_brl"
       flowName="Institucional"
       maCol="instit_cum_ma21_bi_brl"
@@ -136,8 +136,8 @@ ORDER BY w.trading_date
     <TerminalDualAxisChart
       data={serie_comparativa}
       panelIndex="04"
-      panelTitle="IBOV × Inst. Financeira"
-      panelSubtitle="Acumulado contínuo (âmbar, R$ bi) vs. IBOV oficial (grafite)"
+      panelTitle="Como atuam as Instituições Financeiras?"
+      panelSubtitle="Fluxo acumulado de Inst. Financeiras (âmbar, R$ bi) vs. Ibovespa (grafite)"
       flowCol="inst_fin_cum_bi_brl"
       flowName="Inst. Financeira"
       maCol="inst_fin_cum_ma21_bi_brl"
@@ -211,6 +211,6 @@ ORDER BY f.display_order
 <FlowExplorerTable
   data={explorador_perfis}
   panelIndex="06"
-  title="Perfis Oficiais B3"
-  subtitle="Saldos diário, mensal (MTD) e acumulado contínuo em R$ bi no último pregão · MM21 ativa com 21 pregões completos"
+  title="Qual a posição atual de cada perfil no último pregão?"
+  subtitle="Saldos diário, mensal (MTD) e acumulado em R$ bi por categoria B3 · MM21 ativa com 21 pregões completos"
 />

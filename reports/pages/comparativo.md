@@ -13,7 +13,7 @@ FROM gringolake.fct_ibov_investor_flow_daily
   <div class="page-head-row">
     <div class="page-title-group">
       <h1 class="page-title">Comparativo Multi-Perfil</h1>
-      <p class="page-subtitle">Inspeção detalhada por categoria oficial B3 em R$ bilhões e contraparte entre os três maiores grupos</p>
+      <p class="page-subtitle">Compare o comportamento de cada categoria oficial da B3, quem faz a contraparte e quem domina o giro</p>
     </div>
 
     <div class="controls-right">
@@ -64,8 +64,8 @@ ORDER BY trading_date
     <TerminalDualAxisChart
       data={serie_perfil}
       panelIndex="01"
-      panelTitle="IBOV × Fluxo Acumulado e MM21 do Perfil Selecionado"
-      panelSubtitle="Acumulado contínuo em R$ bi (âmbar) vs. fechamento oficial do IBOV (grafite)"
+      panelTitle="Como evolui o fluxo do perfil selecionado frente ao Ibovespa?"
+      panelSubtitle="Acumulado contínuo em R$ bi (âmbar) e MM21 vs. fechamento oficial do Ibovespa (grafite)"
       flowCol="cum_net_flow_bi_brl"
       flowName="Fluxo Acumulado"
       maCol="cum_net_flow_ma21_bi_brl"
@@ -85,8 +85,8 @@ ORDER BY trading_date
     <TerminalLineChart
       data={todos_perfis_wide}
       panelIndex="02"
-      panelTitle="Contraparte de Mercado · Estrangeiro × Pessoa Física × Institucional"
-      panelSubtitle="Evolução acumulada conjunta dos 3 maiores grupos da B3 no horizonte disponível (R$ bi)"
+      panelTitle="Quem compra na contraparte de quem está vendendo?"
+      panelSubtitle="Evolução acumulada dos 3 maiores grupos da B3 (Estrangeiro, Pessoa Física e Institucional) em R$ bi"
       x="trading_date"
       y={['estrang_cum_bi_brl', 'pf_cum_bi_brl', 'instit_cum_bi_brl']}
       names={['Estrangeiro', 'Pessoa Física', 'Institucional']}
@@ -140,8 +140,8 @@ ORDER BY mtd_share_pct DESC
     <FlowScatterChart
       data={dispersao_estrang_ibov}
       panelIndex="03"
-      panelTitle="Dispersão · Estrangeiro × Retorno IBOV"
-      panelSubtitle="Eixo X: fluxo diário estrangeiro (R$ mi) · Eixo Y: variação diária do Ibovespa (%)"
+      panelTitle="Quando o estrangeiro entra, o IBOV sobe?"
+      panelSubtitle="Dispersão diária: fluxo estrangeiro (R$ mi, X) × variação do Ibovespa (%, Y)"
       height="290px"
     />
   </section>
@@ -150,8 +150,8 @@ ORDER BY mtd_share_pct DESC
     <MarketShareBarChart
       data={participacao_volume_b3}
       panelIndex="04"
-      panelTitle="Participação no Volume da B3 (%)"
-      panelSubtitle="Fatia oficial no mês (BDI) e no último pregão por categoria de investidor"
+      panelTitle="Qual perfil domina o volume na B3?"
+      panelSubtitle="Participação oficial no giro do mês (BDI) e no último pregão (%)"
     />
   </section>
 </div>
@@ -163,6 +163,6 @@ SELECT * FROM ${serie_perfil} ORDER BY trading_date DESC
 <FlowExplorerTable
   data={serie_perfil_desc}
   panelIndex="05"
-  title="Histórico Diário do Perfil Selecionado"
+  title="Qual o histórico diário detalhado do perfil selecionado?"
   subtitle="Pregões em ordem decrescente com saldo diário, MTD e acumulado em R$ bi · MM21 ativa com 21 pregões completos"
 />

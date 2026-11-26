@@ -1,8 +1,8 @@
 <script>
   export let data = [];
   export let panelIndex = '05';
-  export let title = 'Consolidado Mensal × Retorno do Ibovespa';
-  export let subtitle = 'Último saldo MTD oficial de cada mês em R$ bi · Entradas líquidas positivas destacadas em âmbar';
+  export let title = 'Quem liderou o fluxo em cada mês e como fechou o Ibovespa?';
+  export let subtitle = 'Último saldo mensal oficial (MTD) em R$ bi por perfil · Entradas líquidas positivas destacadas em âmbar';
 
   $: rows = Array.isArray(data)
     ? data

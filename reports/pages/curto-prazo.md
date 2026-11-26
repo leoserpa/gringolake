@@ -73,8 +73,8 @@ ORDER BY trading_date
     <TerminalDualAxisChart
       data={pf_serie_completa}
       panelIndex="01"
-      panelTitle="IBOV × Acumulado Pessoa Física e MM21"
-      panelSubtitle="Use a barra inferior ou scroll para zoom nos pregões · Passe o mouse sobre a curva para valores exatos"
+      panelTitle="A Pessoa Física está acelerando ou perdendo força no curto prazo?"
+      panelSubtitle="Fluxo acumulado da P.F. (R$ bi) vs. MM21 e Ibovespa · Use a barra inferior ou scroll para dar zoom nos pregões"
       flowCol="pf_cum_short_term_bi_brl"
       flowName="Acum. P.F."
       maCol="pf_cum_short_term_ma21_bi_brl"
@@ -95,8 +95,8 @@ ORDER BY trading_date
     <TerminalLineChart
       data={pf_serie_completa}
       panelIndex="02"
-      panelTitle="Saldo Líquido Diário de Pessoa Física (R$ bi)"
-      panelSubtitle="Âmbar = compra líquida diária · Grafite = saída líquida diária (desacumulação MTD)"
+      panelTitle="Quanto a Pessoa Física comprou ou vendeu em cada pregão?"
+      panelSubtitle="Saldo líquido diário da Pessoa Física em R$ bi · Âmbar = compra líquida, grafite = saída líquida (desacumulação MTD)"
       x="trading_date"
       y="daily_net_flow_bi_brl"
       names={['Saldo Diário P.F.']}

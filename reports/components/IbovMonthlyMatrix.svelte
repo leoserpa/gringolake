@@ -1,8 +1,8 @@
 <script>
   export let data = [];
   export let panelIndex = '03';
-  export let title = 'Matriz de Retornos Mensais do Ibovespa';
-  export let subtitle = 'Variação percentual fechamento/fechamento por mês e acumulado anual oficial da B3 (2020–2026)';
+  export let title = 'Quais meses historicamente rendem mais ou menos no Ibovespa?';
+  export let subtitle = 'Matriz de retornos mensais (%) e fechamento anual oficial da B3 (2020–2026)';
 
   const MONTHS = [
     { key: 'm01', label: 'Jan' },

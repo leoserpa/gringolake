@@ -46,7 +46,7 @@ FROM ${ibov_filtrado}
   <div class="page-head-row">
     <div class="page-title-group">
       <h1 class="page-title">Ibovespa Histórico</h1>
-      <p class="page-subtitle">Fechamento oficial diário da B3 (GetPortfolioDay) utilizado como calendário âncora da desacumulação MTD</p>
+      <p class="page-subtitle">Tendência, quedas a partir do topo e sazonalidade mensal do índice oficial da B3 (GetPortfolioDay)</p>
     </div>
 
     <div class="controls-right">
@@ -74,8 +74,8 @@ FROM ${ibov_filtrado}
     <TerminalLineChart
       data={ibov_filtrado}
       panelIndex="01"
-      panelTitle="Evolução do Ibovespa no Horizonte Selecionado"
-      panelSubtitle="Pontos de fechamento oficial diário da B3 (stg_b3_ibov_daily)"
+      panelTitle="Qual a trajetória do Ibovespa no horizonte selecionado?"
+      panelSubtitle="Fechamento oficial diário da B3 em pontos (stg_b3_ibov_daily)"
       x="trading_date"
       y="ibov_close"
       names={['Ibovespa']}
@@ -92,8 +92,8 @@ FROM ${ibov_filtrado}
     <TerminalLineChart
       data={ibov_filtrado}
       panelIndex="02"
-      panelTitle="Drawdown Histórico do Ibovespa (%)"
-      panelSubtitle="Queda percentual a partir da máxima acumulada na janela selecionada (0% = topo da janela)"
+      panelTitle="Quanto o Ibovespa já caiu desde a máxima do período?"
+      panelSubtitle="Drawdown percentual a partir do topo acumulado na janela selecionada (0% = máxima da janela)"
       x="trading_date"
       y="drawdown_pct"
       names={['Drawdown IBOV']}
@@ -178,8 +178,8 @@ ORDER BY trading_year DESC
 ```
 
 <section class="terminal-panel">
-  <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Resumo Anual do Ibovespa (B3 Oficial)</span></h2>
-  <p class="terminal-panel-sub">Contagem oficial de pregões, extremos de fechamento e variação percentual por ano calendário</p>
+  <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Como o Ibovespa fechou em cada ano desde 2020?</span></h2>
+  <p class="terminal-panel-sub">Contagem oficial de pregões, abertura, mínima, máxima e variação percentual por ano calendário</p>
   <DataTable data={resumo_anual_ibov} rows=10>
     <Column id=ano title="Ano" fmt=id />
     <Column id=pregoes title="Pregões" fmt=num0 />
