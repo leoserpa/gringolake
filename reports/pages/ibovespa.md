@@ -109,8 +109,8 @@ FROM ${ibov_filtrado}
 ```sql matriz_mensal_ibov
 WITH mensal AS (
     SELECT
-        CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano,
-        CAST(EXTRACT(MONTH FROM trading_date) AS INTEGER) AS mes,
+        CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano_num,
+        CAST(EXTRACT(MONTH FROM trading_date) AS INTEGER) AS mes_num,
         strftime(trading_date, '%Y-%m') AS ym,
         LAST(ibov_close ORDER BY trading_date) AS close_end
     FROM gringolake.stg_b3_ibov_daily
@@ -118,50 +118,104 @@ WITH mensal AS (
 ),
 retornos_m AS (
     SELECT
-        ano,
-        mes,
-        ROUND(((close_end / LAG(close_end) OVER (ORDER BY ym)) - 1.0) * 100.0, 2) AS ret_pct
+        ano_num,
+        mes_num,
+        ROUND((close_end / LAG(close_end) OVER (ORDER BY ym)) - 1.0, 4) AS retorno
     FROM mensal
-),
-anual_base AS (
-    SELECT
-        CAST(EXTRACT(YEAR FROM trading_date) AS INTEGER) AS ano,
-        FIRST(ibov_close ORDER BY trading_date) AS first_close,
-        LAST(ibov_close ORDER BY trading_date) AS last_close
-    FROM gringolake.stg_b3_ibov_daily
-    GROUP BY 1
-),
-anual_ret AS (
-    SELECT
-        ano,
-        ROUND(
-            ((last_close / COALESCE(LAG(last_close) OVER (ORDER BY ano), first_close)) - 1.0) * 100.0,
-            2
-        ) AS ano_pct
-    FROM anual_base
 )
 SELECT
-    r.ano,
-    MAX(CASE WHEN r.mes = 1 THEN r.ret_pct END) AS m01,
-    MAX(CASE WHEN r.mes = 2 THEN r.ret_pct END) AS m02,
-    MAX(CASE WHEN r.mes = 3 THEN r.ret_pct END) AS m03,
-    MAX(CASE WHEN r.mes = 4 THEN r.ret_pct END) AS m04,
-    MAX(CASE WHEN r.mes = 5 THEN r.ret_pct END) AS m05,
-    MAX(CASE WHEN r.mes = 6 THEN r.ret_pct END) AS m06,
-    MAX(CASE WHEN r.mes = 7 THEN r.ret_pct END) AS m07,
-    MAX(CASE WHEN r.mes = 8 THEN r.ret_pct END) AS m08,
-    MAX(CASE WHEN r.mes = 9 THEN r.ret_pct END) AS m09,
-    MAX(CASE WHEN r.mes = 10 THEN r.ret_pct END) AS m10,
-    MAX(CASE WHEN r.mes = 11 THEN r.ret_pct END) AS m11,
-    MAX(CASE WHEN r.mes = 12 THEN r.ret_pct END) AS m12,
-    MAX(a.ano_pct) AS ano_pct
-FROM retornos_m r
-LEFT JOIN anual_ret a ON r.ano = a.ano
-GROUP BY r.ano
-ORDER BY r.ano DESC
+    CAST(ano_num AS VARCHAR) AS ano,
+    ano_num,
+    mes_num,
+    CASE mes_num
+        WHEN 1 THEN 'Jan'
+        WHEN 2 THEN 'Fev'
+        WHEN 3 THEN 'Mar'
+        WHEN 4 THEN 'Abr'
+        WHEN 5 THEN 'Mai'
+        WHEN 6 THEN 'Jun'
+        WHEN 7 THEN 'Jul'
+        WHEN 8 THEN 'Ago'
+        WHEN 9 THEN 'Set'
+        WHEN 10 THEN 'Out'
+        WHEN 11 THEN 'Nov'
+        WHEN 12 THEN 'Dez'
+    END AS mes,
+    retorno
+FROM retornos_m
+WHERE retorno IS NOT NULL
+ORDER BY ano_num DESC, mes_num ASC
 ```
 
-<IbovMonthlyMatrix data={matriz_mensal_ibov} panelIndex="03" />
+<section class="terminal-panel">
+  <h2 class="terminal-panel-title"><span class="panel-index">03</span><span>Quais meses historicamente rendem mais ou menos no Ibovespa?</span></h2>
+  <p class="terminal-panel-sub">Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (2020–2026) · Passe o mouse ou clique na legenda de cores</p>
+  <Heatmap
+    data={matriz_mensal_ibov}
+    x=mes
+    y=ano
+    xSort=mes_num
+    xSortOrder=asc
+    ySort=ano_num
+    ySortOrder=desc
+    value=retorno
+    valueFmt=pct1
+    nullsZero=false
+    zeroDisplay="0.0%"
+    cellHeight=40
+    leftPadding=48
+    rightPadding=12
+    mobileValueLabels=false
+    seriesOptions={{
+      itemStyle: {
+        borderColor: '#2b2b2b',
+        borderWidth: 3,
+        borderRadius: 6
+      },
+      label: {
+        color: '#f8f8f8',
+        fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+        fontSize: 11,
+        fontWeight: 600
+      }
+    }}
+    echartsOptions={{
+      backgroundColor: 'transparent',
+      tooltip: {
+        backgroundColor: '#222222',
+        borderColor: '#45454a',
+        textStyle: { color: '#f8f8f8' }
+      },
+      xAxis: {
+        splitArea: { show: false },
+        axisLabel: { color: '#d4d4d8', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', fontSize: 11.5, fontWeight: 600 }
+      },
+      yAxis: {
+        splitArea: { show: false },
+        axisLabel: { color: '#e5e5e5', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 11.5, fontWeight: 600 }
+      },
+      visualMap: [{
+        type: 'piecewise',
+        orient: 'horizontal',
+        left: 'center',
+        bottom: 0,
+        itemWidth: 14,
+        itemHeight: 10,
+        itemGap: 10,
+        textStyle: { color: '#a3a3a3', fontSize: 11, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
+        pieces: [
+          { max: -0.08, label: '< -8%', color: '#991b1b' },
+          { min: -0.08, max: -0.03, label: '-8% a -3%', color: '#c0392b' },
+          { min: -0.03, max: -0.005, label: '-3% a 0%', color: '#6b282b' },
+          { min: -0.005, max: 0.005, label: 'Neutro', color: '#35353c' },
+          { min: 0.005, max: 0.03, label: '0% a +3%', color: '#1b5e44' },
+          { min: 0.03, max: 0.08, label: '+3% a +8%', color: '#1c8c5e' },
+          { min: 0.08, label: '> +8%', color: '#22b573' }
+        ]
+      }]
+    }}
+  />
+</section>
 
 ```sql resumo_anual_ibov
 SELECT
