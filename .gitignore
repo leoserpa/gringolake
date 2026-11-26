@@ -11,6 +11,7 @@ __pycache__/
 .dg/
 dagster_home/
 .local_defs_state/
+.tmp_dagster_home*/
 tmp*/
 
 # dbt artifacts & logs

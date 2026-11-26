@@ -13,7 +13,7 @@ Além disso, ao integrar o projeto dbt ao Dagster via `DbtProjectComponent` (um 
 
 ## Decision
 1. Materializar todos os modelos Silver e Gold como tabelas no DuckDB (`data/warehouse/gringolandia.duckdb`, schemas `silver` e `gold`) e exportar automaticamente cada tabela para Parquet com compressão ZSTD (`data/silver/<model>.parquet` e `data/gold/<model>.parquet`) via post-hook dbt ([export_parquet.sql](../../dbt_gringolandia/macros/export_parquet.sql)), restrito a `execute and flags.WHICH in ('run', 'build')`.
-2. Configurar caminhos no dbt via variáveis de ambiente com fallback relativo (`GRINGOLANDIA_DATA_DIR` e `GRINGOLANDIA_DUCKDB_PATH` em `profiles.yml`, `_sources.yml` e `export_parquet.sql`).
+2. Configurar caminhos no dbt via variáveis de ambiente com fallback relativo (`GRINGOLANDIA_DATA_DIR` e `GRINGOLANDIA_DUCKDB_PATH` em `profiles.yml`, `_sources.yml` e `export_parquet.sql`), escapando apóstrofos (`replace("'", "''")`) antes de interpolar caminhos em literais SQL do DuckDB.
 3. Em `src/gringolandia/definitions.py`, preencher `os.environ.setdefault(...)` com os caminhos absolutos resolvidos por `get_lakehouse_paths()` antes de chamar `load_from_defs_folder()`.
 
 ## Alternatives Considered

@@ -39,7 +39,7 @@ Não assuma que `make` está instalado no host; prefira sempre `uv run`:
 | Materializar apenas Bronze | `uv run dg launch --assets bronze/b3_ibov_daily,bronze/b3_investor_flow_mtd` |
 | Executar pipeline Medalhão completo (Bronze → Silver → Gold) | `uv run dg launch --job b3_medallion_full_refresh` |
 | Executar dbt standalone (build + unit/data tests) | `(cd dbt_gringolandia && uv run dbt build --profiles-dir .)` |
-| Rodar apenas testes dbt (38 data + 2 unit tests) | `(cd dbt_gringolandia && uv run dbt test --profiles-dir .)` |
+| Rodar apenas testes dbt (41 data + 2 unit tests) | `(cd dbt_gringolandia && uv run dbt test --profiles-dir .)` |
 | Rodar testes unitários Python | `uv run pytest -v` |
 | Rodar linter Python | `uv run ruff check src tests` |
 | Subir Dagster UI local | `uv run dg dev` |

@@ -95,9 +95,9 @@ Todas as tabelas Silver e Gold existem de forma espelhada em `data/warehouse/gri
 ### `gold.mart_ibov_vs_investors_wide`
 - **Chave primária:** `trading_date` (1 linha por pregão)
 - **Uso:** Gráficos comparativos **`COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)`**.
-- **Colunas:** `trading_date`, `trading_month`, `trading_year`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, além dos trios `*_daily_bi_brl`, `*_cum_bi_brl` e `*_cum_ma21_bi_brl` para os 5 perfis (`estrang`, `instit`, `pf`, `inst_fin`, `outros`) e `*_cum_k_brl` para os 3 perfis principais.
+- **Colunas:** `trading_date`, `trading_month`, `trading_year`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `has_full_ma21_window`, além dos trios `*_daily_bi_brl`, `*_cum_bi_brl` e `*_cum_ma21_bi_brl` para os 5 perfis (`estrang`, `instit`, `pf`, `inst_fin`, `outros`) e `*_cum_k_brl` para os 3 perfis principais.
 
 ### `gold.mart_ibov_vs_pf_short_term`
 - **Chave primária:** `trading_date` (últimos `160` pregões configuráveis via `var short_term_trading_days`)
 - **Uso:** Gráfico **`Relação: IBOV x P.F. (CURTO PRAZO)`**.
-- **Colunas:** `trading_date`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `daily_net_flow_k_brl`, `daily_net_flow_bi_brl`, `pf_cum_short_term_k_brl`, `pf_cum_short_term_bi_brl` (rebased no início da janela), `pf_cum_short_term_ma21_k_brl`, `pf_cum_short_term_ma21_bi_brl`, `is_pf_below_ma21`.
+- **Colunas:** `trading_date`, `ibov_close`, `ibov_return_1d_pct`, `ibov_local_extrema_type`, `ibov_label_points`, `daily_net_flow_k_brl`, `daily_net_flow_bi_brl`, `pf_cum_short_term_k_brl`, `pf_cum_short_term_bi_brl` (rebased no início da janela), `pf_cum_short_term_ma21_k_brl`, `pf_cum_short_term_ma21_bi_brl`, `is_pf_below_ma21`, `has_full_ma21_window`.

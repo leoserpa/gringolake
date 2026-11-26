@@ -9,7 +9,9 @@ See docs/decisions/002-official-b3-data-sources-only.md for source constraints
 (B3 D+2 lag, D-21 rolling retention, and immutable Bronze snapshot strategy).
 """
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import dagster as dg
 import polars as pl
@@ -24,6 +26,9 @@ from gringolandia.storage import (
     write_parquet_partition_atomic,
 )
 
+B3_TIMEZONE = ZoneInfo("America/Sao_Paulo")
+FINALIZED_MARKER_NAME = ".finalized"
+
 OFFICIAL_B3_INVESTOR_TYPES = {
     "Investidor Estrangeiro",
     "Institucionais",
@@ -31,6 +36,36 @@ OFFICIAL_B3_INVESTOR_TYPES = {
     "Instituições Financeiras",
     "Outros",
 }
+
+
+def b3_today() -> date:
+    """Return the current calendar date in B3's local timezone (America/Sao_Paulo).
+
+    Avoids premature date/year rollover when executing in UTC containers after 21:00 BRT.
+    """
+    return datetime.now(B3_TIMEZONE).date()
+
+
+def resolve_lookback_days(override: int | None, default: int) -> int:
+    """Resolve investor flow lookback window while preserving an explicit 0-day override."""
+    return override if override is not None else default
+
+
+def should_skip_cached_year(
+    year: int,
+    current_year: int,
+    partition_file: Path,
+    force_refresh_past_years: bool,
+) -> bool:
+    """Return True only when a past year has both cached Parquet data and a `.finalized` marker.
+
+    Prevents permanently skipping an unfinished year after New Year rollover if its last
+    ingestion happened before the final trading day of December.
+    """
+    if force_refresh_past_years or year >= current_year:
+        return False
+    finalized_marker = partition_file.parent / FINALIZED_MARKER_NAME
+    return partition_file.exists() and finalized_marker.exists()
 
 
 class IbovBronzeConfig(dg.Config):
@@ -79,9 +114,9 @@ class B3MarketDataComponent(dg.Component, dg.Model, dg.Resolvable):
             paths = get_lakehouse_paths()
             paths.ensure_dirs()
 
-            current_year = date.today().year
-            start_year = config.start_year or default_start_year
-            end_year = config.end_year or current_year
+            current_year = b3_today().year
+            start_year = config.start_year if config.start_year is not None else default_start_year
+            end_year = config.end_year if config.end_year is not None else current_year
 
             years_written: list[int] = []
             years_skipped: list[int] = []
@@ -89,8 +124,12 @@ class B3MarketDataComponent(dg.Component, dg.Model, dg.Resolvable):
             with B3Client(timeout_seconds=timeout_seconds) as client:
                 for year in range(start_year, end_year + 1):
                     partition_file = paths.bronze_ibov_dir / f"year={year}" / "part-0.parquet"
-                    is_past_year = year < current_year
-                    if is_past_year and partition_file.exists() and not config.force_refresh_past_years:
+                    if should_skip_cached_year(
+                        year=year,
+                        current_year=current_year,
+                        partition_file=partition_file,
+                        force_refresh_past_years=config.force_refresh_past_years,
+                    ):
                         years_skipped.append(year)
                         continue
 
@@ -107,6 +146,15 @@ class B3MarketDataComponent(dg.Component, dg.Model, dg.Resolvable):
                         target_path=partition_file,
                         sort_by=["trading_date"],
                     )
+                    if year < current_year:
+                        write_json_atomic(
+                            partition_file.parent / FINALIZED_MARKER_NAME,
+                            {
+                                "year": year,
+                                "row_count": rows,
+                                "finalized_at_utc": datetime.now(UTC).isoformat(),
+                            },
+                        )
                     years_written.append(year)
                     context.log.info(
                         f"Wrote {rows} IBOV trading days for year={year} -> {partition_file}"
@@ -155,8 +203,10 @@ class B3MarketDataComponent(dg.Component, dg.Model, dg.Resolvable):
             paths = get_lakehouse_paths()
             paths.ensure_dirs()
 
-            lookback_days = config.lookback_calendar_days or default_lookback_days
-            today = date.today()
+            lookback_days = resolve_lookback_days(
+                config.lookback_calendar_days, default_lookback_days
+            )
+            today = b3_today()
             recent_cutoff = today - timedelta(days=config.force_refresh_recent_days)
 
             partitions_written: list[str] = []

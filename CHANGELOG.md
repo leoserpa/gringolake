@@ -5,6 +5,19 @@ Ao registrar novas alterações ou correções de documentação, **adicione uma
 
 ## [Unreleased]
 
+### Fixed
+- **Virada de ano no cache do IBOV:** adicionado marcador `.finalized` em `b3_market_data_component.py` para impedir que um ano encerrado parcialmente em dezembro seja pulado permanentemente após 1º de janeiro.
+- **Timezone seguro em ambientes UTC:** substituído `date.today()` por `datetime.now(ZoneInfo("America/Sao_Paulo")).date()` em `b3_market_data_component.py`.
+- **Lookback `0` explícito:** `resolve_lookback_days()` preserva `lookback_calendar_days=0` (usando padrão apenas quando `None`).
+- **Backfill CSV com decimais tardios:** aplicados `schema_overrides` (`pl.Float64`) no `pl.scan_csv` em `parquet_store.py` para evitar falha de inferência após a janela padrão de 100 linhas do Polars.
+- **Escape SQL no DuckDB:** escapados apóstrofos (`'`) em `GRINGOLANDIA_DATA_DIR` em `export_parquet.sql` e `models/bronze/_sources.yml`.
+- **Detecção de drift Git:** `scripts/check_docs_drift.sh` agora reporta `can't tell` em repositórios shallow e quando há alterações locais não commitadas.
+
+### Added
+- Teste dbt `relationships` em `stg_b3_investor_flow_mtd.reference_date` → `stg_b3_ibov_daily.trading_date` impedindo descarte silencioso no `INNER JOIN` do calendário.
+- Coluna `has_full_ma21_window` (com teste `not_null`) propagada para `gold.mart_ibov_vs_investors_wide` e `gold.mart_ibov_vs_pf_short_term`.
+- Novos testes unitários em `tests/test_b3_component_logic.py` e `tests/test_parquet_store.py`.
+
 ### Changed
 - Adicionados metadados de licença (`GPL-3.0`) e autoria em `pyproject.toml`, badges técnicos e seção legível de **Licença e Aviso sobre Dados (B3)** no `README.md` (preservando o arquivo `LICENSE` GPLv3 verbatim).
 

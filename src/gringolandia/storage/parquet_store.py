@@ -127,12 +127,22 @@ def load_optional_investor_backfill(backfill_dir: Path) -> pl.DataFrame:
         return pl.DataFrame(schema=BRONZE_INVESTOR_FLOW_SCHEMA)
 
     ingested_at = datetime.now(UTC)
+    csv_numeric_overrides: dict[str, pl.DataType] = {
+        "mtd_purchases_k_brl": pl.Float64,
+        "mtd_sales_k_brl": pl.Float64,
+        "purchase_share_pct": pl.Float64,
+        "sale_share_pct": pl.Float64,
+    }
     frames: list[pl.LazyFrame] = []
     for file_path in files:
         lf = (
             pl.scan_parquet(file_path)
             if file_path.suffix.lower() == ".parquet"
-            else pl.scan_csv(file_path, try_parse_dates=True)
+            else pl.scan_csv(
+                file_path,
+                try_parse_dates=True,
+                schema_overrides=csv_numeric_overrides,
+            )
         )
         cols = set(lf.collect_schema().names())
         required = {

@@ -71,6 +71,10 @@ models:
         description: "Fechamento oficial do Ibovespa em pontos."
         data_tests:
           - not_null
+      - name: has_full_ma21_window
+        description: "Indica se todas as categorias já possuem 21 pregões completos na janela da MM21."
+        data_tests:
+          - not_null
 
   - name: mart_ibov_vs_pf_short_term
     description: >
@@ -88,6 +92,10 @@ models:
           - not_null
       - name: pf_cum_short_term_ma21_bi_brl
         description: "Média móvel de 21 pregões sobre o acumulado de curto prazo de PF (R$ bilhões)."
+        data_tests:
+          - not_null
+      - name: has_full_ma21_window
+        description: "Indica se a janela de curto prazo já atingiu 21 pregões completos para a MM21."
         data_tests:
           - not_null
 

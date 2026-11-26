@@ -100,17 +100,19 @@ flowchart LR
 - **Contrato de Backfill Histórico Oficial B3:** [`data/landing/b3_investor_flow_backfill/README.md`](data/landing/b3_investor_flow_backfill/README.md)
 - **Histórico de Mudanças:** [`CHANGELOG.md`](CHANGELOG.md)
 
-### Automação Diária
+### Automação Diária e Cuidados Operacionais
 
-O schedule `b3_daily_eod_schedule` executa `b3_medallion_full_refresh` de **segunda a sexta às 21h (`America/Sao_Paulo`)**, 1 hora após o SLA oficial das `20:00 BRT` informado no payload do BDI da B3.
+- **Schedule pós-SLA:** `b3_daily_eod_schedule` executa `b3_medallion_full_refresh` de **segunda a sexta às 21h (`America/Sao_Paulo`)**, 1 hora após o SLA oficial das `20:00 BRT` informado no payload do BDI da B3. Todas as datas de coleta usam explicitamente o fuso `America/Sao_Paulo` para evitar virada prematura em ambientes UTC.
+- **Lock de escrita no DuckDB:** ao conectar ferramentas de BI (Power BI, Metabase, notebooks), leia preferencialmente **`data/gold/*.parquet`** ou abra o DuckDB em modo `read_only=True` para não bloquear a execução diária das 21h.
+- **Retenção `D-21` da B3:** se a máquina ficar desligada por mais de ~21 pregões consecutivos, a API pública perde os dias mais antigos; para operação contínua sem depender do PC local, execute `uv run dg launch --job b3_medallion_full_refresh` em um servidor pequeno ou workflow agendado.
 
 ## Consumo para os 4 Gráficos (Camada Gold)
 
 Os dados finais ficam sincronizados em `data/warehouse/gringolandia.duckdb` (schemas `silver` e `gold`) e em `data/gold/*.parquet`:
 
 - **Gráfico 1 — `Relação: IBOV x P.F. (CURTO PRAZO)`:** `gold.mart_ibov_vs_pf_short_term`
-  - `trading_date` (eixo X, últimos 160 pregões), `pf_cum_short_term_bi_brl` + `pf_cum_short_term_ma21_bi_brl` (eixo Y esquerdo), `ibov_close` + `ibov_label_points` (eixo Y direito), `is_pf_below_ma21` (faixas de cruzamento).
-- **Gráficos 2, 3 e 4 — `COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)`:** `gold.mart_ibov_vs_investors_wide` (wide) ou `gold.fct_ibov_investor_flow_daily` (long)
+  - `trading_date` (eixo X, últimos 160 pregões), `pf_cum_short_term_bi_brl` + `pf_cum_short_term_ma21_bi_brl` (eixo Y esquerdo; filtre `has_full_ma21_window = true` para iniciar a MM21 somente após 21 pregões), `ibov_close` + `ibov_label_points` (eixo Y direito), `is_pf_below_ma21` (faixas de cruzamento).
+- **Gráficos 2, 3 e 4 — `COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)`:** `gold.mart_ibov_vs_investors_wide` (wide, também com `has_full_ma21_window`) ou `gold.fct_ibov_investor_flow_daily` (long)
   - Pessoa Física: `pf_cum_bi_brl` + `pf_cum_ma21_bi_brl` vs. `ibov_close`
   - Institucional: `instit_cum_bi_brl` + `instit_cum_ma21_bi_brl` vs. `ibov_close`
   - Estrangeiro: `estrang_cum_bi_brl` + `estrang_cum_ma21_bi_brl` vs. `ibov_close`

@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # Detecta drift entre arquivos de código e sua documentação/ADRs usando o histórico do Git.
-# Baseado na skill documentation-and-adrs: quando o histórico Git não existe ou não permite
-# determinar ordem ancestral (shallow clone, branches divergentes, arquivos ainda não commitados),
-# reporta explicitamente "can't tell" em vez de declarar "current".
+# Baseado na skill documentation-and-adrs: quando o histórico Git não existe, é raso (shallow),
+# possui alterações locais não commitadas ou ordem ancestral indefinida, reporta explicitamente
+# "can't tell" em vez de declarar "current".
 
 set -euo pipefail
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "can't tell: diretório não é um repositório Git (sem histórico de commits para comparar)."
+  exit 0
+fi
+
+if [ "$(git rev-parse --is-shallow-repository 2>/dev/null || echo false)" = "true" ]; then
+  echo "can't tell: repositório em clone shallow (histórico insuficiente para determinar ordem de commits)."
   exit 0
 fi
 
@@ -17,6 +22,11 @@ check_pair() {
 
   if [ ! -e "$code_path" ] || [ ! -e "$doc_path" ]; then
     echo "can't tell: caminho ausente ($code_path <-> $doc_path)"
+    return
+  fi
+
+  if [ -n "$(git status --porcelain -- "$code_path" "$doc_path" 2>/dev/null || true)" ]; then
+    echo "can't tell (uncommitted local changes): $doc_path <-> $code_path"
     return
   fi
 

@@ -30,6 +30,10 @@ models:
         description: "Data real do pregão de referência extraída do texto oficial do BDI (corrigindo o lag D+2)."
         data_tests:
           - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_b3_ibov_daily')
+                field: trading_date
       - name: investor_type_code
         description: "Código canônico da categoria oficial de investidor da B3."
         data_tests:

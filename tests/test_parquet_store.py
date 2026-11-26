@@ -80,3 +80,16 @@ def test_load_optional_investor_backfill_csv_and_validation(tmp_path):
     (bad_dir / "broken.csv").write_text("reference_date,foo\n2021-06-01,1\n", encoding="utf-8")
     with pytest.raises(ValueError, match="missing required columns"):
         load_optional_investor_backfill(bad_dir)
+
+
+def test_load_optional_investor_backfill_handles_decimals_after_inference_window(tmp_path):
+    lines = ["reference_date,investor_type_raw,mtd_purchases_k_brl,mtd_sales_k_brl"]
+    for _ in range(110):
+        lines.append("2021-06-01,Investidores Individuais,4000000,3500000")
+    lines.append("2021-06-02,Investidores Individuais,4000000.5,3500000.25")
+    (tmp_path / "decimals_late.csv").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    df = load_optional_investor_backfill(tmp_path)
+    assert df.height == 111
+    assert df["mtd_purchases_k_brl"][-1] == pytest.approx(4000000.5)
+    assert df["mtd_sales_k_brl"][-1] == pytest.approx(3500000.25)
