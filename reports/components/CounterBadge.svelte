@@ -2,11 +2,8 @@
   export let data = [];
   export let value = null;
   export let label = '';
-  export let prefix = '';
   export let suffix = '';
   export let decimals = 0;
-  export let signed = false;
-  export let staticValue = null;
 
   $: rows = Array.isArray(data)
     ? data
@@ -15,21 +12,21 @@
       : [];
 
   $: row = rows.length > 0 ? rows[0] : null;
-  $: rawVal = staticValue !== null ? staticValue : row && value ? row[value] : null;
+  $: rawVal = row && value ? row[value] : null;
 
   function formatValue(v) {
     if (v === null || v === undefined) return '—';
-    if (typeof v === 'string') return `${prefix}${v}${suffix}`;
+    if (typeof v === 'string') return `${v}${suffix}`;
     const num = Number(v);
     if (Number.isNaN(num)) return String(v);
     const epsilon = 0.5 * Math.pow(10, -decimals);
     const normalized = Math.abs(num) < epsilon ? 0 : num;
-    const sign = normalized < 0 ? '-' : signed && normalized > 0 ? '+' : '';
+    const sign = normalized < 0 ? '-' : '';
     const formatted = Math.abs(normalized).toLocaleString('pt-BR', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals,
     });
-    return `${sign}${prefix}${formatted}${suffix}`;
+    return `${sign}${formatted}${suffix}`;
   }
 </script>
 

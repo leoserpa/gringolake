@@ -73,7 +73,6 @@ ORDER BY trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       focal={true}
       height="360px"
       zoom={true}

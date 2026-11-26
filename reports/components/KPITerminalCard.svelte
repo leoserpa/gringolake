@@ -14,7 +14,6 @@
   export let liveDot = false;
   export let focal = false;
   export let focalWhenPositive = false;
-  export let badge = '';
 
   const CODE_ICON_MAP = {
     IBOV: 'trend',
@@ -67,7 +66,7 @@
   $: formattedDate = rawDate ? formatDate(rawDate) : '';
 </script>
 
-<div class="kpi-card" class:is-focal-card={isFocal && badge} data-code={code || undefined} data-icon={resolvedIcon}>
+<div class="kpi-card" data-code={code || undefined} data-icon={resolvedIcon}>
   <div class="kpi-head">
     <span class="kpi-label">
       <svg
@@ -132,23 +131,16 @@
         <span class="kpi-live-dot" aria-hidden="true"></span>
       {/if}
     </span>
-    {#if badge}
-      <span class="kpi-pill-badge">{badge}</span>
-    {:else if formattedDate}
+    {#if formattedDate}
       <span class="kpi-date">{formattedDate}</span>
     {/if}
   </div>
 
   <div class="kpi-value" class:is-focal={isFocal}>{formatValue(rawVal)}</div>
 
-  {#if subtitle || (badge && formattedDate)}
+  {#if subtitle}
     <div class="kpi-sub">
-      {#if subtitle}
-        <span>{subtitle}</span>
-      {/if}
-      {#if badge && formattedDate}
-        <span class="kpi-date">{formattedDate}</span>
-      {/if}
+      <span>{subtitle}</span>
     </div>
   {/if}
 </div>
@@ -172,10 +164,6 @@
 
   .kpi-card:hover {
     border-color: #45454a;
-  }
-
-  .kpi-card.is-focal-card {
-    border-color: rgba(242, 185, 75, 0.34);
   }
 
   .kpi-head {
@@ -215,20 +203,6 @@
     background: #f8f8f8;
     opacity: 0.75;
     flex-shrink: 0;
-  }
-
-  .kpi-pill-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 9px;
-    border-radius: 999px;
-    background: rgba(242, 185, 75, 0.14);
-    color: #f2b94b;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 10.5px;
-    font-weight: 600;
-    line-height: 1.3;
-    white-space: nowrap;
   }
 
   .kpi-value {

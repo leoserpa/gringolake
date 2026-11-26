@@ -66,17 +66,6 @@
   function formatVal(v) {
     if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
     const num = Number(v);
-    const sign = num < 0 ? '-' : signed && num > 0 ? '+' : '';
-    const formatted = Math.abs(num).toLocaleString('pt-BR', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    return `${sign}${prefix}${formatted}${suffix}`;
-  }
-
-  function formatHeaderReadout(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
-    const num = Number(v);
     const epsilon = 0.5 * Math.pow(10, -decimals);
     const normalized = Math.abs(num) < epsilon ? 0 : num;
     const sign = normalized < 0 ? '-' : signed && normalized > 0 ? '+' : '';
@@ -369,7 +358,7 @@
       </h2>
       {#if primaryLastVal !== null}
         <span class="line-live-readout" style={`color: ${readoutColor};`}>
-          {formatHeaderReadout(primaryLastVal)}
+          {formatVal(primaryLastVal)}
         </span>
       {/if}
     </div>

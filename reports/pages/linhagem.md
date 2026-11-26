@@ -45,7 +45,7 @@ CROSS JOIN perfis p
     </div>
 
     <div class="controls-right">
-      <CounterBadge data={kpi_qualidade} value="max_residuo_k_brl" label="Resíduo Máx." suffix="k" decimals={1} />
+      <CounterBadge data={kpi_qualidade} value="max_residuo_k_brl" label="Resíduo (R$ mil)" decimals={1} />
     </div>
   </div>
 </div>

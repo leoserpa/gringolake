@@ -74,7 +74,7 @@ ORDER BY trading_date
       data={pf_serie_completa}
       panelIndex="01"
       panelTitle="IBOV × Acumulado Pessoa Física e MM21"
-      panelSubtitle="Use o slider ou scroll para zoom nos pregões · Rótulos sobre o IBOV marcam extremos locais"
+      panelSubtitle="Use a barra inferior ou scroll para zoom nos pregões · Passe o mouse sobre a curva para valores exatos"
       flowCol="pf_cum_short_term_bi_brl"
       flowName="Acum. P.F."
       maCol="pf_cum_short_term_ma21_bi_brl"
@@ -82,7 +82,6 @@ ORDER BY trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       shadeCol="shade_flag"
       focal={true}
       height="360px"

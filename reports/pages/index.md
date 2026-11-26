@@ -38,14 +38,9 @@ CROSS JOIN agg a
 
     <div class="controls-right">
       <ButtonGroup name=janela_panorama>
-        <ButtonGroupItem valueLabel="30d" value="45" />
-        <ButtonGroupItem valueLabel="160d" value="240" default />
+        <ButtonGroupItem valueLabel="30 pregões" value="45" />
+        <ButtonGroupItem valueLabel="160 pregões" value="240" default />
         <ButtonGroupItem valueLabel="Máx" value="36500" />
-      </ButtonGroup>
-
-      <ButtonGroup name=exibir_extremos>
-        <ButtonGroupItem valueLabel="Extremos" value="1" default />
-        <ButtonGroupItem valueLabel="Limpo" value="0" />
       </ButtonGroup>
 
       <CounterBadge data={kpi_latest} value="total_pregoes" label="Pregões" decimals={0} />
@@ -67,7 +62,6 @@ WITH limite AS (
 SELECT
     w.trading_date,
     w.ibov_close,
-    CASE WHEN '${inputs.exibir_extremos}' = '1' THEN w.ibov_label_points ELSE NULL END AS ibov_label_points,
     w.ma21_window_obs_count,
     w.estrang_cum_bi_brl,
     w.estrang_cum_ma21_bi_brl,
@@ -97,7 +91,6 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       focal={true}
       height="285px"
     />
@@ -116,7 +109,6 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       height="285px"
     />
   </section>
@@ -136,7 +128,6 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       height="285px"
     />
   </section>
@@ -154,7 +145,6 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      extremaCol="ibov_label_points"
       height="285px"
     />
   </section>

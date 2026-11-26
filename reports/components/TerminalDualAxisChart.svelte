@@ -10,7 +10,6 @@
   export let maName = 'MM 21d';
   export let ibovCol = 'ibov_close';
   export let ibovName = 'IBOV (pts)';
-  export let extremaCol = null;
   export let shadeCol = null;
   export let height = '280px';
   export let flowColor = '#f2b94b';
@@ -46,18 +45,9 @@
   function formatBi(v) {
     if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
     const num = Number(v);
-    const sign = num < 0 ? '-' : num > 0 ? '+' : '';
-    return `${sign}R$ ${Math.abs(num).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} bi`;
-  }
-
-  function formatBiShort(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '';
-    const num = Number(v);
-    const sign = num < 0 ? '-' : num > 0 ? '+' : '';
-    return `${sign}R$ ${Math.abs(num).toLocaleString('pt-BR', {
+    const normalized = Math.abs(num) < 0.005 ? 0 : num;
+    const sign = normalized < 0 ? '-' : normalized > 0 ? '+' : '';
+    return `${sign}R$ ${Math.abs(normalized).toLocaleString('pt-BR', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })} bi`;
@@ -115,7 +105,6 @@
   })();
 
   $: latestFlowVal = lastFlowIdx >= 0 ? flowData[lastFlowIdx] : null;
-  $: resolvedFlowColor = flowColor === 'auto' ? '#f2b94b' : flowColor;
   $: badgeColor = focal || (latestFlowVal !== null && latestFlowVal > 0) ? '#f2b94b' : '#e5e5e5';
 
   $: shadeAreas = (() => {
@@ -137,29 +126,6 @@
     return areas;
   })();
 
-  $: ibovExtremaPoints = (() => {
-    if (!extremaCol || !rows.length) return [];
-    const validIbov = ibovData.filter((v) => v !== null && !Number.isNaN(v));
-    const midIbov =
-      validIbov.length > 0 ? (Math.min(...validIbov) + Math.max(...validIbov)) / 2 : 0;
-    const pts = [];
-    for (let i = 0; i < rows.length; i++) {
-      const labelPts = rows[i][extremaCol];
-      if (labelPts !== null && labelPts !== undefined && ibovData[i] !== null) {
-        const isPeak = ibovData[i] >= midIbov;
-        pts.push({
-          coord: [dates[i], ibovData[i]],
-          value: formatPts(labelPts),
-          label: {
-            position: isPeak ? 'top' : 'bottom',
-            distance: 8,
-          },
-        });
-      }
-    }
-    return pts;
-  })();
-
   $: series = [
     {
       name: flowName,
@@ -169,8 +135,8 @@
       showSymbol: false,
       smooth: 0.25,
       connectNulls: true,
-      lineStyle: { color: resolvedFlowColor, width: 2.4, cap: 'round' },
-      itemStyle: { color: resolvedFlowColor },
+      lineStyle: { color: flowColor, width: 2.4, cap: 'round' },
+      itemStyle: { color: flowColor },
       markPoint:
         lastFlowIdx >= 0
           ? {
@@ -178,7 +144,7 @@
               symbolSize: 8,
               silent: true,
               label: { show: false },
-              itemStyle: { color: resolvedFlowColor, borderColor: '#2b2b2b', borderWidth: 2 },
+              itemStyle: { color: flowColor, borderColor: '#2b2b2b', borderWidth: 2 },
               data: [{ coord: [dates[lastFlowIdx], flowData[lastFlowIdx]] }],
             }
           : undefined,
@@ -220,29 +186,6 @@
       connectNulls: true,
       lineStyle: { color: ibovColor, width: 1.5, cap: 'round' },
       itemStyle: { color: ibovColor },
-      markPoint:
-        ibovExtremaPoints.length > 0
-          ? {
-              symbol: 'circle',
-              symbolSize: 5.5,
-              silent: true,
-              itemStyle: { color: '#f8f8f8', borderColor: '#2b2b2b', borderWidth: 1.5 },
-              label: {
-                show: true,
-                position: 'top',
-                distance: 6,
-                formatter: (p) => p.data.value,
-                color: '#a3a3a3',
-                backgroundColor: 'transparent',
-                borderWidth: 0,
-                padding: [0, 2],
-                fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-                fontSize: isCompact ? 9 : 10,
-                fontWeight: 500,
-              },
-              data: ibovExtremaPoints,
-            }
-          : undefined,
     },
   ];
 
@@ -386,7 +329,7 @@
         <span>{panelTitle}</span>
       </h2>
       {#if latestFlowVal !== null}
-        <span class="dual-live-readout" style={`color: ${badgeColor};`}>{formatBiShort(latestFlowVal)}</span>
+        <span class="dual-live-readout" style={`color: ${badgeColor};`}>{formatBi(latestFlowVal)}</span>
       {/if}
     </div>
     {#if panelSubtitle || (maCol && !hasValidMa && latestMaObs !== null)}

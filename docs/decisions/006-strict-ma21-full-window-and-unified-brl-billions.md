@@ -33,12 +33,12 @@ Durante a auditoria financeira do dashboard e da camada Gold com dados reais da 
 - Cons: Gera sinais direcionais (`acima_mm21` / `abaixo_mm21`) e faixas de alerta matematicamente inválidos para uma janela de 21 pregões; um usuário pode interpretar o sinal como cruzamento real de tendência mensal.
 - Rejected: Em finanças quantitativas, um indicador não definido deve ser `NULL` (`em_formacao`), nunca um substituto parcial disfarçado.
 
-### Manter formatação automática `R$ mi` / `R$ bi` por magnitude
+### Manter formatação automática `R$ mi` / `R$ bi` por magnitude dentro da mesma tabela ou gráfico
 - Pros: Evita zeros à esquerda em categorias menores (`+R$ 0,03 bi` vs. `+R$ 31,3 mi`).
 - Cons: Mistura escalas de 1.000× na mesma coluna ou no mesmo gráfico (`+R$ 683,6 mi` ao lado de `-R$ 5,91 bi`), aumentando o risco de erro cognitivo na leitura rápida de fluxo de mercado.
-- Rejected: A uniformidade dimensional (`R$ bi` em todos os fluxos) prioriza precisão comparativa sobre estética numérica isolada.
+- Rejected: A uniformidade dimensional dentro de cada tela/tabela (`R$ bi` nos acumulados/mensal, `R$ mi` no fluxo diário isolado e `R$ mil` na auditoria) prioriza precisão comparativa sobre estética numérica isolada.
 
 ## Consequences
 - Durante os primeiros 20 pregões de uma série nova (ou rebased em `mart_ibov_vs_pf_short_term`), as colunas `*_ma21_*` são legitimamente `NULL`; testes `not_null` ingênuos nessas colunas foram substituídos pelo invariante completo `assert_ma21_window_integrity`.
 - Assim que o pipeline completar 21 pregões válidos na Gold (automaticamente às 21h BRT), a curva MM21 e os sinais `Acima MM21` / `Abaixo MM21` passam a renderizar automaticamente sem intervenção manual.
-- Todo valor de fluxo exibido ao analista em `reports/` usa a mesma unidade (`R$ bi`), eliminando ambiguidade entre páginas, eixos e tabelas.
+- Cada página, gráfico e tabela em `reports/` usa uma única unidade fixa do início ao fim (`R$ bi` nos acumulados e consolidado mensal; `R$ mi` no fluxo diário; `R$ mil` na auditoria contábil soma-zero), eliminando ambiguidade entre eixos, cabeçalhos e células.
