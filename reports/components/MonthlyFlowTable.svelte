@@ -153,7 +153,7 @@
     border: 1px solid #e4e4e7;
     background: #ffffff;
     color: #18181b;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;

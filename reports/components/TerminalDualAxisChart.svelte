@@ -217,7 +217,7 @@
       itemGap: 14,
       textStyle: {
         color: '#52525b',
-        fontFamily: 'IBM Plex Sans, system-ui, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif',
         fontSize: 11,
         padding: [0, 0, 0, 3],
       },
