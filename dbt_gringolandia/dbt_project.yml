@@ -1,0 +1,35 @@
+name: gringolandia
+version: "1.0.0"
+config-version: 2
+
+profile: gringolandia
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  short_term_trading_days: 160
+  local_extrema_window_days: 10
+
+models:
+  gringolandia:
+    silver:
+      +schema: silver
+      +materialized: table
+      +tags: ["silver", "medallion"]
+      +post-hook:
+        - "{{ export_layer_parquet('silver') }}"
+    gold:
+      +schema: gold
+      +materialized: table
+      +tags: ["gold", "medallion", "bi"]
+      +post-hook:
+        - "{{ export_layer_parquet('gold') }}"

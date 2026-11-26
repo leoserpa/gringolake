@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Camada Bronze imutável em Parquet gerada pelos assets oficiais da B3 no Dagster."
+    tables:
+      - name: b3_ibov_daily
+        description: "Série histórica diária oficial do Ibovespa (B3 GetPortfolioDay)."
+        meta:
+          external_location: "read_parquet('{{ env_var(\"GRINGOLANDIA_DATA_DIR\", \"../data\") }}/bronze/b3_ibov_daily/year=*/*.parquet', hive_partitioning=true)"
+          dagster:
+            asset_key: ["bronze", "b3_ibov_daily"]
+        columns:
+          - name: trading_date
+            description: "Data oficial do pregão na B3."
+          - name: ibov_close
+            description: "Pontuação oficial de fechamento do Ibovespa."
+
+      - name: b3_investor_flow_mtd
+        description: "Snapshots diários oficiais da tabela BDI SharesInvesVolum (acumulado MTD em R$ mil)."
+        meta:
+          external_location: "read_parquet('{{ env_var(\"GRINGOLANDIA_DATA_DIR\", \"../data\") }}/bronze/b3_investor_flow_mtd/publication_date=*/*.parquet', hive_partitioning=true)"
+          dagster:
+            asset_key: ["bronze", "b3_investor_flow_mtd"]
+        columns:
+          - name: publication_date
+            description: "Data de publicação do boletim BDI na B3 (defasagem D+2)."
+          - name: reference_date
+            description: "Data real do pregão de referência extraída da nota oficial do BDI."
+          - name: investor_type_raw
+            description: "Classificação oficial do perfil de investidor divulgada pela B3."

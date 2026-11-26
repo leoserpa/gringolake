@@ -1,0 +1,7 @@
+type: gringolandia.components.b3_market_data_component.B3MarketDataComponent
+
+attributes:
+  ibov_start_year: 2020
+  investor_flow_lookback_days: 35
+  group_name: bronze
+  request_timeout_seconds: 20.0

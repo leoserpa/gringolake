@@ -1,0 +1,15 @@
+gringolandia:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('GRINGOLANDIA_DUCKDB_PATH', '../data/warehouse/gringolandia.duckdb') }}"
+      threads: 4
+      extensions:
+        - parquet
+    prod:
+      type: duckdb
+      path: "{{ env_var('GRINGOLANDIA_DUCKDB_PATH', '../data/warehouse/gringolandia.duckdb') }}"
+      threads: 4
+      extensions:
+        - parquet

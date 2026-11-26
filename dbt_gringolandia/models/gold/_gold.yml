@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: dim_investor_type
+    description: "Dimensão oficial dos 5 perfis de investidores divulgados no BDI da B3."
+    columns:
+      - name: investor_type_code
+        description: "Código canônico da categoria de investidor (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: display_order
+        description: "Ordem padrão de exibição em dashboards e relatórios."
+        data_tests:
+          - unique
+          - not_null
+
+  - name: fct_ibov_investor_flow_daily
+    description: >
+      Tabela fato Gold no grão (trading_date x investor_type_code) combinando o fechamento oficial
+      do Ibovespa com fluxo diário líquido, fluxo acumulado e Média Móvel de 21 pregões (MM21)
+      por tipo de investidor na B3.
+    columns:
+      - name: fact_ibov_flow_sk
+        description: "Chave primária determinística da fato (trading_date + investor_type_code)."
+        data_tests:
+          - unique
+          - not_null
+      - name: trading_date
+        description: "Data oficial do pregão na B3."
+        data_tests:
+          - not_null
+      - name: investor_type_code
+        description: "Chave estrangeira para dim_investor_type."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_investor_type')
+                field: investor_type_code
+      - name: ibov_close
+        description: "Fechamento oficial do Ibovespa em pontos."
+        data_tests:
+          - not_null
+      - name: cum_net_flow_bi_brl
+        description: "Saldo líquido acumulado do fluxo de investidores em R$ bilhões."
+        data_tests:
+          - not_null
+      - name: cum_net_flow_ma21_bi_brl
+        description: "Média móvel simples de 21 pregões sobre o fluxo líquido acumulado (R$ bilhões)."
+        data_tests:
+          - not_null
+      - name: flow_vs_ma21_signal
+        description: "Sinal direcional do acumulado em relação à média móvel de 21 pregões."
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["acima_mm21", "abaixo_mm21"]
+
+  - name: mart_ibov_vs_investors_wide
+    description: >
+      Mart analítico em formato wide (1 linha por pregão) pronto para os gráficos comparativos
+      'COMPARATIVO: IBOVESPA X ESTRANG X INSTIT. X P.F. - R$ (mil)' em ferramentas de BI.
+    columns:
+      - name: trading_date
+        description: "Data oficial do pregão (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: ibov_close
+        description: "Fechamento oficial do Ibovespa em pontos."
+        data_tests:
+          - not_null
+
+  - name: mart_ibov_vs_pf_short_term
+    description: >
+      Mart analítico de curto prazo (últimos 160 pregões, rebased na janela) pronto para o gráfico
+      'Relação: IBOV x P.F. (CURTO PRAZO)' com acumulado de Pessoa Física, MM21 e flag de cruzamento.
+    columns:
+      - name: trading_date
+        description: "Data oficial do pregão (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: pf_cum_short_term_bi_brl
+        description: "Saldo líquido acumulado de Pessoa Física na janela de curto prazo (R$ bilhões)."
+        data_tests:
+          - not_null
+      - name: pf_cum_short_term_ma21_bi_brl
+        description: "Média móvel de 21 pregões sobre o acumulado de curto prazo de PF (R$ bilhões)."
+        data_tests:
+          - not_null
+
+unit_tests:
+  - name: test_fct_ibov_investor_flow_daily_cumulative_and_ma21
+    description: >
+      Valida soma acumulada, média móvel e sinal acima/abaixo da MM21 em série diária controlada
+      de Pessoa Física cruzada com fechamentos oficiais do IBOV.
+    model: fct_ibov_investor_flow_daily
+    given:
+      - input: ref('int_b3_investor_flow_daily')
+        rows:
+          - {trading_date: '2026-11-03', trading_month: '2026-11-01', trading_year: 2026, publication_date: '2026-11-05', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'month_start_exact', daily_purchases_k_brl: 5000000.0, daily_sales_k_brl: 4000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0, mtd_purchases_k_brl: 5000000.0, mtd_sales_k_brl: 4000000.0, mtd_net_flow_k_brl: 1000000.0, mtd_net_flow_bi_brl: 1.0, purchase_share_pct: 5.0, sale_share_pct: 4.0}
+          - {trading_date: '2026-11-04', trading_month: '2026-11-01', trading_year: 2026, publication_date: '2026-11-06', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 6000000.0, daily_sales_k_brl: 4000000.0, daily_net_flow_k_brl: 2000000.0, daily_net_flow_bi_brl: 2.0, mtd_purchases_k_brl: 11000000.0, mtd_sales_k_brl: 8000000.0, mtd_net_flow_k_brl: 3000000.0, mtd_net_flow_bi_brl: 3.0, purchase_share_pct: 5.5, sale_share_pct: 4.5}
+          - {trading_date: '2026-11-05', trading_month: '2026-11-01', trading_year: 2026, publication_date: '2026-11-09', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 2000000.0, daily_sales_k_brl: 5000000.0, daily_net_flow_k_brl: -3000000.0, daily_net_flow_bi_brl: -3.0, mtd_purchases_k_brl: 13000000.0, mtd_sales_k_brl: 13000000.0, mtd_net_flow_k_brl: 0.0, mtd_net_flow_bi_brl: 0.0, purchase_share_pct: 4.2, sale_share_pct: 5.8}
+      - input: ref('stg_b3_ibov_daily')
+        rows:
+          - {trading_date: '2026-11-03', ibov_close: 170000.0, ibov_return_1d_pct: 0.5}
+          - {trading_date: '2026-11-04', ibov_close: 172000.0, ibov_return_1d_pct: 1.18}
+          - {trading_date: '2026-11-05', ibov_close: 171000.0, ibov_return_1d_pct: -0.58}
+      - input: ref('dim_investor_type')
+        rows:
+          - {investor_type_code: 'pessoa_fisica', investor_type_name_pt: 'Pessoa Física', investor_type_short_pt: 'P.F.', display_order: 3}
+    expect:
+      rows:
+        - {trading_date: '2026-11-03', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 1.0, cum_net_flow_ma21_bi_brl: 1.0, flow_vs_ma21_signal: 'acima_mm21'}
+        - {trading_date: '2026-11-04', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 3.0, cum_net_flow_ma21_bi_brl: 2.0, flow_vs_ma21_signal: 'acima_mm21'}
+        - {trading_date: '2026-11-05', investor_type_code: 'pessoa_fisica', cum_net_flow_bi_brl: 0.0, cum_net_flow_ma21_bi_brl: 1.333333, flow_vs_ma21_signal: 'abaixo_mm21'}

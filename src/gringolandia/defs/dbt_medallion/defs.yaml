@@ -1,0 +1,19 @@
+type: dagster_dbt.DbtProjectComponent
+
+attributes:
+  project:
+    project_dir: "{{ context.project_root }}/dbt_gringolandia"
+    profiles_dir: "{{ context.project_root }}/dbt_gringolandia"
+  cli_args:
+    - build
+    - --exclude-resource-type
+    - unit_test
+  include_metadata:
+    - row_count
+    - column_metadata
+  translation:
+    group_name: "{{ node.schema }}"
+    key: "{{ node.schema }}/{{ node.name }}"
+  translation_settings:
+    enable_asset_checks: true
+    enable_code_references: true

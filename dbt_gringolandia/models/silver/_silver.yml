@@ -1,0 +1,110 @@
+version: 2
+
+models:
+  - name: stg_b3_ibov_daily
+    description: "Série oficial diária do Ibovespa limpa e enriquecida com calendário oficial de pregões da B3."
+    columns:
+      - name: trading_date
+        description: "Data oficial do pregão na B3 (chave primária)."
+        data_tests:
+          - unique
+          - not_null
+      - name: ibov_close
+        description: "Fechamento oficial do Ibovespa em pontos."
+        data_tests:
+          - not_null
+      - name: is_first_trading_day_of_month
+        description: "Indica se o pregão é o primeiro dia útil com negociação no mês (base para reset do MTD da B3)."
+        data_tests:
+          - not_null
+
+  - name: stg_b3_investor_flow_mtd
+    description: "Participação dos investidores da B3 deduplicada por (reference_date, investor_type_code), ainda na granularidade acumulada mensal (MTD) original do BDI."
+    columns:
+      - name: investor_flow_mtd_sk
+        description: "Chave substituta determinística (reference_date + investor_type_code)."
+        data_tests:
+          - unique
+          - not_null
+      - name: reference_date
+        description: "Data real do pregão de referência extraída do texto oficial do BDI (corrigindo o lag D+2)."
+        data_tests:
+          - not_null
+      - name: investor_type_code
+        description: "Código canônico da categoria oficial de investidor da B3."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - estrangeiro
+                  - institucional
+                  - pessoa_fisica
+                  - instituicoes_financeiras
+                  - outros
+      - name: mtd_purchases_k_brl
+        description: "Compras acumuladas no mês (MTD) em R$ mil."
+        data_tests:
+          - not_null
+      - name: mtd_sales_k_brl
+        description: "Vendas acumuladas no mês (MTD) em R$ mil."
+        data_tests:
+          - not_null
+
+  - name: int_b3_investor_flow_daily
+    description: >
+      Modelo intermediário Silver que desacumula o MTD mensal do BDI da B3 para fluxo diário real
+      cruzando com o calendário oficial de pregões do Ibovespa. Protege contra distorções em
+      meses iniciados parcialmente (ex.: início da janela deslizante D-21).
+    columns:
+      - name: investor_flow_daily_sk
+        description: "Chave primária determinística (trading_date + investor_type_code)."
+        data_tests:
+          - unique
+          - not_null
+      - name: trading_date
+        description: "Data oficial do pregão."
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_b3_ibov_daily')
+                field: trading_date
+      - name: daily_derivation_method
+        description: "Método de derivação do fluxo diário a partir do MTD oficial B3."
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - month_start_exact
+                  - mtd_diff_exact
+                  - missing_prior_trading_day
+
+unit_tests:
+  - name: test_int_b3_investor_flow_daily_mtd_deaccumulation_and_month_reset
+    description: >
+      Valida os 3 cenários críticos de desacumulação MTD -> Diário da B3:
+      1) Início truncado no meio do mês (sem pregão anterior) -> daily_* NULL (missing_prior_trading_day)
+      2) Pregão consecutivo no mesmo mês -> diferença exata MTD[t] - MTD[t-1] (mtd_diff_exact)
+      3) Primeiro pregão do mês seguinte -> reset exato para o valor MTD (month_start_exact)
+    model: int_b3_investor_flow_daily
+    given:
+      - input: ref('stg_b3_ibov_daily')
+        rows:
+          - {trading_date: '2026-10-29', trading_month: '2026-10-01', trading_year: 2026, prev_trading_date: '2026-10-28', trading_day_num_in_month: 20, is_first_trading_day_of_month: false}
+          - {trading_date: '2026-10-30', trading_month: '2026-10-01', trading_year: 2026, prev_trading_date: '2026-10-29', trading_day_num_in_month: 21, is_first_trading_day_of_month: false}
+          - {trading_date: '2026-11-03', trading_month: '2026-11-01', trading_year: 2026, prev_trading_date: '2026-10-30', trading_day_num_in_month: 1, is_first_trading_day_of_month: true}
+          - {trading_date: '2026-11-04', trading_month: '2026-11-01', trading_year: 2026, prev_trading_date: '2026-11-03', trading_day_num_in_month: 2, is_first_trading_day_of_month: false}
+      - input: ref('stg_b3_investor_flow_mtd')
+        rows:
+          - {reference_date: '2026-10-29', publication_date: '2026-11-03', investor_type_code: 'pessoa_fisica', investor_type_raw: 'Investidores Individuais', mtd_purchases_k_brl: 120000000.0, mtd_sales_k_brl: 112000000.0, mtd_net_flow_k_brl: 8000000.0, mtd_net_flow_bi_brl: 8.0, purchase_share_pct: 5.0, sale_share_pct: 4.6, _source_system: 'b3_bdi_api'}
+          - {reference_date: '2026-10-30', publication_date: '2026-11-04', investor_type_code: 'pessoa_fisica', investor_type_raw: 'Investidores Individuais', mtd_purchases_k_brl: 125000000.0, mtd_sales_k_brl: 116000000.0, mtd_net_flow_k_brl: 9000000.0, mtd_net_flow_bi_brl: 9.0, purchase_share_pct: 5.0, sale_share_pct: 4.6, _source_system: 'b3_bdi_api'}
+          - {reference_date: '2026-11-03', publication_date: '2026-11-05', investor_type_code: 'pessoa_fisica', investor_type_raw: 'Investidores Individuais', mtd_purchases_k_brl: 5000000.0, mtd_sales_k_brl: 4000000.0, mtd_net_flow_k_brl: 1000000.0, mtd_net_flow_bi_brl: 1.0, purchase_share_pct: 5.9, sale_share_pct: 4.9, _source_system: 'b3_bdi_api'}
+          - {reference_date: '2026-11-04', publication_date: '2026-11-06', investor_type_code: 'pessoa_fisica', investor_type_raw: 'Investidores Individuais', mtd_purchases_k_brl: 9500000.0, mtd_sales_k_brl: 8800000.0, mtd_net_flow_k_brl: 700000.0, mtd_net_flow_bi_brl: 0.7, purchase_share_pct: 5.7, sale_share_pct: 5.0, _source_system: 'b3_bdi_api'}
+    expect:
+      rows:
+        - {trading_date: '2026-10-29', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'missing_prior_trading_day', daily_purchases_k_brl: null, daily_sales_k_brl: null, daily_net_flow_k_brl: null, daily_net_flow_bi_brl: null}
+        - {trading_date: '2026-10-30', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 5000000.0, daily_sales_k_brl: 4000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0}
+        - {trading_date: '2026-11-03', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'month_start_exact', daily_purchases_k_brl: 5000000.0, daily_sales_k_brl: 4000000.0, daily_net_flow_k_brl: 1000000.0, daily_net_flow_bi_brl: 1.0}
+        - {trading_date: '2026-11-04', investor_type_code: 'pessoa_fisica', daily_derivation_method: 'mtd_diff_exact', daily_purchases_k_brl: 4500000.0, daily_sales_k_brl: 4800000.0, daily_net_flow_k_brl: -300000.0, daily_net_flow_bi_brl: -0.3}
