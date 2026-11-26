@@ -14,6 +14,7 @@ Ao registrar novas alterações ou correções de documentação, **adicione uma
 - **Detecção de drift Git:** `scripts/check_docs_drift.sh` agora reporta `can't tell` em repositórios shallow e quando há alterações locais não commitadas.
 
 ### Added
+- Workflow de CI automatizado no GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) executando `ruff`, `dg check defs` e `pytest` (incluindo o novo teste E2E offline de toda a cadeia Bronze → Silver → Gold + 41 data tests + 2 dbt unit tests em [`tests/test_medallion_e2e_offline.py`](tests/test_medallion_e2e_offline.py)) a cada push e pull request na branch `main`.
 - Teste dbt `relationships` em `stg_b3_investor_flow_mtd.reference_date` → `stg_b3_ibov_daily.trading_date` impedindo descarte silencioso no `INNER JOIN` do calendário.
 - Coluna `has_full_ma21_window` (com teste `not_null`) propagada para `gold.mart_ibov_vs_investors_wide` e `gold.mart_ibov_vs_pf_short_term`.
 - Novos testes unitários em `tests/test_b3_component_logic.py` e `tests/test_parquet_store.py`.
