@@ -279,9 +279,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  :global([data-sveltekit-preload-data] > div:has(> main)),
   :global(main),
   :global(#evidence-main-article),
   :global(#evidence-main-article > div) {
+    width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -324,16 +326,19 @@
 
   /* ==================== FULL-WIDTH SHELL & STICKY 58px HEADER ==================== */
   .gl-app-shell {
+    inline-size: 100%;
     min-block-size: 100dvh;
     background: #f5f5f4;
     color: #18181b;
   }
 
   .site-header {
+    inline-size: 100%;
+    box-sizing: border-box;
     position: sticky;
     inset-block-start: 0;
     z-index: 40;
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(8px);
     border-block-end: 1px solid #e4e4e7;
     padding-block-start: env(safe-area-inset-top, 0px);
