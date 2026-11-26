@@ -147,6 +147,45 @@ ORDER BY f.trading_date ASC
   </section>
 </div>
 
+```sql fluxo_mensal_ibov
+WITH last_flow AS (
+    SELECT
+        strftime(trading_date, '%Y-%m') AS mes,
+        investor_type_code,
+        LAST(mtd_net_flow_k_brl ORDER BY trading_date) AS mtd_k_brl,
+        MAX(trading_date) AS max_dt
+    FROM gringolake.int_b3_investor_flow_daily
+    GROUP BY 1, 2
+),
+ibov_m AS (
+    SELECT
+        strftime(trading_date, '%Y-%m') AS mes,
+        LAST(ibov_close ORDER BY trading_date) AS close_end
+    FROM gringolake.stg_b3_ibov_daily
+    GROUP BY 1
+),
+ibov_ret AS (
+    SELECT
+        mes,
+        ROUND(((close_end / LAG(close_end) OVER (ORDER BY mes)) - 1.0) * 100.0, 2) AS ibov_month_pct
+    FROM ibov_m
+)
+SELECT
+    f.mes,
+    MAX(f.max_dt) AS ate_pregao,
+    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN f.mtd_k_brl END) AS estrang_k_brl,
+    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN f.mtd_k_brl END) AS instit_k_brl,
+    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN f.mtd_k_brl END) AS pf_k_brl,
+    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN f.mtd_k_brl END) AS inst_fin_k_brl,
+    MAX(i.ibov_month_pct) AS ibov_month_pct
+FROM last_flow f
+LEFT JOIN ibov_ret i ON f.mes = i.mes
+GROUP BY f.mes
+ORDER BY f.mes DESC
+```
+
+<MonthlyFlowTable data={fluxo_mensal_ibov} />
+
 ```sql tabela_fluxo_diario
 SELECT
     strftime(trading_date, '%Y-%m-%d') AS pregao,
