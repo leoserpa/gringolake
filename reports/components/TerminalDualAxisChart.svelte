@@ -195,7 +195,7 @@
     grid: {
       top: isCompact ? 34 : 38,
       right: isCompact ? 2 : 6,
-      bottom: zoom ? 50 : 22,
+      bottom: zoom ? 64 : 22,
       left: isCompact ? 2 : 6,
       containLabel: true,
     },
@@ -258,14 +258,47 @@
           {
             type: 'slider',
             xAxisIndex: 0,
-            height: 20,
-            bottom: 4,
-            borderColor: '#363636',
-            backgroundColor: '#222222',
-            fillerColor: 'rgba(242, 185, 75, 0.16)',
-            handleStyle: { color: '#f2b94b', borderColor: '#f2b94b' },
-            moveHandleStyle: { color: '#5c5c62' },
-            textStyle: { color: '#767676', fontFamily: 'JetBrains Mono, monospace', fontSize: 10 },
+            height: 28,
+            bottom: 6,
+            brushSelect: false,
+            borderColor: '#45454a',
+            backgroundColor: '#1e1e20',
+            fillerColor: 'rgba(245, 245, 245, 0.09)',
+            dataBackground: {
+              lineStyle: { color: '#5a5a62', width: 1 },
+              areaStyle: { color: 'rgba(255, 255, 255, 0.04)' },
+            },
+            selectedDataBackground: {
+              lineStyle: { color: '#f2b94b', width: 1.75 },
+              areaStyle: { color: 'rgba(242, 185, 75, 0.16)' },
+            },
+            handleIcon: 'path://M-5,-10 A5,5 0 0,1 5,-10 L5,10 A5,5 0 0,1 -5,10 Z',
+            handleSize: '105%',
+            handleStyle: {
+              color: '#f5f5f5',
+              borderColor: '#222222',
+              borderWidth: 1.5,
+              shadowBlur: 6,
+              shadowColor: 'rgba(0, 0, 0, 0.45)',
+            },
+            moveHandleSize: 7,
+            moveHandleStyle: {
+              color: '#8a8a93',
+            },
+            emphasis: {
+              handleStyle: {
+                color: '#f2b94b',
+                borderColor: '#222222',
+              },
+              moveHandleStyle: {
+                color: '#f5f5f5',
+              },
+            },
+            textStyle: {
+              color: '#d4d4d8',
+              fontFamily: 'JetBrains Mono, ui-monospace, monospace',
+              fontSize: 10.5,
+            },
           },
         ]
       : undefined,
