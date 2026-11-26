@@ -54,7 +54,8 @@
   function syncNavLayout(force = false) {
     if (!headerEl || !headerInnerEl || !menuEl) return;
 
-    const currentWidth = headerEl.clientWidth;
+    const viewportWidth = document.documentElement?.clientWidth || window.innerWidth || 0;
+    const currentWidth = viewportWidth > 0 ? Math.min(headerEl.clientWidth || viewportWidth, viewportWidth) : headerEl.clientWidth;
     if (!force && !isWide && currentWidth <= lastCollapsedWidth) {
       return;
     }
@@ -70,7 +71,8 @@
     headerEl.classList.add('is-measuring', 'is-wide');
     menuEl.removeAttribute('popover');
 
-    const fits = headerInnerEl.scrollWidth <= headerInnerEl.clientWidth + 1;
+    const availableWidth = Math.min(headerInnerEl.clientWidth, viewportWidth || headerInnerEl.clientWidth);
+    const fits = headerInnerEl.scrollWidth <= availableWidth + 1;
 
     if (fits) {
       isWide = true;
@@ -112,15 +114,21 @@
     syncNavLayout(true);
 
     let resizeRaf = 0;
-    const observer = new ResizeObserver(() => {
+    const scheduleSync = (force = false) => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(() => {
         resizeRaf = 0;
-        syncNavLayout(false);
+        syncNavLayout(force);
       });
-    });
+    };
+
+    const observer = new ResizeObserver(() => scheduleSync(false));
     if (headerEl) observer.observe(headerEl);
     if (menuEl) observer.observe(menuEl);
+    observer.observe(document.documentElement);
+
+    const onWindowResize = () => scheduleSync(true);
+    window.addEventListener('resize', onWindowResize, { passive: true });
 
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => syncNavLayout(true));
@@ -128,6 +136,7 @@
 
     return () => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf);
+      window.removeEventListener('resize', onWindowResize);
       observer.disconnect();
     };
   });
@@ -379,7 +388,7 @@
 
   .site-header {
     inline-size: 100%;
-    max-inline-size: none;
+    max-inline-size: 100%;
     margin: 0;
     box-sizing: border-box;
     background: rgba(43, 43, 43, 0.94);
@@ -391,9 +400,14 @@
     padding-block-start: env(safe-area-inset-top, 0px);
   }
 
+  .site-header.is-measuring {
+    overflow: hidden;
+  }
+
   .header-inner {
     inline-size: 100%;
-    max-inline-size: 1440px;
+    max-inline-size: min(1440px, 100%);
+    min-inline-size: 0;
     margin-inline: auto;
     display: flex;
     align-items: center;
@@ -404,6 +418,10 @@
     padding-inline-start: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-left, 0px));
     padding-inline-end: max(clamp(16px, 2.5vw, 32px), env(safe-area-inset-right, 0px));
     box-sizing: border-box;
+  }
+
+  .site-header.is-measuring .header-inner {
+    overflow: hidden;
   }
 
   .header-inner > * {

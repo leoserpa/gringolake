@@ -127,7 +127,10 @@
 
   <div class="monthly-foot">
     <span>Saldo MTD oficial da B3 no último pregão de cada mês · Histórico ampliado automaticamente às 21h BRT</span>
-    <span>{rows.length} {rows.length === 1 ? 'mês' : 'meses'} disponíveis</span>
+    <span class="monthly-foot-right">
+      <span class="scroll-hint">Deslize na tabela →</span>
+      <span>{rows.length} {rows.length === 1 ? 'mês' : 'meses'} disponíveis</span>
+    </span>
   </div>
 </section>
 
@@ -189,20 +192,13 @@
     max-block-size: 460px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-    container-type: inline-size;
   }
 
   .monthly-table {
     inline-size: 100%;
-    min-inline-size: 700px;
+    min-inline-size: 680px;
     border-collapse: separate;
     border-spacing: 0;
-    --label-2: 'Até Pregão';
-    --label-3: 'Estrangeiro';
-    --label-4: 'Institucional';
-    --label-5: 'Pessoa Física';
-    --label-6: 'Inst. Financeira';
-    --label-7: 'Ibovespa Mês';
   }
 
   .monthly-table thead th {
@@ -308,81 +304,56 @@
     color: #767676;
   }
 
-  @container (width < 600px) {
-    .monthly-table,
-    .monthly-table tbody,
-    .monthly-table tr {
-      display: block;
-      min-inline-size: 0;
-      inline-size: 100%;
+  .monthly-foot-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .scroll-hint {
+    display: none;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    color: #f2b94b;
+  }
+
+  @media (max-width: 720px) {
+    .monthly-scroll {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-block-size: 420px;
     }
 
-    .monthly-table thead {
-      display: none;
+    .monthly-table {
+      min-inline-size: 620px;
     }
 
-    .monthly-table tr {
-      border: 1px solid #363636;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #262626;
-      margin-block-end: 12px;
+    .monthly-table thead th,
+    .monthly-table tbody th,
+    .monthly-table tbody td {
+      padding: 11px 10px;
+      font-size: 11.5px;
     }
 
-    .monthly-table tr:last-child {
-      margin-block-end: 0;
+    .monthly-table thead th:first-child {
+      position: sticky;
+      inset-inline-start: 0;
+      z-index: 3;
+      padding-inline: 0 12px;
+      border-inline-end: 1px solid #363636;
     }
 
     .monthly-table tbody th.mes-col {
-      position: sticky;
-      inset-block-start: 0;
-      z-index: 1;
-      display: block;
-      padding: 11px 14px;
-      background: #303034;
-      border-block-end: 1px solid #3a3a3f;
-      font-size: 13px;
+      padding-inline: 0 12px;
+      border-inline-end: 1px solid #363636;
     }
 
-    .monthly-table tbody td {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 14px;
-      font-size: 12px;
-      background: #262626;
-      border-block-end: 1px solid #323236;
-      text-align: right;
+    .scroll-hint {
+      display: inline;
     }
-
-    .monthly-table tbody td:last-child {
-      padding-inline-end: 14px;
-      border-block-end: 0;
-    }
-
-    .monthly-table tbody td::before {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-size: 11.5px;
-      font-weight: 500;
-      color: #a3a3a3;
-      text-align: left;
-    }
-
-    .monthly-table tbody td:nth-child(2)::before { content: var(--label-2); }
-    .monthly-table tbody td:nth-child(3)::before { content: var(--label-3); }
-    .monthly-table tbody td:nth-child(4)::before { content: var(--label-4); }
-    .monthly-table tbody td:nth-child(5)::before { content: var(--label-5); }
-    .monthly-table tbody td:nth-child(6)::before { content: var(--label-6); }
-    .monthly-table tbody td:nth-child(7)::before { content: var(--label-7); }
   }
 
   @media (max-width: 640px) {
-    .monthly-scroll {
-      max-block-size: none;
-      overflow: visible;
-    }
-
     .monthly-right {
       inline-size: 100%;
     }

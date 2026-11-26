@@ -158,6 +158,7 @@
 
   <div class="exec-foot">
     <span>Mostrando {filteredRows.length} de {rawRows.length} registros oficiais B3 (Gold)</span>
+    <span class="scroll-hint">Deslize na tabela →</span>
   </div>
 </section>
 
@@ -238,22 +239,13 @@
     max-block-size: 460px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
-    container-type: inline-size;
   }
 
   .exec-table {
     inline-size: 100%;
-    min-inline-size: 820px;
+    min-inline-size: 800px;
     border-collapse: separate;
     border-spacing: 0;
-    --label-2: 'Perfil B3';
-    --label-3: 'Pregão';
-    --label-4: 'Saldo Dia';
-    --label-5: 'Saldo MTD';
-    --label-6: 'Acumulado';
-    --label-7: 'MM21';
-    --label-8: 'Part. Compra';
-    --label-9: 'Sinal MM21';
   }
 
   .exec-table thead th {
@@ -270,6 +262,7 @@
     position: sticky;
     inset-block-start: 0;
     z-index: 2;
+    white-space: nowrap;
   }
 
   .exec-table thead th:first-child {
@@ -369,88 +362,59 @@
     margin-block-start: 14px;
     padding-block-start: 12px;
     border-block-start: 1px solid #343438;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 16px;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 11.5px;
     color: #767676;
   }
 
-  @container (width < 600px) {
-    .exec-table,
-    .exec-table tbody,
-    .exec-table tr {
-      display: block;
-      min-inline-size: 0;
-      inline-size: 100%;
+  .scroll-hint {
+    display: none;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 10.5px;
+    color: #f2b94b;
+  }
+
+  @media (max-width: 820px) {
+    .exec-table-scroll {
+      overflow-x: auto;
+      overflow-y: auto;
+      max-block-size: 440px;
     }
 
-    .exec-table thead {
-      display: none;
+    .exec-table {
+      min-inline-size: 740px;
     }
 
-    .exec-table tr {
-      border: 1px solid #363636;
-      border-radius: 18px;
-      overflow: hidden;
-      background: #262626;
-      margin-block-end: 12px;
+    .exec-table thead th,
+    .exec-table tbody th,
+    .exec-table tbody td {
+      padding: 10px 9px;
+      font-size: 11.5px;
     }
 
-    .exec-table tr:last-child {
-      margin-block-end: 0;
+    .exec-table thead th:first-child {
+      position: sticky;
+      inset-inline-start: 0;
+      z-index: 3;
+      padding-inline: 0 12px;
+      border-inline-end: 1px solid #363636;
     }
 
     .exec-table tbody th.code-col {
-      position: sticky;
-      inset-block-start: 0;
-      z-index: 1;
-      display: block;
-      padding: 10px 14px;
-      background: #303034;
-      border-block-end: 1px solid #3a3a3f;
-      font-size: 12px;
-      color: #f8f8f8;
+      padding-inline: 0 12px;
+      border-inline-end: 1px solid #363636;
     }
 
-    .exec-table tbody td {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 9px 14px;
-      font-size: 12px;
-      background: #262626;
-      border-block-end: 1px solid #323236;
-      text-align: right;
+    .scroll-hint {
+      display: inline;
     }
-
-    .exec-table tbody td:last-child {
-      padding-inline-end: 14px;
-      border-block-end: 0;
-    }
-
-    .exec-table tbody td::before {
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-size: 11.5px;
-      font-weight: 500;
-      color: #a3a3a3;
-      text-align: left;
-    }
-
-    .exec-table tbody td:nth-child(2)::before { content: var(--label-2); }
-    .exec-table tbody td:nth-child(3)::before { content: var(--label-3); }
-    .exec-table tbody td:nth-child(4)::before { content: var(--label-4); }
-    .exec-table tbody td:nth-child(5)::before { content: var(--label-5); }
-    .exec-table tbody td:nth-child(6)::before { content: var(--label-6); }
-    .exec-table tbody td:nth-child(7)::before { content: var(--label-7); }
-    .exec-table tbody td:nth-child(8)::before { content: var(--label-8); }
-    .exec-table tbody td:nth-child(9)::before { content: var(--label-9); }
   }
 
   @media (max-width: 640px) {
-    .exec-table-scroll {
-      max-block-size: none;
-      overflow: visible;
-    }
     .exec-actions {
       inline-size: 100%;
       flex-wrap: wrap;
