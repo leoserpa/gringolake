@@ -79,9 +79,8 @@ ORDER BY m.trading_date ASC
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={pf_serie_completa}
-      panelIndex="01"
       panelTitle="A Pessoa Física está acelerando ou perdendo força no curto prazo?"
-      panelSubtitle="Terminal interativo TradingView · Fluxo acumulado P.F. (âmbar, R$ bi) vs. MM21 e Ibovespa (prata) · Role para zoom ou use + / −"
+      panelSubtitle="Terminal interativo TradingView · Fluxo acumulado P.F. (âmbar, R$ mi / bi) vs. MM21 e Ibovespa (prata) · Role para zoom ou use + / −"
       flowCol="pf_cum_short_term_bi_brl"
       flowName="Acum. P.F."
       maCol="pf_cum_short_term_ma21_bi_brl"
@@ -100,9 +99,8 @@ ORDER BY m.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={pf_serie_completa}
-      panelIndex="02"
       panelTitle="Quanto a Pessoa Física comprou ou vendeu em cada pregão?"
-      panelSubtitle="Saldo líquido diário da Pessoa Física em R$ bi · Âmbar = compra líquida, grafite = saída líquida (desacumulação MTD)"
+      panelSubtitle="Saldo líquido diário da Pessoa Física (R$ mi / bi) · Âmbar = compra líquida, grafite = saída líquida (desacumulação MTD)"
       x="trading_date"
       y="daily_net_flow_bi_brl"
       names={['Saldo Diário P.F.']}
@@ -112,6 +110,7 @@ ORDER BY m.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={240}
     />

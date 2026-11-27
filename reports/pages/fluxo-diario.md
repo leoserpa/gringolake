@@ -34,7 +34,7 @@ GROUP BY f.trading_date
   <div class="page-head-row">
     <div class="page-title-group">
       <h1 class="page-title">Entradas e Saídas Diárias na B3</h1>
-      <p class="page-subtitle">Quanto cada grupo comprou ou vendeu isoladamente por pregão em R$ milhões (desacumulação MTD · ADR-003)</p>
+      <p class="page-subtitle">Quanto cada grupo comprou ou vendeu isoladamente por pregão (R$ mi / bi · desacumulação MTD · ADR-003)</p>
     </div>
 
     <div class="controls-right">
@@ -44,7 +44,15 @@ GROUP BY f.trading_date
         <ButtonGroupItem valueLabel="Máx" value="9999" />
       </ButtonGroup>
 
-      <CounterBadge data={kpis_dia_recente} value="max_residuo_k" label="Resíduo (R$ mil)" decimals={1} />
+      <CounterBadge
+        data={kpis_dia_recente}
+        value="max_residuo_k"
+        label="Resíduo"
+        prefix="R$ "
+        suffix=" mil"
+        decimals={1}
+        hint="Resíduo máximo diário da auditoria soma-zero B3 (tolerância ≤ R$ 20 mil)"
+      />
     </div>
   </div>
 </div>
@@ -82,9 +90,8 @@ ORDER BY f.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
-      panelIndex="01"
       panelTitle="Quanto o estrangeiro movimentou por dia?"
-      panelSubtitle="Saldo líquido diário em R$ mi · Âmbar = compra, grafite = saída"
+      panelSubtitle="Saldo líquido diário (R$ mi / bi) · Âmbar = compra, grafite = saída"
       x="trading_date"
       y="estrang_mi"
       names={['Estrangeiro']}
@@ -94,6 +101,7 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={220}
     />
@@ -102,9 +110,8 @@ ORDER BY f.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
-      panelIndex="02"
       panelTitle="Quando a Pessoa Física entrou comprando?"
-      panelSubtitle="Saldo líquido diário em R$ mi · Âmbar = compra, grafite = saída"
+      panelSubtitle="Saldo líquido diário (R$ mi / bi) · Âmbar = compra, grafite = saída"
       x="trading_date"
       y="pf_mi"
       names={['Pessoa Física']}
@@ -114,6 +121,7 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={220}
     />
@@ -124,9 +132,8 @@ ORDER BY f.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
-      panelIndex="03"
       panelTitle="Qual foi o fluxo diário do institucional?"
-      panelSubtitle="Saldo líquido diário em R$ mi · Âmbar = compra, grafite = saída"
+      panelSubtitle="Saldo líquido diário (R$ mi / bi) · Âmbar = compra, grafite = saída"
       x="trading_date"
       y="instit_mi"
       names={['Institucional']}
@@ -136,6 +143,7 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={220}
     />
@@ -144,9 +152,8 @@ ORDER BY f.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
-      panelIndex="04"
       panelTitle="Como atuaram as Inst. Financeiras por dia?"
-      panelSubtitle="Saldo líquido diário em R$ mi · Âmbar = compra, grafite = saída"
+      panelSubtitle="Saldo líquido diário (R$ mi / bi) · Âmbar = compra, grafite = saída"
       x="trading_date"
       y="inst_fin_mi"
       names={['Inst. Financeira']}
@@ -156,6 +163,7 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={220}
     />
@@ -166,7 +174,6 @@ ORDER BY f.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
-      panelIndex="05"
       panelTitle="Quais pregões concentraram o maior volume financeiro na B3?"
       panelSubtitle="Giro financeiro diário total em R$ bi (1 ponta, 5 perfis BDI) · Âmbar = pregões ≥ 1,4× média da janela"
       x="trading_date"
@@ -199,17 +206,5 @@ ORDER BY trading_date DESC
 ```
 
 <div class="terminal-grid-1">
-  <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">06</span><span>Como ficou o saldo diário detalhado de todos os perfis?</span></h2>
-    <p class="terminal-panel-sub">Histórico pregão a pregão em R$ mi · Soma das 5 categorias oficiais fecha em zero (tolerância ≤ R$ 20 mil) · Atualização às 21h BRT</p>
-    <DataTable data={tabela_fluxo_diario} rows=15 search=false>
-      <Column id=pregao title="Pregão" />
-      <Column id=ibov_close title="IBOV (pts)" fmt="#,##0" />
-      <Column id=estrang_mi title="Estrangeiro (R$ mi)" fmt="+#,##0.0;-#,##0.0;0.0" />
-      <Column id=pf_mi title="Pessoa Física (R$ mi)" fmt="+#,##0.0;-#,##0.0;0.0" />
-      <Column id=instit_mi title="Institucional (R$ mi)" fmt="+#,##0.0;-#,##0.0;0.0" />
-      <Column id=inst_fin_mi title="Inst. Financeira (R$ mi)" fmt="+#,##0.0;-#,##0.0;0.0" />
-      <Column id=outros_mi title="Outros (R$ mi)" fmt="+#,##0.0;-#,##0.0;0.0" />
-    </DataTable>
-  </section>
+  <DailyFlowTable data={tabela_fluxo_diario} />
 </div>

@@ -81,9 +81,8 @@ ORDER BY w.trading_date
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={serie_comparativa}
-      panelIndex="01"
       panelTitle="Os estrangeiros estão comprando ou vendendo?"
-      panelSubtitle="Fluxo estrangeiro acumulado (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
+      panelSubtitle="Fluxo estrangeiro acumulado (âmbar, R$ mi / bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="estrang_cum_bi_brl"
       flowName="Estrangeiro"
       maCol="estrang_cum_ma21_bi_brl"
@@ -99,9 +98,8 @@ ORDER BY w.trading_date
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={serie_comparativa}
-      panelIndex="02"
       panelTitle="Como a Pessoa Física está posicionada na B3?"
-      panelSubtitle="Fluxo acumulado da Pessoa Física (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
+      panelSubtitle="Fluxo acumulado da Pessoa Física (âmbar, R$ mi / bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="pf_cum_bi_brl"
       flowName="Pessoa Física"
       maCol="pf_cum_ma21_bi_brl"
@@ -118,9 +116,8 @@ ORDER BY w.trading_date
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={serie_comparativa}
-      panelIndex="03"
       panelTitle="O institucional está entrando ou saindo?"
-      panelSubtitle="Fluxo institucional acumulado (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
+      panelSubtitle="Fluxo institucional acumulado (âmbar, R$ mi / bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="instit_cum_bi_brl"
       flowName="Institucional"
       maCol="instit_cum_ma21_bi_brl"
@@ -135,9 +132,8 @@ ORDER BY w.trading_date
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={serie_comparativa}
-      panelIndex="04"
       panelTitle="Como atuam as Instituições Financeiras?"
-      panelSubtitle="Fluxo acumulado de Inst. Financeiras (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
+      panelSubtitle="Fluxo acumulado de Inst. Financeiras (âmbar, R$ mi / bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="inst_fin_cum_bi_brl"
       flowName="Inst. Financeira"
       maCol="inst_fin_cum_ma21_bi_brl"
@@ -187,7 +183,7 @@ GROUP BY f.mes
 ORDER BY f.mes DESC
 ```
 
-<MonthlyFlowTable data={fluxo_mensal_ibov} panelIndex="05" />
+<MonthlyFlowTable data={fluxo_mensal_ibov} />
 
 ```sql explorador_perfis
 WITH ultimo_pregao AS (
@@ -210,7 +206,6 @@ ORDER BY f.display_order
 
 <FlowExplorerTable
   data={explorador_perfis}
-  panelIndex="06"
   title="Qual a posição atual de cada perfil no último pregão?"
-  subtitle="Saldos diário, mensal (MTD) e acumulado em R$ bi por categoria B3 · MM21 ativa com 21 pregões completos"
+  subtitle="Saldos diário, mensal (MTD) e acumulado (R$ mi / bi) por categoria B3 · MM21 ativa com 21 pregões completos"
 />

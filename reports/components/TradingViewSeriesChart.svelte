@@ -3,7 +3,6 @@
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
 
   export let data = [];
-  export let panelIndex = '';
   export let panelTitle = '';
   export let panelSubtitle = '';
   export let x = 'trading_date';
@@ -16,6 +15,7 @@
   export let signed = false;
   export let chartType = 'line';
   export let axisCompact = false;
+  export let autoScaleUnit = false;
   export let highlightAboveAvg = false;
   export let zeroLine = true;
   export let defaultZoomPoints = 60;
@@ -79,19 +79,49 @@
   function formatValue(val, useCompactAxis = false) {
     const num = Number(val);
     if (!Number.isFinite(num)) return '—';
+    const trimmedSuffix = (suffix || '').trim();
+    const canAutoUnit = autoScaleUnit && (trimmedSuffix === 'mi' || trimmedSuffix === 'bi');
+
+    if (canAutoUnit) {
+      const inMi = trimmedSuffix === 'bi' ? num * 1000 : num;
+      if (Math.abs(inMi) < 0.05) {
+        return `${prefix || ''}0`;
+      }
+      const signChar = inMi < 0 ? '-' : signed ? '+' : '';
+      const absMi = Math.abs(inMi);
+
+      if (absMi >= 999.95) {
+        const absBi = absMi / 1000;
+        const formatted = new Intl.NumberFormat(
+          'pt-BR',
+          useCompactAxis
+            ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+            : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+        ).format(absBi);
+        return `${signChar}${prefix || ''}${formatted} bi`;
+      }
+
+      const formatted = new Intl.NumberFormat(
+        'pt-BR',
+        useCompactAxis
+          ? { minimumFractionDigits: 0, maximumFractionDigits: absMi >= 100 ? 0 : 1 }
+          : { minimumFractionDigits: 1, maximumFractionDigits: 1 }
+      ).format(absMi);
+      return `${signChar}${prefix || ''}${formatted} mi`;
+    }
+
     const d = Number.isFinite(Number(decimals)) ? Number(decimals) : 1;
     const epsilon = 0.5 * Math.pow(10, -Math.max(0, d));
     const cleanNum = Math.abs(num) < epsilon ? 0 : num;
 
-    let fracDigits = d;
-    if (useCompactAxis && axisCompact) {
-      if (cleanNum === 0) fracDigits = 0;
-      else if (Math.abs(cleanNum) >= 100) fracDigits = 0;
+    if (cleanNum === 0 && useCompactAxis && axisCompact) {
+      return `${prefix || ''}0${trimmedSuffix === '%' ? '%' : ''}`;
     }
 
+    const useCompactFormat = useCompactAxis && axisCompact;
     const absFormatted = new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: fracDigits,
-      maximumFractionDigits: fracDigits
+      minimumFractionDigits: useCompactFormat ? 0 : d,
+      maximumFractionDigits: d
     }).format(Math.abs(cleanNum));
 
     let signChar = '';
@@ -262,7 +292,7 @@
       }
     });
 
-    const modeKey = `${chartType}|${seriesMeta.map((s) => `${s.field}:${s.color}`).join(',')}`;
+    const modeKey = `${chartType}|${autoScaleUnit}|${seriesMeta.map((s) => `${s.field}:${s.color}`).join(',')}`;
     const needsRebuild = modeKey !== lastChartModeKey || seriesApis.length !== seriesMeta.length;
 
     if (needsRebuild) {
@@ -569,6 +599,7 @@
     prefix;
     suffix;
     axisCompact;
+    autoScaleUnit;
     numericHeight;
     syncChartData();
   }
@@ -591,7 +622,6 @@
     <div class="terminal-panel-header">
       <div class="terminal-panel-heading">
         <div class="terminal-panel-title">
-          {#if panelIndex}<span class="terminal-panel-index">{panelIndex}</span>{/if}
           {panelTitle}
         </div>
         {#if panelSubtitle}
@@ -853,6 +883,7 @@
     width: 100%;
     min-width: 0;
     position: relative;
+    margin-top: auto;
   }
 
   .tvs-empty {

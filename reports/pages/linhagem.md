@@ -45,7 +45,15 @@ CROSS JOIN perfis p
     </div>
 
     <div class="controls-right">
-      <CounterBadge data={kpi_qualidade} value="max_residuo_k_brl" label="Resíduo (R$ mil)" decimals={1} />
+      <CounterBadge
+        data={kpi_qualidade}
+        value="max_residuo_k_brl"
+        label="Resíduo"
+        prefix="R$ "
+        suffix=" mil"
+        decimals={1}
+        hint="Resíduo máximo diário da auditoria soma-zero B3 (tolerância ≤ R$ 20 mil)"
+      />
     </div>
   </div>
 </div>
@@ -83,7 +91,7 @@ ORDER BY trading_date DESC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">01</span><span>Como cada pregão foi desacumulado do MTD para diário?</span></h2>
+    <h2 class="terminal-panel-title">Como cada pregão foi desacumulado do MTD para diário?</h2>
     <p class="terminal-panel-sub">Distribuição dos métodos oficiais em int_b3_investor_flow_daily conforme ADR-003</p>
     <DataTable data={auditoria_derivacao} rows=10>
       <Column id=metodo_derivacao title="Método" />
@@ -95,7 +103,7 @@ ORDER BY trading_date DESC
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">02</span><span>As compras e vendas da B3 fecham em soma-zero todo dia?</span></h2>
+    <h2 class="terminal-panel-title">As compras e vendas da B3 fecham em soma-zero todo dia?</h2>
     <p class="terminal-panel-sub">Auditoria contábil diária das 5 categorias oficiais (resíduo esperado ≤ R$ 20 mil)</p>
     <DataTable data={auditoria_soma_zero} rows=10>
       <Column id=pregao title="Pregão" />

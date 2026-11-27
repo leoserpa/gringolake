@@ -1,8 +1,7 @@
 <script>
   export let data = [];
-  export let panelIndex = '05';
   export let title = 'Quem liderou o fluxo em cada mês e como fechou o Ibovespa?';
-  export let subtitle = 'Último saldo mensal oficial (MTD) em R$ bi por perfil · Entradas líquidas positivas destacadas em âmbar';
+  export let subtitle = 'Último saldo mensal oficial (MTD) por perfil (R$ mi / bi) · Entradas líquidas positivas destacadas em âmbar';
 
   $: rows = Array.isArray(data)
     ? data
@@ -19,13 +18,20 @@
 
   function formatFlowFromKBrl(kVal) {
     if (kVal === null || kVal === undefined || Number.isNaN(Number(kVal))) return '—';
-    const numBi = Number(kVal) / 1_000_000;
-    const normalized = Math.abs(numBi) < 0.005 ? 0 : numBi;
-    const sign = normalized < 0 ? '-' : normalized > 0 ? '+' : '';
-    return `${sign}R$ ${Math.abs(normalized).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} bi`;
+    const inMi = Number(kVal) / 1_000;
+    if (Math.abs(inMi) < 0.05) return 'R$ 0';
+    const sign = inMi < 0 ? '-' : '+';
+    const absMi = Math.abs(inMi);
+    if (absMi >= 999.95) {
+      return `${sign}R$ ${(absMi / 1000).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} bi`;
+    }
+    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} mi`;
   }
 
   function formatPct(v) {
@@ -81,9 +87,6 @@
   <div class="monthly-head">
     <div class="monthly-title-block">
       <h2 id="monthly-flow-title" class="terminal-panel-title" style="margin: 0 0 4px 0;">
-        {#if panelIndex}
-          <span class="panel-index">{panelIndex}</span>
-        {/if}
         <span>{title}</span>
       </h2>
       {#if subtitle}

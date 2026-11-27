@@ -1,8 +1,7 @@
 <script>
   export let data = [];
-  export let panelIndex = '';
   export let title = 'Perfis Oficiais B3';
-  export let subtitle = 'Saldos diário, mensal (MTD) e acumulado contínuo em R$ bi no último pregão · MM21 ativa a partir de 21 pregões completos';
+  export let subtitle = 'Saldos diário, mensal (MTD) e acumulado contínuo (R$ mi / bi) no último pregão · MM21 ativa a partir de 21 pregões completos';
 
   const PAGE_STEP = 50;
   let query = '';
@@ -45,11 +44,20 @@
     if (v === null || v === undefined) return '—';
     const num = Number(v);
     if (Number.isNaN(num)) return String(v);
-    const sign = num < 0 ? '-' : signed && num > 0 ? '+' : '';
-    return `${sign}R$ ${Math.abs(num).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} bi`;
+    const inMi = num * 1000;
+    if (Math.abs(inMi) < 0.05) return 'R$ 0';
+    const sign = inMi < 0 ? '-' : signed ? '+' : '';
+    const absMi = Math.abs(inMi);
+    if (absMi >= 999.95) {
+      return `${sign}R$ ${(absMi / 1000).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} bi`;
+    }
+    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} mi`;
   }
 
   function formatPct(v) {
@@ -110,9 +118,6 @@
   <div class="exec-head">
     <div>
       <h2 id="exec-explorer-title" class="terminal-panel-title" style="margin: 0 0 4px 0;">
-        {#if panelIndex}
-          <span class="panel-index">{panelIndex}</span>
-        {/if}
         <span>{title}</span>
       </h2>
       <p class="terminal-panel-sub" style="margin-block-end: 0;">{subtitle}</p>

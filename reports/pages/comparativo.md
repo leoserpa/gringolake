@@ -83,9 +83,8 @@ ORDER BY w.trading_date ASC
   <section class="terminal-panel">
     <TradingViewDualAxisChart
       data={serie_perfil}
-      panelIndex="01"
       panelTitle="Como evolui o fluxo do perfil selecionado frente ao Ibovespa?"
-      panelSubtitle="Terminal interativo TradingView · Acumulado contínuo em R$ bi (âmbar) e MM21 vs. Ibovespa (prata) · Role para zoom ou use + / −"
+      panelSubtitle="Terminal interativo TradingView · Acumulado contínuo (R$ mi / bi, âmbar) e MM21 vs. Ibovespa (prata) · Role para zoom ou use + / −"
       flowCol="cum_net_flow_bi_brl"
       flowName="Fluxo Acumulado"
       maCol="cum_net_flow_ma21_bi_brl"
@@ -104,9 +103,8 @@ ORDER BY w.trading_date ASC
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={todos_perfis_wide}
-      panelIndex="02"
       panelTitle="Quem compra na contraparte de quem está vendendo?"
-      panelSubtitle="Evolução acumulada dos 3 maiores grupos da B3 (Estrangeiro, Pessoa Física e Institucional) em R$ bi"
+      panelSubtitle="Evolução acumulada dos 3 maiores grupos da B3 (Estrangeiro, Pessoa Física e Institucional) em R$ mi / bi"
       x="trading_date"
       y={['estrang_cum_bi_brl', 'pf_cum_bi_brl', 'instit_cum_bi_brl']}
       names={['Estrangeiro', 'Pessoa Física', 'Institucional']}
@@ -116,6 +114,7 @@ ORDER BY w.trading_date ASC
       decimals={2}
       signed={true}
       axisCompact={true}
+      autoScaleUnit={true}
       defaultZoomPoints={60}
       height={265}
     />
@@ -148,7 +147,7 @@ WITH ultimo AS (
 total_dia AS (
     SELECT
         f.trading_date,
-        SUM(f.daily_purchases_k_brl + f.daily_sales_k_brl) AS total_2sided_k
+        NULLIF(SUM(f.daily_purchases_k_brl + f.daily_sales_k_brl), 0) AS total_2sided_k
     FROM gringolake.fct_ibov_investor_flow_daily f
     INNER JOIN ultimo u ON f.trading_date = u.max_dt
     GROUP BY f.trading_date
@@ -176,17 +175,17 @@ ORDER BY sort_key DESC, periodo ASC
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <FlowScatterChart
+    <TradingViewFlowReturnChart
       data={dispersao_estrang_ibov}
-      panelIndex="03"
       panelTitle="Quando o estrangeiro entra, o IBOV sobe?"
-      panelSubtitle="Dispersão diária: fluxo estrangeiro (R$ mi, X) × variação do Ibovespa (%, Y)"
-      height="290px"
+      panelSubtitle="Fluxo diário estrangeiro (barras, R$ mi / bi) × variação diária do Ibovespa (linha prata, %)"
+      defaultZoomPoints={60}
+      height={235}
     />
   </section>
 
   <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Qual perfil domina o volume na B3?</span></h2>
+    <h2 class="terminal-panel-title">Qual perfil domina o volume na B3?</h2>
     <p class="terminal-panel-sub">Participação oficial no giro do mês (BDI) e no último pregão (%) · Clique na legenda ou passe o mouse</p>
     <BarChart
       data={participacao_volume_b3}
@@ -244,7 +243,6 @@ SELECT * FROM ${serie_perfil} ORDER BY trading_date DESC
 
 <FlowExplorerTable
   data={serie_perfil_desc}
-  panelIndex="05"
   title="Qual o histórico diário detalhado do perfil selecionado?"
-  subtitle="Pregões em ordem decrescente com saldo diário, MTD e acumulado em R$ bi · MM21 ativa com 21 pregões completos"
+  subtitle="Pregões em ordem decrescente com saldo diário, MTD e acumulado (R$ mi / bi) · MM21 ativa com 21 pregões completos"
 />

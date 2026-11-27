@@ -17,7 +17,6 @@
   export let maColor = '#8a8a93';
   export let focal = false;
   export let defaultZoomPoints = 0;
-  export let panelIndex = '';
   export let panelTitle = '';
   export let panelSubtitle = '';
 
@@ -50,24 +49,43 @@
   function formatBi(v) {
     if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
     const num = Number(v);
-    const normalized = Math.abs(num) < 0.005 ? 0 : num;
-    const sign = normalized < 0 ? '-' : normalized > 0 ? '+' : '';
-    return `${sign}R$ ${Math.abs(normalized).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} bi`;
+    const inMi = num * 1000;
+    if (Math.abs(inMi) < 0.05) return 'R$ 0';
+    const sign = inMi < 0 ? '-' : '+';
+    const absMi = Math.abs(inMi);
+    if (absMi >= 999.95) {
+      const absBi = absMi / 1000;
+      return `${sign}R$ ${absBi.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })} bi`;
+    }
+    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    })} mi`;
   }
 
   function formatBiAxis(v) {
     const num = Number(v);
     if (Number.isNaN(num)) return '';
-    const normalized = Math.abs(num) < 0.005 ? 0 : num;
-    const sign = normalized < 0 ? '-' : normalized > 0 ? '+' : '';
-    const abs = Math.abs(normalized).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+    const inMi = num * 1000;
+    if (Math.abs(inMi) < 0.05) return '0';
+    const sign = inMi < 0 ? '-' : '+';
+    const absMi = Math.abs(inMi);
+    if (absMi >= 999.95) {
+      const absBi = absMi / 1000;
+      const abs = absBi.toLocaleString('pt-BR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+      return `${sign}${abs} bi`;
+    }
+    const abs = absMi.toLocaleString('pt-BR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: absMi >= 100 ? 0 : 1,
     });
-    return `${sign}${abs} bi`;
+    return `${sign}${abs} mi`;
   }
 
   function formatPts(v) {
@@ -363,9 +381,6 @@
   {#if panelTitle}
     <div class="tvd-head-row">
       <h2 class="terminal-panel-title" style="margin: 0;">
-        {#if panelIndex}
-          <span class="panel-index">{panelIndex}</span>
-        {/if}
         <span>{panelTitle}</span>
       </h2>
     </div>

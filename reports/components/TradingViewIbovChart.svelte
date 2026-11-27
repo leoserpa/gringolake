@@ -3,7 +3,6 @@
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
 
   export let data = [];
-  export let panelIndex = '01';
   export let panelTitle = 'Qual a trajetória do Ibovespa no horizonte selecionado?';
   export let panelSubtitle = 'Velas (Candlestick) oficiais da B3 · Alternância 1S (Semanal), 1M (Mensal) e 1D + MM21/MM50/MM200';
   export let height = 340;
@@ -407,9 +406,6 @@
   <div class="tv-head">
     <div class="tv-title-block">
       <h2 class="terminal-panel-title" style="margin: 0 0 4px 0;">
-        {#if panelIndex}
-          <span class="panel-index">{panelIndex}</span>
-        {/if}
         <span>{panelTitle}</span>
       </h2>
       {#if panelSubtitle}

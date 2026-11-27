@@ -1,6 +1,5 @@
 <script>
   export let data = [];
-  export let panelIndex = '03';
   export let title = 'Quais meses historicamente rendem mais ou menos no Ibovespa?';
   export let subtitle = '';
 
@@ -130,7 +129,6 @@
   <div class="hm-header">
     <div class="hm-heading">
       <h2 id="ibov-heatmap-title" class="terminal-panel-title">
-        {#if panelIndex}<span class="panel-index">{panelIndex}</span>{/if}
         <span>{title}</span>
       </h2>
       {#if subtitle}

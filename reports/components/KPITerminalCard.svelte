@@ -9,6 +9,7 @@
   export let suffix = '';
   export let decimals = 2;
   export let signed = false;
+  export let autoScaleUnit = true;
   export let icon = '';
   export let alertCol = null;
   export let focal = false;
@@ -45,6 +46,30 @@
     if (typeof v === 'string') return `${prefix}${v}${suffix}`;
     const num = Number(v);
     if (Number.isNaN(num)) return String(v);
+    const trimmedSuffix = (suffix || '').trim();
+    const canAutoUnit = autoScaleUnit && (trimmedSuffix === 'mi' || trimmedSuffix === 'bi');
+
+    if (canAutoUnit) {
+      const inMi = trimmedSuffix === 'bi' ? num * 1000 : num;
+      if (Math.abs(inMi) < 0.05) {
+        return `${prefix}0`;
+      }
+      const sign = inMi < 0 ? '-' : signed ? '+' : '';
+      const absMi = Math.abs(inMi);
+      if (absMi >= 999.95) {
+        const formatted = (absMi / 1000).toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        return `${sign}${prefix}${formatted} bi`;
+      }
+      const formatted = absMi.toLocaleString('pt-BR', {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      });
+      return `${sign}${prefix}${formatted} mi`;
+    }
+
     const epsilon = 0.5 * Math.pow(10, -decimals);
     const normalized = Math.abs(num) < epsilon ? 0 : num;
     const sign = normalized < 0 ? '-' : signed && normalized > 0 ? '+' : '';

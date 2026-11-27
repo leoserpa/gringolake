@@ -99,7 +99,6 @@ FROM ${ibov_filtrado}
   <section class="terminal-panel">
     <TradingViewIbovChart
       data={ibov_filtrado}
-      panelIndex="01"
       panelTitle="Qual a trajetória do Ibovespa no horizonte selecionado?"
       panelSubtitle="Gráfico de velas (Candlestick) derivado dos fechamentos oficiais B3 · Tempo gráfico 1D / 1S / 1M + MM21/MM50/MM200"
       height={340}
@@ -111,7 +110,6 @@ FROM ${ibov_filtrado}
   <section class="terminal-panel">
     <TradingViewSeriesChart
       data={ibov_filtrado}
-      panelIndex="02"
       panelTitle="Quanto o Ibovespa já caiu desde a máxima do período?"
       panelSubtitle="Drawdown percentual a partir do topo acumulado na janela selecionada (0% = máxima da janela)"
       x="trading_date"
@@ -172,7 +170,6 @@ ORDER BY ano_num DESC, mes_num ASC
 <div class="terminal-grid-1">
   <MonthlyHeatmap
     data={matriz_mensal_ibov}
-    panelIndex="03"
     title="Quais meses historicamente rendem mais ou menos no Ibovespa?"
     subtitle="Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (Jan/2020 a Nov/2026 · Dez/2026 ainda não iniciado)"
   />
@@ -193,17 +190,5 @@ ORDER BY trading_year DESC
 ```
 
 <div class="terminal-grid-1">
-  <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">04</span><span>Como o Ibovespa fechou em cada ano desde 2020?</span></h2>
-    <p class="terminal-panel-sub">Contagem oficial de pregões, abertura, mínima, máxima e variação percentual por ano calendário</p>
-    <DataTable data={resumo_anual_ibov} rows=10>
-      <Column id=ano title="Ano" fmt=id />
-      <Column id=pregoes title="Pregões" fmt=num0 />
-      <Column id=primeiro_fechamento title="Abertura Ano" fmt=num0 />
-      <Column id=ultimo_fechamento title="Último Fech." fmt=num0 />
-      <Column id=minima title="Mínima" fmt=num0 />
-      <Column id=maxima title="Máxima" fmt=num0 />
-      <Column id=retorno_anual_pct title="Variação (%)" fmt=num2 />
-    </DataTable>
-  </section>
+  <AnnualIbovTable data={resumo_anual_ibov} />
 </div>

@@ -240,11 +240,16 @@
           </nav>
 
           <div class="header-provenance">
-            <span class="prov-meta">B3 Oficial · D+2</span>
-            <span class="mobile-b3-pill" aria-label="Fonte oficial B3">
-              <span class="amber-dot" aria-hidden="true"></span>
-              <span>B3</span>
-            </span>
+            <a
+              class="prov-chip"
+              href={`${base}/linhagem`}
+              title="Dados oficiais B3 (BDI e GetPortfolioDay) · Defasagem oficial D+2"
+            >
+              <span class="prov-exchange">B3</span>
+              <span class="prov-official">Oficial</span>
+              <span class="prov-sep" aria-hidden="true"></span>
+              <span class="prov-lag">D+2</span>
+            </a>
           </div>
         </div>
       </header>
@@ -253,12 +258,60 @@
     <div class="gl-page-container">
       <slot />
 
-      <footer class="gl-footer">
-        <span class="footer-note">
-          <span class="footer-dot" aria-hidden="true"></span>
-          <span>Desacumulação MTD ancorada no calendário oficial IBOV (ADR-003) · Soma das 5 categorias fecha em R$ 0</span>
-        </span>
-        <span class="footer-pill">100% B3 Oficial · GPL v3</span>
+      <footer class="gl-footer" aria-label="Rodapé institucional e metodologia">
+        <div class="footer-brand-row">
+          <a class="footer-brand" href={`${base}/`} aria-label="Voltar ao início do GringoLake">
+            <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <path
+                d="M6 18C6 9.5 12.5 5 21 7.5"
+                stroke="#F5F5F5"
+                stroke-width="2.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M26 14C26 22.5 19.5 27 11 24.5"
+                stroke="#8A8A93"
+                stroke-width="2.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M8 17L14 13L18 19L24 11"
+                stroke="#F5F5F5"
+                stroke-width="2.1"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="24.25" cy="10.75" r="2.75" fill="#F2B94B" />
+            </svg>
+            <span class="footer-brand-name">GringoLake</span>
+          </a>
+        </div>
+
+        <div class="footer-rule" aria-hidden="true"></div>
+
+        <div class="footer-meta-row">
+          <p class="footer-legal">
+            GringoLake · 100% B3 Oficial (BDI SharesInvesVolum &amp; GetPortfolioDay) · Licença GPL v3
+          </p>
+          <span class="footer-sla">Atualização diária pós-SLA B3 (21h BRT) · Lag D+2</span>
+        </div>
+
+        <nav class="footer-nav" aria-label="Links do rodapé">
+          {#each navItems as item}
+            <a
+              href={item.path === '/' ? `${base}/` : `${base}${item.path}`}
+              aria-current={isCurrent(item.path, $page.url.pathname) ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          {/each}
+        </nav>
+
+        <p class="footer-methodology">
+          Desacumulação MTD ancorada no calendário oficial do Ibovespa (ADR-003). A soma das 5 categorias
+          oficiais fecha em R$ 0 (tolerância ≤ R$ 20 mil). Conteúdo exclusivamente informativo e
+          analítico, sem recomendação de investimento.
+        </p>
       </footer>
     </div>
   </div>
@@ -627,38 +680,61 @@
     margin-inline-start: 0;
   }
 
-  .prov-meta {
+  .prov-chip {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 12px;
-    font-weight: 500;
-    color: #8a8a91;
-    padding-inline-end: 8px;
-  }
-
-  .mobile-b3-pill {
-    display: none;
-    align-items: center;
-    gap: 7px;
-    min-block-size: max(36px, var(--target-size));
-    padding: 0 13px;
+    gap: 6px;
+    min-block-size: 34px;
+    padding: 0 12px;
     border-radius: 999px;
     background: #262626;
-    border: 1px solid #3a3a3f;
-    color: #f8f8f8;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 12px;
-    font-weight: 600;
+    border: 1px solid #363636;
+    text-decoration: none;
+    transition: background-color 0.16s ease, border-color 0.16s ease;
   }
 
-  .amber-dot {
-    inline-size: 6px;
-    block-size: 6px;
-    border-radius: 50%;
-    background: #f2b94b;
+  .prov-chip:hover {
+    background: #2f2f33;
+    border-color: #4a4a52;
+  }
+
+  .prov-chip:focus-visible {
+    outline: 2px solid #f2b94b;
+    outline-offset: 2px;
+  }
+
+  .prov-exchange {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #f5f5f5;
+    line-height: 1;
+  }
+
+  .prov-official {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #9a9aa4;
+    line-height: 1;
+  }
+
+  .prov-sep {
+    inline-size: 1px;
+    block-size: 12px;
+    background: #3e3e44;
+    margin-inline: 2px;
     flex-shrink: 0;
+  }
+
+  .prov-lag {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #d4d4dc;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
 
   @media (max-width: 720px) {
@@ -670,11 +746,13 @@
       min-block-size: 56px;
     }
     .brand-dot,
-    .prov-meta {
+    .prov-official {
       display: none;
     }
-    .mobile-b3-pill {
-      display: inline-flex;
+    .prov-chip {
+      min-block-size: 32px;
+      padding: 0 10px;
+      gap: 5px;
     }
   }
 
@@ -871,14 +949,6 @@
     line-height: 1.3;
   }
 
-  :global(.panel-index) {
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 12px;
-    color: #767676;
-    font-weight: 600;
-    flex-shrink: 0;
-  }
-
   :global(.terminal-panel-sub) {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-size: 12.5px;
@@ -888,9 +958,9 @@
   }
 
   /* ==================== STANDARD EVIDENCE TABLES (TUFTE GRAPHITE) ==================== */
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .table-container),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .overflow-auto),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .overflow-x-auto) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) .table-container),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) .overflow-auto),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) .overflow-x-auto) {
     max-inline-size: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -898,14 +968,14 @@
     border-color: #363636 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) table) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) table) {
     background: transparent !important;
     border-collapse: separate;
     border-spacing: 0;
     inline-size: 100%;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) thead th) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) thead th) {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
@@ -921,7 +991,7 @@
     white-space: nowrap;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) tbody td) {
     font-size: 12px !important;
     color: #e5e5e5 !important;
     border-bottom: 1px solid #343438 !important;
@@ -930,64 +1000,126 @@
     background: transparent !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody tr:hover td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) tbody tr:hover td) {
     background: #323236 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody tr:last-child td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) tbody tr:last-child td) {
     border-bottom: 0 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .pagination),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) button),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) input) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) .pagination),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) button),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel):not(.daily-panel):not(.annual-ibov-panel) input) {
     color: #a3a3a3;
     border-color: #3a3a3f;
   }
 
-  /* ==================== ROUNDED FOOTER PILL BAR ==================== */
+  /* ==================== EDITORIAL FOOTER (BLOOMBERG-INSPIRED) ==================== */
   .gl-footer {
-    margin-block-start: 28px;
-    padding: 16px 22px;
-    background: #2b2b2b;
-    border: 1px solid #363636;
-    border-radius: 22px;
+    margin-block-start: 48px;
+    padding: 8px 0 4px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  .footer-brand-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+  }
+
+  .footer-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+    color: #f5f5f5;
+    transition: opacity 0.16s ease;
+  }
+
+  .footer-brand:hover {
+    opacity: 0.85;
+  }
+
+  .footer-brand:focus-visible {
+    outline: 2px solid #f2b94b;
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  .footer-brand-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #f5f5f5;
+  }
+
+  .footer-rule {
+    inline-size: 100%;
+    block-size: 1px;
+    background: #35353a;
+  }
+
+  .footer-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 20px;
+  }
+
+  .footer-legal {
+    margin: 0;
+    font-size: 12px;
+    color: #8a8a93;
+    line-height: 1.5;
+  }
+
+  .footer-sla {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #6e6e76;
+    white-space: nowrap;
+  }
+
+  .footer-nav {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 10px 16px;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-size: 12px;
-    color: #8a8a91;
+    gap: 10px 24px;
   }
 
-  .footer-note {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+  .footer-nav a {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: #c4c4cc;
+    text-decoration: none;
+    transition: color 0.15s ease;
   }
 
-  .footer-dot {
-    inline-size: 6px;
-    block-size: 6px;
-    border-radius: 50%;
-    background: #f8f8f8;
-    opacity: 0.7;
-    flex-shrink: 0;
+  .footer-nav a:hover,
+  .footer-nav a[aria-current='page'] {
+    color: #f8f8f8;
   }
 
-  .footer-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: #262626;
-    border: 1px solid #363636;
-    font-family: 'JetBrains Mono', ui-monospace, monospace;
-    font-size: 11px;
-    color: #a3a3a3;
-    white-space: nowrap;
+  .footer-nav a:focus-visible {
+    outline: 2px solid #f2b94b;
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .footer-methodology {
+    margin: 0;
+    max-inline-size: 92ch;
+    font-size: 11.5px;
+    color: #6f6f78;
+    line-height: 1.55;
   }
 
   /* ==================== RESPONSIVENESS ==================== */
@@ -1059,8 +1191,20 @@
     }
 
     .gl-footer {
-      border-radius: 20px;
-      padding: 14px 16px;
+      margin-block-start: 36px;
+      gap: 14px;
+    }
+
+    .footer-brand-row {
+      justify-content: flex-start;
+    }
+
+    .footer-sla {
+      white-space: normal;
+    }
+
+    .footer-nav {
+      gap: 10px 18px;
     }
   }
 
