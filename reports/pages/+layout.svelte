@@ -179,19 +179,29 @@
       >
         <div bind:this={headerInnerEl} class="header-inner">
           <a class="site-brand" href={`${base}/`}>
-            <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <rect width="32" height="32" rx="10" fill="#F5F5F5" />
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
               <path
-                d="M7.5 21.5L12.5 16L16.8 18.4L23.5 10.5"
-                stroke="#222222"
-                stroke-width="2.5"
+                d="M6 18C6 9.5 12.5 5 21 7.5"
+                stroke="#F5F5F5"
+                stroke-width="2.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M26 14C26 22.5 19.5 27 11 24.5"
+                stroke="#8A8A93"
+                stroke-width="2.6"
+                stroke-linecap="round"
+              />
+              <path
+                d="M8 17L14 13L18 19L24 11"
+                stroke="#F5F5F5"
+                stroke-width="2.1"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               />
-              <circle cx="23.5" cy="10.5" r="2.6" fill="#F2B94B" />
+              <circle cx="24.25" cy="10.75" r="2.75" fill="#F2B94B" />
             </svg>
             <span class="brand-name">GringoLake</span>
-            <span class="brand-dot" aria-hidden="true"></span>
           </a>
 
           <nav class="site-nav" aria-label="Navegação principal">
@@ -833,10 +843,6 @@
     min-inline-size: 0;
     --base-100: #2b2b2b;
     --twc-base-100: 0 0% 17%;
-  }
-
-  :global(.terminal-panel + .terminal-panel) {
-    margin-block-start: 20px;
   }
 
   :global(.terminal-panel .chart-container),

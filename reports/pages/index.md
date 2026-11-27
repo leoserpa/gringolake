@@ -79,11 +79,11 @@ ORDER BY w.trading_date
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={serie_comparativa}
       panelIndex="01"
       panelTitle="Os estrangeiros estão comprando ou vendendo?"
-      panelSubtitle="Fluxo estrangeiro acumulado (âmbar, R$ bi) vs. Ibovespa (grafite)"
+      panelSubtitle="Fluxo estrangeiro acumulado (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="estrang_cum_bi_brl"
       flowName="Estrangeiro"
       maCol="estrang_cum_ma21_bi_brl"
@@ -92,16 +92,16 @@ ORDER BY w.trading_date
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       focal={true}
-      height="285px"
+      height={220}
     />
   </section>
 
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={serie_comparativa}
       panelIndex="02"
       panelTitle="Como a Pessoa Física está posicionada na B3?"
-      panelSubtitle="Fluxo acumulado da Pessoa Física (âmbar, R$ bi) vs. Ibovespa (grafite)"
+      panelSubtitle="Fluxo acumulado da Pessoa Física (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="pf_cum_bi_brl"
       flowName="Pessoa Física"
       maCol="pf_cum_ma21_bi_brl"
@@ -109,18 +109,18 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      height="285px"
+      height={220}
     />
   </section>
 </div>
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={serie_comparativa}
       panelIndex="03"
       panelTitle="O institucional está entrando ou saindo?"
-      panelSubtitle="Fluxo institucional acumulado (âmbar, R$ bi) vs. Ibovespa (grafite)"
+      panelSubtitle="Fluxo institucional acumulado (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="instit_cum_bi_brl"
       flowName="Institucional"
       maCol="instit_cum_ma21_bi_brl"
@@ -128,16 +128,16 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      height="285px"
+      height={220}
     />
   </section>
 
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={serie_comparativa}
       panelIndex="04"
       panelTitle="Como atuam as Instituições Financeiras?"
-      panelSubtitle="Fluxo acumulado de Inst. Financeiras (âmbar, R$ bi) vs. Ibovespa (grafite)"
+      panelSubtitle="Fluxo acumulado de Inst. Financeiras (âmbar, R$ bi) vs. Ibovespa (prata) · Role para zoom"
       flowCol="inst_fin_cum_bi_brl"
       flowName="Inst. Financeira"
       maCol="inst_fin_cum_ma21_bi_brl"
@@ -145,7 +145,7 @@ ORDER BY w.trading_date
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      height="285px"
+      height={220}
     />
   </section>
 </div>

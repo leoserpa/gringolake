@@ -43,11 +43,6 @@ CROSS JOIN agg a
         <ButtonGroupItem valueLabel="Máx" value="9999" />
       </ButtonGroup>
 
-      <ButtonGroup name=exibir_faixas>
-        <ButtonGroupItem valueLabel="Faixas P.F. < MM21" value="1" default />
-        <ButtonGroupItem valueLabel="Sem faixas" value="0" />
-      </ButtonGroup>
-
       <CounterBadge data={pf_kpis} value="total_pregoes" label="Pregões" decimals={0} />
     </div>
   </div>
@@ -74,8 +69,7 @@ SELECT
     m.daily_net_flow_bi_brl,
     m.pf_cum_short_term_bi_brl,
     m.pf_cum_short_term_ma21_bi_brl,
-    m.ma21_window_obs_count,
-    CASE WHEN '${inputs.exibir_faixas}' = '1' THEN m.is_pf_below_ma21 ELSE FALSE END AS shade_flag
+    m.ma21_window_obs_count
 FROM gringolake.mart_ibov_vs_pf_short_term m
 INNER JOIN janela j ON m.trading_date = j.trading_date
 ORDER BY m.trading_date ASC
@@ -83,11 +77,11 @@ ORDER BY m.trading_date ASC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={pf_serie_completa}
       panelIndex="01"
       panelTitle="A Pessoa Física está acelerando ou perdendo força no curto prazo?"
-      panelSubtitle="Fluxo acumulado da P.F. (R$ bi) vs. MM21 e Ibovespa · Use a barra inferior ou scroll para dar zoom nos pregões"
+      panelSubtitle="Terminal interativo TradingView · Fluxo acumulado P.F. (âmbar, R$ bi) vs. MM21 e Ibovespa (prata) · Role para zoom ou use + / −"
       flowCol="pf_cum_short_term_bi_brl"
       flowName="Acum. P.F."
       maCol="pf_cum_short_term_ma21_bi_brl"
@@ -95,10 +89,9 @@ ORDER BY m.trading_date ASC
       maName="MM 21d"
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
-      shadeCol="shade_flag"
       focal={true}
-      height="360px"
-      zoom={true}
+      defaultZoomPoints={90}
+      height={300}
     />
   </section>
 </div>

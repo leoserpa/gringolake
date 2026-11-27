@@ -6,13 +6,36 @@ title: Ibovespa Histórico — GringoLake
 WITH limite AS (
     SELECT MAX(trading_date) AS max_dt FROM gringolake.stg_b3_ibov_daily
 ),
+com_medias AS (
+    SELECT
+        trading_date,
+        trading_year,
+        ibov_close,
+        ibov_return_1d_pct,
+        CASE
+            WHEN COUNT(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 20 PRECEDING AND CURRENT ROW) = 21
+            THEN ROUND(AVG(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 20 PRECEDING AND CURRENT ROW), 2)
+        END AS ibov_ma21,
+        CASE
+            WHEN COUNT(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 49 PRECEDING AND CURRENT ROW) = 50
+            THEN ROUND(AVG(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 49 PRECEDING AND CURRENT ROW), 2)
+        END AS ibov_ma50,
+        CASE
+            WHEN COUNT(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 199 PRECEDING AND CURRENT ROW) = 200
+            THEN ROUND(AVG(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN 199 PRECEDING AND CURRENT ROW), 2)
+        END AS ibov_ma200
+    FROM gringolake.stg_b3_ibov_daily
+),
 janela AS (
     SELECT
         s.trading_date,
         s.trading_year,
         s.ibov_close,
-        s.ibov_return_1d_pct
-    FROM gringolake.stg_b3_ibov_daily s
+        s.ibov_return_1d_pct,
+        s.ibov_ma21,
+        s.ibov_ma50,
+        s.ibov_ma200
+    FROM com_medias s
     CROSS JOIN limite l
     WHERE date_diff('day', s.trading_date, l.max_dt) <= CAST('${inputs.horizonte_ibov}' AS INTEGER)
 )
@@ -21,6 +44,9 @@ SELECT
     trading_year,
     ibov_close,
     ibov_return_1d_pct,
+    ibov_ma21,
+    ibov_ma50,
+    ibov_ma200,
     ROUND(
         ((ibov_close / MAX(ibov_close) OVER (ORDER BY trading_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) - 1.0) * 100.0,
         2
@@ -71,18 +97,12 @@ FROM ${ibov_filtrado}
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewIbovChart
       data={ibov_filtrado}
       panelIndex="01"
       panelTitle="Qual a trajetória do Ibovespa no horizonte selecionado?"
-      panelSubtitle="Fechamento oficial diário da B3 em pontos (stg_b3_ibov_daily)"
-      x="trading_date"
-      y="ibov_close"
-      names={['Ibovespa']}
-      colors={['#f2b94b']}
-      suffix=" pts"
-      decimals={0}
-      height="350px"
+      panelSubtitle="Gráfico de velas (Candlestick) derivado dos fechamentos oficiais B3 · Tempo gráfico 1D / 1S / 1M + MM21/MM50/MM200"
+      height={340}
     />
   </section>
 </div>

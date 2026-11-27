@@ -81,11 +81,11 @@ ORDER BY w.trading_date ASC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalDualAxisChart
+    <TradingViewDualAxisChart
       data={serie_perfil}
       panelIndex="01"
       panelTitle="Como evolui o fluxo do perfil selecionado frente ao Ibovespa?"
-      panelSubtitle="Acumulado contínuo em R$ bi (âmbar) e MM21 vs. fechamento oficial do Ibovespa (grafite)"
+      panelSubtitle="Terminal interativo TradingView · Acumulado contínuo em R$ bi (âmbar) e MM21 vs. Ibovespa (prata) · Role para zoom ou use + / −"
       flowCol="cum_net_flow_bi_brl"
       flowName="Fluxo Acumulado"
       maCol="cum_net_flow_ma21_bi_brl"
@@ -94,8 +94,8 @@ ORDER BY w.trading_date ASC
       ibovCol="ibov_close"
       ibovName="IBOV (pts)"
       focal={true}
-      height="360px"
-      zoom={true}
+      defaultZoomPoints={90}
+      height={300}
     />
   </section>
 </div>
