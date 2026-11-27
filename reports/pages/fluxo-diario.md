@@ -17,10 +17,10 @@ zero_sum AS (
 )
 SELECT
     f.trading_date,
-    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS estrang_mi,
-    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS pf_mi,
-    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS instit_mi,
-    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS inst_fin_mi,
+    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN f.daily_net_flow_k_brl / 1000.0 END) AS estrang_mi,
+    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN f.daily_net_flow_k_brl / 1000.0 END) AS pf_mi,
+    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN f.daily_net_flow_k_brl / 1000.0 END) AS instit_mi,
+    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN f.daily_net_flow_k_brl / 1000.0 END) AS inst_fin_mi,
     MAX(z.max_residuo_k) AS max_residuo_k
 FROM gringolake.fct_ibov_investor_flow_daily f
 INNER JOIN ultimo u ON f.trading_date = u.max_dt
@@ -50,7 +50,7 @@ GROUP BY f.trading_date
         label="Resíduo"
         prefix="R$ "
         suffix=" mil"
-        decimals={1}
+        decimals={2}
         hint="Resíduo máximo diário da auditoria soma-zero B3 (tolerância ≤ R$ 20 mil)"
       />
     </div>
@@ -74,12 +74,12 @@ WITH datas_janela AS (
 SELECT
     f.trading_date,
     MAX(f.ibov_close) AS ibov_close,
-    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS estrang_mi,
-    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS pf_mi,
-    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS instit_mi,
-    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS inst_fin_mi,
-    MAX(CASE WHEN f.investor_type_code = 'outros' THEN round(f.daily_net_flow_k_brl / 1000.0, 2) END) AS outros_mi,
-    ROUND(SUM(f.daily_purchases_k_brl) / 1000000.0, 2) AS volume_total_bi
+    MAX(CASE WHEN f.investor_type_code = 'estrangeiro' THEN f.daily_net_flow_k_brl / 1000.0 END) AS estrang_mi,
+    MAX(CASE WHEN f.investor_type_code = 'pessoa_fisica' THEN f.daily_net_flow_k_brl / 1000.0 END) AS pf_mi,
+    MAX(CASE WHEN f.investor_type_code = 'institucional' THEN f.daily_net_flow_k_brl / 1000.0 END) AS instit_mi,
+    MAX(CASE WHEN f.investor_type_code = 'instituicoes_financeiras' THEN f.daily_net_flow_k_brl / 1000.0 END) AS inst_fin_mi,
+    MAX(CASE WHEN f.investor_type_code = 'outros' THEN f.daily_net_flow_k_brl / 1000.0 END) AS outros_mi,
+    SUM(f.daily_purchases_k_brl) / 1000000.0 AS volume_total_bi
 FROM gringolake.fct_ibov_investor_flow_daily f
 INNER JOIN datas_janela d ON f.trading_date = d.trading_date
 GROUP BY f.trading_date
@@ -181,7 +181,7 @@ ORDER BY f.trading_date ASC
       names={['Volume Total B3']}
       prefix="R$ "
       suffix=" bi"
-      decimals={1}
+      decimals={2}
       chartType="bar"
       axisCompact={true}
       highlightAboveAvg={true}

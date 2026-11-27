@@ -67,11 +67,12 @@
       return `${prefix || ''}0${trimmedSuffix === '%' ? '%' : ''}`;
     }
 
-    const useCompactFormat = useCompactAxis && axisCompact;
+    const absClean = Math.abs(cleanNum);
+    const useIntegerTick = useCompactAxis && axisCompact && Math.abs(absClean - Math.round(absClean)) < 1e-9;
     const absFormatted = new Intl.NumberFormat('pt-BR', {
-      minimumFractionDigits: useCompactFormat ? 0 : d,
-      maximumFractionDigits: d
-    }).format(Math.abs(cleanNum));
+      minimumFractionDigits: useIntegerTick ? 0 : d,
+      maximumFractionDigits: useIntegerTick ? 0 : d
+    }).format(absClean);
 
     let signChar = '';
     if (cleanNum < 0) signChar = '-';

@@ -124,7 +124,7 @@ WITH janela AS (
 )
 SELECT
     f.trading_date,
-    ROUND(f.daily_net_flow_k_brl / 1000.0, 1) AS estrang_mi,
+    f.daily_net_flow_k_brl / 1000.0 AS estrang_mi,
     f.ibov_return_1d_pct
 FROM gringolake.fct_ibov_investor_flow_daily f
 INNER JOIN janela j ON f.trading_date = j.trading_date

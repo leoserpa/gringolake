@@ -51,7 +51,7 @@ CROSS JOIN perfis p
         label="Resíduo"
         prefix="R$ "
         suffix=" mil"
-        decimals={1}
+        decimals={2}
         hint="Resíduo máximo diário da auditoria soma-zero B3 (tolerância ≤ R$ 20 mil)"
       />
     </div>

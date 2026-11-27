@@ -55,8 +55,12 @@ test('formatFlowBrl applies ADR-007 adaptive mi/bi scale across k, mi, and bi in
   assert.equal(formatFlowBrl(-1490000, { inputUnit: 'k' }), '-R$ 1,49 bi');
   assert.equal(formatFlowBrl(88000, { inputUnit: 'k' }), '+R$ 88,0 mi');
 
-  // Compact axis mode
-  assert.equal(formatFlowBrl(1.5, { inputUnit: 'bi', prefix: '', compactAxis: true }), '+1,5 bi');
+  // Compact axis mode preserves exact HUD/table decimals on data values, while showing integer ticks cleanly
+  assert.equal(formatFlowBrl(-104.92, { inputUnit: 'mi', compactAxis: true }), '-R$ 104,9 mi');
+  assert.equal(formatFlowBrl(322.5, { inputUnit: 'mi', prefix: '', compactAxis: true }), '+322,5 mi');
+  assert.equal(formatFlowBrl(-1.499871, { inputUnit: 'bi', prefix: '', compactAxis: true }), '-1,50 bi');
+  assert.equal(formatFlowBrl(1.5, { inputUnit: 'bi', prefix: '', compactAxis: true }), '+1,50 bi');
+  assert.equal(formatFlowBrl(2, { inputUnit: 'bi', prefix: 'R$ ', compactAxis: true }), '+R$ 2 bi');
   assert.equal(formatFlowBrl(250, { inputUnit: 'mi', prefix: '', compactAxis: true }), '+250 mi');
   assert.equal(formatFlowBrl(42.5, { inputUnit: 'mi', prefix: '', compactAxis: true }), '+42,5 mi');
 
@@ -71,6 +75,9 @@ test('formatPctSigned normalizes near-zero values and formats pt-BR percentages'
   assert.equal(formatPctSigned(0.004), '0,00%');
   assert.equal(formatPctSigned(-0.004), '0,00%');
   assert.equal(formatPctSigned(0, { compactAxis: true }), '0%');
+  assert.equal(formatPctSigned(-0.95, { compactAxis: true }), '-0,95%');
+  assert.equal(formatPctSigned(-3.4, { compactAxis: true }), '-3,40%');
+  assert.equal(formatPctSigned(-8, { compactAxis: true }), '-8%');
   assert.equal(formatPctSigned(null), '—');
 });
 

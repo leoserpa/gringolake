@@ -68,11 +68,13 @@ export function formatDayMonthBR(val) {
   return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 }
 
+const isExactInteger = (num) => Math.abs(num - Math.round(num)) < 1e-9;
+
 /**
  * Formats monetary flows using GringoLake's adaptive R$ mi / R$ bi scale (ADR-007):
  * - |value_mi| < 0.05  -> "<prefix>0"
- * - |value_mi| >= 999.95 -> billions (2 decimals in labels, 0..2 on compact axis)
- * - otherwise -> millions (1 decimal in labels, 0 or 0..1 on compact axis)
+ * - |value_mi| >= 999.95 -> billions (2 decimals; compact integer ticks drop trailing zeros)
+ * - otherwise -> millions (1 decimal; compact integer ticks drop trailing zeros)
  *
  * @param {unknown} value
  * @param {object} [options]
@@ -110,19 +112,21 @@ export function formatFlowBrl(
 
   if (absMi >= MI_TO_BI_THRESHOLD) {
     const absBi = absMi / 1000;
+    const useIntegerTick = compactAxis && isExactInteger(absBi);
     const formatted = absBi.toLocaleString(
       BR_LOCALE,
-      compactAxis
-        ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+      useIntegerTick
+        ? { minimumFractionDigits: 0, maximumFractionDigits: 0 }
         : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
     );
     return `${sign}${prefix}${formatted} bi`;
   }
 
+  const useIntegerTick = compactAxis && isExactInteger(absMi);
   const formatted = absMi.toLocaleString(
     BR_LOCALE,
-    compactAxis
-      ? { minimumFractionDigits: 0, maximumFractionDigits: absMi >= 100 ? 0 : 1 }
+    useIntegerTick
+      ? { minimumFractionDigits: 0, maximumFractionDigits: 0 }
       : { minimumFractionDigits: 1, maximumFractionDigits: 1 }
   );
   return `${sign}${prefix}${formatted} mi`;
@@ -148,10 +152,12 @@ export function formatPctSigned(
   if (normalized === 0 && compactAxis) return '0%';
 
   const sign = normalized > 0 ? '+' : normalized < 0 ? '-' : '';
-  const absFormatted = Math.abs(normalized).toLocaleString(
+  const absNorm = Math.abs(normalized);
+  const useIntegerTick = compactAxis && isExactInteger(absNorm);
+  const absFormatted = absNorm.toLocaleString(
     BR_LOCALE,
-    compactAxis
-      ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
+    useIntegerTick
+      ? { minimumFractionDigits: 0, maximumFractionDigits: 0 }
       : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
   );
   return `${sign}${absFormatted}%`;
