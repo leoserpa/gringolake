@@ -80,7 +80,7 @@ ORDER BY f.trading_date ASC
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
       panelIndex="01"
       panelTitle="Quanto o estrangeiro movimentou por dia?"
@@ -94,13 +94,13 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="275px"
-      showEndLabel={false}
+      defaultZoomPoints={60}
+      height={220}
     />
   </section>
 
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
       panelIndex="02"
       panelTitle="Quando a Pessoa Física entrou comprando?"
@@ -114,15 +114,15 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="275px"
-      showEndLabel={false}
+      defaultZoomPoints={60}
+      height={220}
     />
   </section>
 </div>
 
 <div class="terminal-grid-2">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
       panelIndex="03"
       panelTitle="Qual foi o fluxo diário do institucional?"
@@ -136,13 +136,13 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="275px"
-      showEndLabel={false}
+      defaultZoomPoints={60}
+      height={220}
     />
   </section>
 
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
       panelIndex="04"
       panelTitle="Como atuaram as Inst. Financeiras por dia?"
@@ -156,15 +156,15 @@ ORDER BY f.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="275px"
-      showEndLabel={false}
+      defaultZoomPoints={60}
+      height={220}
     />
   </section>
 </div>
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={fluxo_diario_4_perfis}
       panelIndex="05"
       panelTitle="Quais pregões concentraram o maior volume financeiro na B3?"
@@ -178,8 +178,9 @@ ORDER BY f.trading_date ASC
       chartType="bar"
       axisCompact={true}
       highlightAboveAvg={true}
-      height="250px"
-      showEndLabel={false}
+      zeroLine={false}
+      defaultZoomPoints={60}
+      height={240}
     />
   </section>
 </div>

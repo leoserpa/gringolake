@@ -888,9 +888,9 @@
   }
 
   /* ==================== STANDARD EVIDENCE TABLES (TUFTE GRAPHITE) ==================== */
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) .table-container),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) .overflow-auto),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) .overflow-x-auto) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .table-container),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .overflow-auto),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .overflow-x-auto) {
     max-inline-size: 100%;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -898,14 +898,14 @@
     border-color: #363636 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) table) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) table) {
     background: transparent !important;
     border-collapse: separate;
     border-spacing: 0;
     inline-size: 100%;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) thead th) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) thead th) {
     position: sticky;
     inset-block-start: 0;
     z-index: 1;
@@ -921,7 +921,7 @@
     white-space: nowrap;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) tbody td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody td) {
     font-size: 12px !important;
     color: #e5e5e5 !important;
     border-bottom: 1px solid #343438 !important;
@@ -930,17 +930,17 @@
     background: transparent !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) tbody tr:hover td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody tr:hover td) {
     background: #323236 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) tbody tr:last-child td) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) tbody tr:last-child td) {
     border-bottom: 0 !important;
   }
 
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) .pagination),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) button),
-  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel) input) {
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) .pagination),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) button),
+  :global(.terminal-panel:not(.exec-explorer):not(.monthly-panel):not(.heatmap-panel) input) {
     color: #a3a3a3;
     border-color: #3a3a3f;
   }

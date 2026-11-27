@@ -98,7 +98,7 @@ ORDER BY m.trading_date ASC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={pf_serie_completa}
       panelIndex="02"
       panelTitle="Quanto a Pessoa Física comprou ou vendeu em cada pregão?"
@@ -112,8 +112,8 @@ ORDER BY m.trading_date ASC
       signed={true}
       chartType="bar"
       axisCompact={true}
-      height="250px"
-      showEndLabel={false}
+      defaultZoomPoints={60}
+      height={240}
     />
   </section>
 </div>

@@ -109,7 +109,7 @@ FROM ${ibov_filtrado}
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={ibov_filtrado}
       panelIndex="02"
       panelTitle="Quanto o Ibovespa já caiu desde a máxima do período?"
@@ -121,7 +121,8 @@ FROM ${ibov_filtrado}
       suffix="%"
       decimals={2}
       signed={true}
-      height="250px"
+      defaultZoomPoints={0}
+      height={235}
     />
   </section>
 </div>
@@ -169,75 +170,12 @@ ORDER BY ano_num DESC, mes_num ASC
 ```
 
 <div class="terminal-grid-1">
-  <section class="terminal-panel">
-    <h2 class="terminal-panel-title"><span class="panel-index">03</span><span>Quais meses historicamente rendem mais ou menos no Ibovespa?</span></h2>
-    <p class="terminal-panel-sub">Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (Jan/2020 a Nov/2026 · Dez/2026 ainda não iniciado)</p>
-    <Heatmap
-      data={matriz_mensal_ibov}
-      x=mes
-      y=ano
-      xSort=mes_num
-      xSortOrder=asc
-      ySort=ano_num
-      ySortOrder=desc
-      value=retorno
-      valueFmt=pct1
-      nullsZero=false
-      zeroDisplay="0.0%"
-      cellHeight=40
-      leftPadding=48
-      rightPadding=12
-      mobileValueLabels=false
-      seriesOptions={{
-        itemStyle: {
-          borderColor: '#2b2b2b',
-          borderWidth: 3,
-          borderRadius: 6
-        },
-        label: {
-          color: '#f8f8f8',
-          fontFamily: 'JetBrains Mono, ui-monospace, monospace',
-          fontSize: 11,
-          fontWeight: 600
-        }
-      }}
-      echartsOptions={{
-        backgroundColor: 'transparent',
-        tooltip: {
-          backgroundColor: '#222222',
-          borderColor: '#45454a',
-          textStyle: { color: '#f8f8f8' }
-        },
-        xAxis: {
-          splitArea: { show: false },
-          axisLabel: { color: '#d4d4d8', fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif', fontSize: 11.5, fontWeight: 600 }
-        },
-        yAxis: {
-          splitArea: { show: false },
-          axisLabel: { color: '#e5e5e5', fontFamily: 'JetBrains Mono, ui-monospace, monospace', fontSize: 11.5, fontWeight: 600 }
-        },
-        visualMap: [{
-          type: 'piecewise',
-          orient: 'horizontal',
-          left: 'center',
-          bottom: 0,
-          itemWidth: 14,
-          itemHeight: 10,
-          itemGap: 10,
-          textStyle: { color: '#a3a3a3', fontSize: 11, fontFamily: 'Plus Jakarta Sans, system-ui, sans-serif' },
-          pieces: [
-            { max: -0.08, label: '< -8%', color: '#991b1b' },
-            { min: -0.08, max: -0.03, label: '-8% a -3%', color: '#c0392b' },
-            { min: -0.03, max: -0.005, label: '-3% a 0%', color: '#6b282b' },
-            { min: -0.005, max: 0.005, label: 'Neutro', color: '#35353c' },
-            { min: 0.005, max: 0.03, label: '0% a +3%', color: '#1b5e44' },
-            { min: 0.03, max: 0.08, label: '+3% a +8%', color: '#1c8c5e' },
-            { min: 0.08, label: '> +8%', color: '#22b573' }
-          ]
-        }]
-      }}
-    />
-  </section>
+  <MonthlyHeatmap
+    data={matriz_mensal_ibov}
+    panelIndex="03"
+    title="Quais meses historicamente rendem mais ou menos no Ibovespa?"
+    subtitle="Mapa de calor (Heatmap) dos retornos mensais oficiais da B3 (Jan/2020 a Nov/2026 · Dez/2026 ainda não iniciado)"
+  />
 </div>
 
 ```sql resumo_anual_ibov

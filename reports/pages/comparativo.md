@@ -102,7 +102,7 @@ ORDER BY w.trading_date ASC
 
 <div class="terminal-grid-1">
   <section class="terminal-panel">
-    <TerminalLineChart
+    <TradingViewSeriesChart
       data={todos_perfis_wide}
       panelIndex="02"
       panelTitle="Quem compra na contraparte de quem está vendendo?"
@@ -116,7 +116,8 @@ ORDER BY w.trading_date ASC
       decimals={2}
       signed={true}
       axisCompact={true}
-      height="295px"
+      defaultZoomPoints={60}
+      height={265}
     />
   </section>
 </div>
