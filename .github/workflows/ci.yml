@@ -87,6 +87,7 @@ jobs:
       - name: Materialize Silver/Gold Parquet offline via dbt
         if: steps.bronze.outputs.available == 'true'
         run: |
+          mkdir -p data/warehouse data/silver data/gold
           uv sync --locked --group dev
           (cd dbt_gringolake && uv run dbt build --profiles-dir .)
 
