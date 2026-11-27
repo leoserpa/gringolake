@@ -101,6 +101,9 @@ flowchart LR
   - [ADR-003](docs/decisions/003-mtd-deaccumulation-using-ibov-calendar.md) — Desacumulação MTD → Diário usando o calendário oficial de pregões do IBOV
   - [ADR-004](docs/decisions/004-dual-storage-duckdb-and-zstd-parquet.md) — Materialização dupla DuckDB + Parquet ZSTD e resolução de caminhos no `DbtProjectComponent`
   - [ADR-005](docs/decisions/005-multi-layer-data-quality-and-zero-sum-invariant.md) — Qualidade em 3 camadas e invariante contábil soma-zero da B3
+  - [ADR-006](docs/decisions/006-strict-ma21-full-window-and-unified-brl-billions.md) — Rigor estatístico na MM21 (janela cheia obrigatória) e padronização monetária
+  - [ADR-007](docs/decisions/007-adaptive-brl-scale-and-tradingview-ui.md) — Escala monetária adaptativa (`R$ mi` / `R$ bi`) no frontend, gráficos TradingView e controles responsivos
+- **Dashboard Evidence.dev (`reports/`):** 6 páginas (`Panorama`, `Fluxo Diário`, `Curto Prazo`, `Comparativo`, `Ibovespa`, `Linhagem`) em tema **Atelier Graphite**, com gráficos interativos **TradingView Lightweight Charts** (`reports/components/TradingView*.svelte`), escala adaptativa `R$ mi` / `R$ bi` e tabelas responsivas (`MonthlyFlowTable`, `DailyFlowTable`, `FlowExplorerTable`, `AnnualIbovTable`, `MonthlyHeatmap`).
 - **Dicionário de Dados (Bronze / Silver / Gold):** [`docs/data-dictionary.md`](docs/data-dictionary.md)
 - **Guia para Agentes e Armadilhas Conhecidas:** [`AGENTS.md`](AGENTS.md)
 - **Contrato de Backfill Histórico Oficial B3:** [`data/landing/b3_investor_flow_backfill/README.md`](data/landing/b3_investor_flow_backfill/README.md)

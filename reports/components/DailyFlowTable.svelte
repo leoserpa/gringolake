@@ -1,4 +1,13 @@
 <script>
+  import {
+    downloadCsv,
+    formatDateBR,
+    formatFlowBrl,
+    formatPoints,
+    signClass as baseSignClass,
+    toArray,
+  } from './formatters.js';
+
   export let data = [];
   export let title = 'Como ficou o saldo diário detalhado de todos os perfis?';
   export let subtitle =
@@ -28,11 +37,7 @@
   let query = '';
   let visibleLimit = PAGE_STEP;
 
-  $: rows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rows = toArray(data);
 
   function normalizeText(str) {
     return String(str ?? '')
@@ -42,43 +47,10 @@
       .trim();
   }
 
-  function formatDateShort(d) {
-    if (!d) return '—';
-    const iso = d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
-    if (iso.length < 10) return iso;
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-  }
-
-  function formatIbov(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    return `${Math.round(Number(v)).toLocaleString('pt-BR')} pts`;
-  }
-
-  function formatFlowFromMi(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    const num = Number(v);
-    if (Math.abs(num) < 0.05) return 'R$ 0';
-    const sign = num < 0 ? '-' : '+';
-    const abs = Math.abs(num);
-    if (abs >= 999.95) {
-      return `${sign}R$ ${(abs / 1000).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} bi`;
-    }
-    return `${sign}R$ ${abs.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })} mi`;
-  }
-
-  function signClass(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return 'neutral';
-    const num = Number(v);
-    if (num > 0.05) return 'pos';
-    if (num < -0.05) return 'neg';
-    return 'neutral';
-  }
+  const formatDateShort = (d) => formatDateBR(d);
+  const formatIbov = (v) => formatPoints(v);
+  const formatFlowFromMi = (v) => formatFlowBrl(v, { inputUnit: 'mi' });
+  const signClass = (v) => baseSignClass(v, { threshold: 0.05 });
 
   function parseQuery(rawQuery) {
     const qNorm = normalizeText(rawQuery);
@@ -149,23 +121,11 @@
   function exportCsv() {
     if (!filteredRows.length) return;
     const headers = ['pregao', 'ibov_close', ...activeCols.map((c) => c.id)];
-    const lines = [headers.join(',')];
-    for (const r of filteredRows) {
-      const vals = headers.map((h) => {
-        const raw = h === 'pregao' ? formatDateShort(r[h]) : r[h] ?? '';
-        return `"${String(raw).replace(/"/g, '""')}"`;
-      });
-      lines.push(vals.join(','));
-    }
-    const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gringolake_fluxo_diario_b3.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      'gringolake_fluxo_diario_b3.csv',
+      headers,
+      filteredRows.map((r) => headers.map((h) => (h === 'pregao' ? formatDateShort(r[h]) : r[h] ?? '')))
+    );
   }
 </script>
 

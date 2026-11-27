@@ -25,8 +25,13 @@ dbt_gringolake/
 └── tests/assert_b3_daily_flow_zero_sum.sql    # Invariante contábil soma-zero de mercado da B3
 
 docs/
-├── decisions/                                 # ADRs numerados (ADR-001 a ADR-005)
+├── decisions/                                 # ADRs numerados (ADR-001 a ADR-007)
 └── data-dictionary.md                         # Contratos de schema e grão das camadas Bronze/Silver/Gold
+
+reports/
+├── components/                                # Componentes Svelte (TradingView charts, KPIs, tabelas, ProfileMenuControl)
+├── pages/                                     # 6 páginas Evidence.dev + layout global (+layout.svelte)
+└── sources/gringolake/                        # Queries DuckDB sobre data/gold/*.parquet e data/silver/*.parquet
 ```
 
 ## Comandos Verificados
@@ -39,9 +44,10 @@ Não assuma que `make` está instalado no host; prefira sempre `uv run`:
 | Materializar apenas Bronze | `uv run dg launch --assets bronze/b3_ibov_daily,bronze/b3_investor_flow_mtd` |
 | Executar pipeline Medalhão completo (Bronze → Silver → Gold) | `uv run dg launch --job b3_medallion_full_refresh` |
 | Executar dbt standalone (build + unit/data tests) | `(cd dbt_gringolake && uv run dbt build --profiles-dir .)` |
-| Rodar apenas testes dbt (41 data + 2 unit tests) | `(cd dbt_gringolake && uv run dbt test --profiles-dir .)` |
+| Rodar apenas testes dbt (45 data + 3 unit tests) | `(cd dbt_gringolake && uv run dbt test --profiles-dir .)` |
 | Rodar testes unitários Python | `uv run pytest -v` |
 | Rodar linter Python | `uv run ruff check src tests` |
+| Gerar build estático do dashboard Evidence.dev | `(cd reports && npm run build)` |
 | Subir Dagster UI local | `uv run dg dev` |
 | Checar drift entre código e documentação | `bash scripts/check_docs_drift.sh` |
 
@@ -59,3 +65,4 @@ Não assuma que `make` está instalado no host; prefira sempre `uv run`:
 - **Nunca use `publication_date` da B3 no join com o IBOV:** o BDI `SharesInvesVolum` tem lag D+2 e valores acumulados no mês (MTD). A data real do pregão vem da nota oficial em `table.texts[0].textPt` (`reference_date`), e o fluxo diário é derivado apenas em `int_b3_investor_flow_daily` cruzado com `stg_b3_ibov_daily` (veja [ADR-003](docs/decisions/003-mtd-deaccumulation-using-ibov-calendar.md)).
 - **Nunca apague partições antigas em `data/bronze/b3_investor_flow_mtd/`:** a API BDI da B3 retém apenas `D-21` pregões online. As partições locais são o histórico permanente do pipeline (veja [ADR-002](docs/decisions/002-official-b3-data-sources-only.md)).
 - **Unidades monetárias:** o BDI publica valores em **`R$ mil`** (`*_k_brl`). Para converter para **`R$ bilhões`** (`*_bi_brl`), divida por `1_000_000.0` (`1e6`), não por `1e9`.
+- **Lockfile Node no dashboard (`reports/package-lock.json`):** o CI usa Node.js 20 com `npm ci`. Evite rodar `npm install` localmente em versões mais novas do Node/npm sem necessidade de alterar dependências, para não reescrever o lockfile de forma incompatível.

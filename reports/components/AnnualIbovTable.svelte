@@ -1,29 +1,20 @@
 <script>
+  import {
+    downloadCsv,
+    formatPctSigned,
+    formatPoints,
+    signClass as baseSignClass,
+    toArray,
+  } from './formatters.js';
+
   export let data = [];
   export let title = 'Como o Ibovespa fechou em cada ano desde 2020?';
   export let subtitle =
     'Contagem oficial de pregões, abertura, mínima, máxima e variação percentual por ano calendário · Anos positivos destacados em âmbar';
 
-  $: rows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rows = toArray(data);
 
-  function toNumber(value) {
-    if (value === null || value === undefined || value === '') return null;
-    const num = Number(value);
-    return Number.isFinite(num) ? num : null;
-  }
-
-  function signClass(value) {
-    const num = toNumber(value);
-    if (num === null) return 'neutral';
-    const normalized = Math.abs(num) < 0.005 ? 0 : num;
-    if (normalized > 0) return 'pos';
-    if (normalized < 0) return 'neg';
-    return 'neutral';
-  }
+  const signClass = (value) => baseSignClass(value, { threshold: 0.005 });
 
   function formatYear(value) {
     if (value === null || value === undefined || value === '') return '—';
@@ -31,36 +22,12 @@
   }
 
   function formatInt(value) {
-    const num = toNumber(value);
-    if (num === null) return '—';
-    return Math.round(num).toLocaleString('pt-BR');
+    if (value === null || value === undefined || value === '') return '—';
+    const num = Number(value);
+    return Number.isFinite(num) ? Math.round(num).toLocaleString('pt-BR') : '—';
   }
 
-  function formatPts(value) {
-    const num = toNumber(value);
-    if (num === null) return '—';
-    return `${Math.round(num).toLocaleString('pt-BR')} pts`;
-  }
-
-  function formatPctSigned(value) {
-    const num = toNumber(value);
-    if (num === null) return '—';
-    const normalized = Math.abs(num) < 0.005 ? 0 : num;
-    const sign = normalized > 0 ? '+' : normalized < 0 ? '-' : '';
-    const absFormatted = Math.abs(normalized).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-    return `${sign}${absFormatted}%`;
-  }
-
-  function csvEscape(value) {
-    const str = value === null || value === undefined ? '' : String(value);
-    if (/[",;\n\r]/.test(str)) {
-      return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-  }
+  const formatPts = (value) => formatPoints(value);
 
   function exportCsv() {
     if (!rows.length) return;
@@ -73,33 +40,19 @@
       'maxima_pts',
       'variacao_pct'
     ];
-    const lines = [
-      headers.join(','),
-      ...rows.map((row) =>
-        [
-          row.ano,
-          row.pregoes,
-          row.primeiro_fechamento,
-          row.ultimo_fechamento,
-          row.minima,
-          row.maxima,
-          row.retorno_anual_pct
-        ]
-          .map(csvEscape)
-          .join(',')
-      )
-    ];
-    const blob = new Blob([`\uFEFF${lines.join('\n')}`], {
-      type: 'text/csv;charset=utf-8;'
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'gringolake_ibovespa_anual_b3.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      'gringolake_ibovespa_anual_b3.csv',
+      headers,
+      rows.map((row) => [
+        row.ano,
+        row.pregoes,
+        row.primeiro_fechamento,
+        row.ultimo_fechamento,
+        row.minima,
+        row.maxima,
+        row.retorno_anual_pct
+      ])
+    );
   }
 </script>
 

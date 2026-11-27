@@ -1,6 +1,13 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
+  import {
+    formatDateBR,
+    formatFlowBrl,
+    formatPoints,
+    toArray,
+    toIsoDate,
+  } from './formatters.js';
 
   export let data = [];
   export let x = 'trading_date';
@@ -35,75 +42,14 @@
   let visibleTo = 0;
   let syncingFromSlider = false;
 
-  function toIsoDate(val) {
-    if (!val) return '';
-    if (val instanceof Date) return val.toISOString().slice(0, 10);
-    return String(val).slice(0, 10);
-  }
+  const formatBrDate = (iso) => formatDateBR(iso);
+  const formatFlow = (v) => formatFlowBrl(v, { inputUnit: 'bi' });
+  const formatFlowAxis = (v) =>
+    formatFlowBrl(v, { inputUnit: 'bi', prefix: '', compactAxis: true, emptyFallback: '' });
+  const formatPts = (v) => formatPoints(v);
+  const formatPtsAxis = (v) => formatPoints(v, { withUnit: false, emptyFallback: '' });
 
-  function formatBrDate(iso) {
-    if (!iso || iso.length < 10) return iso || '—';
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-  }
-
-  function formatBi(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    const num = Number(v);
-    const inMi = num * 1000;
-    if (Math.abs(inMi) < 0.05) return 'R$ 0';
-    const sign = inMi < 0 ? '-' : '+';
-    const absMi = Math.abs(inMi);
-    if (absMi >= 999.95) {
-      const absBi = absMi / 1000;
-      return `${sign}R$ ${absBi.toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} bi`;
-    }
-    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })} mi`;
-  }
-
-  function formatBiAxis(v) {
-    const num = Number(v);
-    if (Number.isNaN(num)) return '';
-    const inMi = num * 1000;
-    if (Math.abs(inMi) < 0.05) return '0';
-    const sign = inMi < 0 ? '-' : '+';
-    const absMi = Math.abs(inMi);
-    if (absMi >= 999.95) {
-      const absBi = absMi / 1000;
-      const abs = absBi.toLocaleString('pt-BR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      });
-      return `${sign}${abs} bi`;
-    }
-    const abs = absMi.toLocaleString('pt-BR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: absMi >= 100 ? 0 : 1,
-    });
-    return `${sign}${abs} mi`;
-  }
-
-  function formatPts(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    return `${Math.round(Number(v)).toLocaleString('pt-BR')} pts`;
-  }
-
-  function formatPtsAxis(v) {
-    const num = Number(v);
-    if (Number.isNaN(num)) return '';
-    return Math.round(num).toLocaleString('pt-BR');
-  }
-
-  $: rawRows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rawRows = toArray(data);
 
   $: parsed = (() => {
     const seen = new Set();
@@ -303,7 +249,7 @@
       priceFormat: {
         type: 'custom',
         minMove: 0.01,
-        formatter: (v) => formatBiAxis(v),
+        formatter: (v) => formatFlowAxis(v),
       },
     });
 
@@ -318,7 +264,7 @@
       priceFormat: {
         type: 'custom',
         minMove: 0.01,
-        formatter: (v) => formatBiAxis(v),
+        formatter: (v) => formatFlowAxis(v),
       },
     });
 
@@ -403,7 +349,7 @@
         <span class="hud-item">
           <span class="hud-dot" style={`background: ${flowColor};`}></span>
           <span class="hud-lbl">{flowName}</span>
-          <strong class="hud-val is-amber">{formatBi(activePoint.flow)}</strong>
+          <strong class="hud-val is-amber">{formatFlow(activePoint.flow)}</strong>
         </span>
         {#if showIbov && activePoint.ibov !== null}
           <span class="hud-item">
@@ -415,7 +361,7 @@
         {#if hasValidMa && showMa && activePoint.ma !== null}
           <span class="hud-item">
             <span class="hud-lbl">{maName}</span>
-            <span class="hud-val">{formatBi(activePoint.ma)}</span>
+            <span class="hud-val">{formatFlow(activePoint.ma)}</span>
           </span>
         {/if}
       </div>

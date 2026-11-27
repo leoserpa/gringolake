@@ -118,6 +118,16 @@ jobs:
         with:
           path: reports/build
 
+      - name: Report failure diagnostics to job summary
+        if: failure()
+        run: |
+          {
+            echo "### GringoLake Deploy Failed"
+            echo "- Trigger: \`${{ github.event_name }}\` (\`${{ github.ref_name }}\`)"
+            echo "- Check whether the failure occurred during B3 API ingestion (post-20:00 BRT SLA), dbt Medallion validation, or Evidence.dev static build."
+            echo "- Bronze partitions on \`data-bronze\` remain untouched unless the sync step succeeded."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   deploy:
     name: Deploy to GitHub Pages
     needs: build

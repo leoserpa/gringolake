@@ -1,6 +1,7 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
+  import { formatDateBR, formatFlowBrl, toArray, toIsoDate } from './formatters.js';
 
   export let data = [];
   export let panelTitle = '';
@@ -43,39 +44,6 @@
   let visibleStartIdx = 0;
   let visibleEndIdx = 0;
 
-  function toArray(input) {
-    if (!input) return [];
-    if (Array.isArray(input)) return input;
-    if (typeof input.toArray === 'function') return input.toArray();
-    if (typeof input[Symbol.iterator] === 'function') return Array.from(input);
-    return [];
-  }
-
-  function toIsoDate(val) {
-    if (val === null || val === undefined) return null;
-    if (typeof val === 'string') {
-      const match = val.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (match) return match[1];
-      const parsed = new Date(val);
-      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
-    }
-    if (val instanceof Date) {
-      return Number.isNaN(val.getTime()) ? null : val.toISOString().slice(0, 10);
-    }
-    if (typeof val === 'number' && Number.isFinite(val)) {
-      const parsed = new Date(val);
-      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
-    }
-    return null;
-  }
-
-  function formatDateBR(iso) {
-    if (!iso || typeof iso !== 'string') return '';
-    const parts = iso.split('-');
-    if (parts.length !== 3) return iso;
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  }
-
   function formatValue(val, useCompactAxis = false) {
     const num = Number(val);
     if (!Number.isFinite(num)) return '—';
@@ -83,31 +51,12 @@
     const canAutoUnit = autoScaleUnit && (trimmedSuffix === 'mi' || trimmedSuffix === 'bi');
 
     if (canAutoUnit) {
-      const inMi = trimmedSuffix === 'bi' ? num * 1000 : num;
-      if (Math.abs(inMi) < 0.05) {
-        return `${prefix || ''}0`;
-      }
-      const signChar = inMi < 0 ? '-' : signed ? '+' : '';
-      const absMi = Math.abs(inMi);
-
-      if (absMi >= 999.95) {
-        const absBi = absMi / 1000;
-        const formatted = new Intl.NumberFormat(
-          'pt-BR',
-          useCompactAxis
-            ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
-            : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-        ).format(absBi);
-        return `${signChar}${prefix || ''}${formatted} bi`;
-      }
-
-      const formatted = new Intl.NumberFormat(
-        'pt-BR',
-        useCompactAxis
-          ? { minimumFractionDigits: 0, maximumFractionDigits: absMi >= 100 ? 0 : 1 }
-          : { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-      ).format(absMi);
-      return `${signChar}${prefix || ''}${formatted} mi`;
+      return formatFlowBrl(num, {
+        inputUnit: trimmedSuffix,
+        signed,
+        prefix: prefix || '',
+        compactAxis: useCompactAxis,
+      });
     }
 
     const d = Number.isFinite(Number(decimals)) ? Number(decimals) : 1;

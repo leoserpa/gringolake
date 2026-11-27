@@ -5,6 +5,20 @@ Ao registrar novas alterações ou correções de documentação, **adicione uma
 
 ## [Unreleased]
 
+### Added (2026-11-27)
+- **Novos componentes interativos do dashboard (`reports/components/`):**
+  - `TradingViewSeriesChart.svelte`, `TradingViewFlowReturnChart.svelte` e `TradingViewRangeSlider.svelte`: séries temporais e comparativo fluxo estrangeiro × retorno IBOV com **TradingView Lightweight Charts** (zoom, crosshair, legenda interativa e slider sincronizado).
+  - `DailyFlowTable.svelte`: tabela diária completa dos 5 perfis em `Fluxo Diário` com busca por perfil/data, cabeçalho fixo, rolagem vertical (`380px`) e exportação CSV.
+  - `AnnualIbovTable.svelte`: tabela anual do Ibovespa (2020–2026) em `Ibovespa` com 7 colunas limpas, formatação condicional única em âmbar (`#f2b94b`) para anos positivos, coluna `Ano` fixa no mobile e exportação CSV.
+  - `ProfileMenuControl.svelte`: seletor de perfil responsivo no `Comparativo` que mantém a barra de 5 abas no desktop (`> 900px`) e recolhe em um botão/dropdown compacto (`PERFIL | Pessoa Física ⌄`) no mobile (`<= 900px`), com navegação completa por teclado (`Arrow*`/`Home`/`End`/`Escape`) e restauração de foco.
+  - `reports/components/formatters.js` e `reports/tests/formatters.test.mjs`: módulo compartilhado de formatação monetária `mi`/`bi`, datas `pt-BR`, pontos, sinais e exportação CSV com testes unitários nativos em `node --test`.
+- **Qualidade de frontend no CI (`.github/workflows/ci.yml`):** novo job `frontend-quality` executando testes unitários dos formatadores e build estático estrito do Evidence.dev (`npm run sources:strict && npm run build:strict`) sobre os snapshots Bronze da branch `data-bronze`, além de resumo automático de diagnóstico em caso de falha em `.github/workflows/deploy-pages.yml`.
+
+### Changed (2026-11-27)
+- **Escala monetária unificada (`R$ mi` ↔ `R$ bi`) no frontend ([ADR-007](docs/decisions/007-adaptive-brl-scale-and-tradingview-ui.md)):** valores abaixo de `R$ 999,95 mi` são exibidos em `R$ mi` e valores a partir de `R$ 1,00 bi` em `R$ bi` (com `R$ 0` no zero) em KPIs, gráficos TradingView e tabelas (`KPITerminalCard`, `TradingViewDualAxisChart`, `TradingViewSeriesChart`, `MonthlyFlowTable`, `DailyFlowTable`, `FlowExplorerTable`).
+- **Refinamento editorial do tema Atelier Graphite (`+layout.svelte` e páginas):** removida numeração `01`–`06` dos títulos dos painéis, redesenhado `CounterBadge` em pílula horizontal inline (`42px`), atualizado rodapé para formato editorial plano sem caixa arredondada, unificado o indicador de procedência no topo (`B3 Oficial | D+2` no desktop, `B3 | D+2` no mobile) e restaurado o `<BarChart>` nativo do Evidence para participação de volume em `Comparativo` (removido `FlowScatterChart.svelte`).
+- **Documentação sincronizada:** atualizados `README.md`, `AGENTS.md` e `scripts/check_docs_drift.sh` (incluindo `ADR-006`, contagem atualizada de 45 data tests + 3 unit tests dbt e mapa do frontend `reports/`).
+
 ### Changed (2026-11-26)
 - **Novos painéis analíticos oficiais da B3 no dashboard:** gráfico de **Volume Financeiro Total da B3 (R$ bi)** com média móvel e destaque de picos em `Fluxo Diário`; **Dispersão (Estrangeiro × Retorno IBOV)** (`FlowScatterChart.svelte`) e **Participação no Volume da B3 (%)** (`MarketShareBarChart.svelte`) em `Comparativo`; **Drawdown Histórico (%)** e **Matriz de Retornos Mensais (2020–2026)** (`IbovMonthlyMatrix.svelte`) em `Ibovespa`.
 - **Rigor estatístico da MM21 ([ADR-006](docs/decisions/006-strict-ma21-full-window-and-unified-brl-billions.md)):** `fct_ibov_investor_flow_daily` e `mart_ibov_vs_pf_short_term` passam a retornar `NULL` nas colunas de MM21, `flow_vs_ma21_signal = 'em_formacao'` e `is_pf_below_ma21 = false` enquanto `ma21_window_obs_count < 21`, impedindo sinais direcionais fabricados por médias parciais. Adicionados `ma21_window_obs_count` na camada Gold, o teste singular `assert_ma21_window_integrity` e testes unitários dbt de aquecimento + janela deslizante de 21/22 pregões.

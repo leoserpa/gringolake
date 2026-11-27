@@ -831,6 +831,8 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
+    max-inline-size: 100%;
+    min-inline-size: 0;
   }
 
   /* ==================== ROUNDED PILL SEGMENTED CONTROLS ==================== */
@@ -841,16 +843,31 @@
     border-radius: 999px !important;
     padding: 4px !important;
     height: auto !important;
+    max-inline-size: 100% !important;
     min-block-size: max(40px, var(--target-size));
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16) !important;
     margin-bottom: 0 !important;
     display: inline-flex !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
     gap: 2px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scroll-padding-inline: 4px;
+    scrollbar-width: none !important;
+    box-sizing: border-box;
+  }
+
+  :global(.controls-right [role='group']::-webkit-scrollbar),
+  :global(.page-head-row [role='group']::-webkit-scrollbar) {
+    display: none;
   }
 
   :global(.controls-right [role='group'] button),
   :global(.page-head-row [role='group'] button) {
+    flex: 0 0 auto !important;
     min-block-size: max(32px, var(--target-size));
     padding: 6px 14px !important;
     border-radius: 999px !important;
@@ -858,6 +875,7 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
+    white-space: nowrap !important;
     background-color: transparent !important;
     color: #a3a3a3 !important;
     transition: background-color 0.15s ease, color 0.15s ease;
@@ -881,6 +899,8 @@
   :global(.controls-right .inline-block),
   :global(.page-head-row .inline-block) {
     margin: 0 !important;
+    max-inline-size: 100% !important;
+    overflow: visible !important;
   }
 
   /* ==================== AIRY ROUNDED KPI & LARGE 2x2 GRIDS ==================== */
@@ -1163,29 +1183,43 @@
 
     :global(.controls-right) {
       inline-size: 100%;
+      min-inline-size: 0;
       gap: 10px;
     }
 
     :global(.controls-right .inline-block),
     :global(.page-head-row .inline-block) {
       inline-size: 100%;
+      max-inline-size: 100% !important;
       display: block !important;
+      overflow: visible !important;
     }
 
     :global(.controls-right [role='group']),
     :global(.page-head-row [role='group']) {
       display: flex !important;
-      flex-wrap: wrap !important;
+      flex-wrap: nowrap !important;
       inline-size: 100% !important;
+      max-inline-size: 100% !important;
+      border-radius: 999px !important;
+      padding: 4px !important;
+      gap: 2px !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: 4px;
       box-sizing: border-box;
     }
 
     :global(.controls-right [role='group'] button),
     :global(.page-head-row [role='group'] button) {
-      flex: 1 1 auto;
+      flex: 1 0 auto !important;
       min-block-size: max(38px, var(--target-size));
-      padding: 6px 10px !important;
+      padding: 6px 12px !important;
+      border-radius: 999px !important;
       font-size: 12px !important;
+      white-space: nowrap !important;
+      scroll-snap-align: start;
       text-align: center;
       justify-content: center;
     }

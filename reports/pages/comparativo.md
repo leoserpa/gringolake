@@ -17,13 +17,7 @@ FROM gringolake.fct_ibov_investor_flow_daily
     </div>
 
     <div class="controls-right">
-      <ButtonGroup name=perfil_foco>
-        <ButtonGroupItem valueLabel="Pessoa Física" value="pessoa_fisica" default />
-        <ButtonGroupItem valueLabel="Institucional" value="institucional" />
-        <ButtonGroupItem valueLabel="Estrangeiro" value="estrangeiro" />
-        <ButtonGroupItem valueLabel="Inst. Financeiras" value="instituicoes_financeiras" />
-        <ButtonGroupItem valueLabel="Outros" value="outros" />
-      </ButtonGroup>
+      <ProfileMenuControl name="perfil_foco" defaultValue="pessoa_fisica" />
 
       <ButtonGroup name=janela_comparativo>
         <ButtonGroupItem valueLabel="60d" value="60" />
@@ -200,9 +194,9 @@ ORDER BY sort_key DESC, periodo ASC
       labelSize=11
       chartAreaHeight=240
       seriesOrder={['Mês (BDI)', 'Último Pregão']}
-      seriesColors={{ 'Mês (BDI)': '#f2b94b', 'Último Pregão': '#8a8a93' }}
+      seriesColors={{ 'Mês (BDI)': ['#f2b94b', '#f2b94b'], 'Último Pregão': ['#8a8a8f', '#8a8a8f'] }}
       seriesOptions={{
-        itemStyle: { borderRadius: [0, 5, 5, 0] },
+        itemStyle: { borderRadius: 0 },
         label: {
           color: '#e5e5e5',
           fontFamily: 'JetBrains Mono, ui-monospace, monospace',

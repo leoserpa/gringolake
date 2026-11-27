@@ -1,56 +1,22 @@
 <script>
+  import {
+    downloadCsv,
+    formatDateBR,
+    formatFlowBrl,
+    formatPctSigned,
+    signClass,
+    toArray,
+  } from './formatters.js';
+
   export let data = [];
   export let title = 'Quem liderou o fluxo em cada mês e como fechou o Ibovespa?';
   export let subtitle = 'Último saldo mensal oficial (MTD) por perfil (R$ mi / bi) · Entradas líquidas positivas destacadas em âmbar';
 
-  $: rows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rows = toArray(data);
 
-  function formatDateShort(d) {
-    if (!d) return '—';
-    const iso = d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
-    if (iso.length < 10) return iso;
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-  }
-
-  function formatFlowFromKBrl(kVal) {
-    if (kVal === null || kVal === undefined || Number.isNaN(Number(kVal))) return '—';
-    const inMi = Number(kVal) / 1_000;
-    if (Math.abs(inMi) < 0.05) return 'R$ 0';
-    const sign = inMi < 0 ? '-' : '+';
-    const absMi = Math.abs(inMi);
-    if (absMi >= 999.95) {
-      return `${sign}R$ ${(absMi / 1000).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} bi`;
-    }
-    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })} mi`;
-  }
-
-  function formatPct(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    const num = Number(v);
-    const sign = num < 0 ? '-' : num > 0 ? '+' : '';
-    return `${sign}${Math.abs(num).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}%`;
-  }
-
-  function signClass(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return 'neutral';
-    const num = Number(v);
-    if (num > 0) return 'pos';
-    if (num < 0) return 'neg';
-    return 'neutral';
-  }
+  const formatDateShort = (d) => formatDateBR(d);
+  const formatFlowFromKBrl = (kVal) => formatFlowBrl(kVal, { inputUnit: 'k' });
+  const formatPct = (v) => formatPctSigned(v);
 
   function exportCsv() {
     if (!rows.length) return;
@@ -63,23 +29,11 @@
       'inst_fin_k_brl',
       'ibov_month_pct',
     ];
-    const lines = [headers.join(',')];
-    for (const r of rows) {
-      const vals = headers.map((h) => {
-        const raw = h === 'ate_pregao' ? formatDateShort(r[h]) : r[h] ?? '';
-        return `"${String(raw).replace(/"/g, '""')}"`;
-      });
-      lines.push(vals.join(','));
-    }
-    const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gringolake_fluxo_mensal_b3.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      'gringolake_fluxo_mensal_b3.csv',
+      headers,
+      rows.map((r) => headers.map((h) => (h === 'ate_pregao' ? formatDateShort(r[h]) : r[h] ?? '')))
+    );
   }
 </script>
 

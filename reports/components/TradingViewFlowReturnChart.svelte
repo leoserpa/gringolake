@@ -1,6 +1,13 @@
 <script>
   import { onMount, onDestroy, tick } from 'svelte';
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
+  import {
+    formatDateBR,
+    formatFlowBrl,
+    formatPctSigned,
+    toArray,
+    toIsoDate,
+  } from './formatters.js';
 
   export let data = [];
   export let x = 'trading_date';
@@ -32,78 +39,15 @@
   let visibleStartIdx = 0;
   let visibleEndIdx = 0;
 
-  function toArray(input) {
-    if (!input) return [];
-    if (Array.isArray(input)) return input;
-    if (typeof input.toArray === 'function') return input.toArray();
-    if (typeof input[Symbol.iterator] === 'function') return Array.from(input);
-    return [];
-  }
+  const formatFlow = (val, useCompactAxis = false) =>
+    formatFlowBrl(val, {
+      inputUnit: 'mi',
+      prefix: useCompactAxis ? '' : 'R$ ',
+      compactAxis: useCompactAxis,
+    });
 
-  function toIsoDate(val) {
-    if (val === null || val === undefined) return null;
-    if (typeof val === 'string') {
-      const match = val.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (match) return match[1];
-      const parsed = new Date(val);
-      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
-    }
-    if (val instanceof Date) {
-      return Number.isNaN(val.getTime()) ? null : val.toISOString().slice(0, 10);
-    }
-    if (typeof val === 'number' && Number.isFinite(val)) {
-      const parsed = new Date(val);
-      return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString().slice(0, 10);
-    }
-    return null;
-  }
-
-  function formatDateBR(iso) {
-    if (!iso || typeof iso !== 'string') return '';
-    const parts = iso.split('-');
-    if (parts.length !== 3) return iso;
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  }
-
-  function formatFlow(val, useCompactAxis = false) {
-    const num = Number(val);
-    if (!Number.isFinite(num)) return '—';
-    if (Math.abs(num) < 0.05) return useCompactAxis ? '0' : 'R$ 0';
-    const sign = num < 0 ? '-' : '+';
-    const abs = Math.abs(num);
-    if (abs >= 999.95) {
-      const absBi = abs / 1000;
-      const formatted = absBi.toLocaleString(
-        'pt-BR',
-        useCompactAxis
-          ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
-          : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-      );
-      return useCompactAxis ? `${sign}${formatted} bi` : `${sign}R$ ${formatted} bi`;
-    }
-    const formatted = abs.toLocaleString(
-      'pt-BR',
-      useCompactAxis
-        ? { minimumFractionDigits: 0, maximumFractionDigits: abs >= 100 ? 0 : 1 }
-        : { minimumFractionDigits: 1, maximumFractionDigits: 1 }
-    );
-    return useCompactAxis ? `${sign}${formatted} mi` : `${sign}R$ ${formatted} mi`;
-  }
-
-  function formatPct(val, useCompactAxis = false) {
-    const num = Number(val);
-    if (!Number.isFinite(num)) return '—';
-    const cleanNum = Math.abs(num) < 0.005 ? 0 : num;
-    if (cleanNum === 0 && useCompactAxis) return '0%';
-    const sign = cleanNum < 0 ? '-' : cleanNum > 0 ? '+' : '';
-    const formatted = Math.abs(cleanNum).toLocaleString(
-      'pt-BR',
-      useCompactAxis
-        ? { minimumFractionDigits: 0, maximumFractionDigits: 2 }
-        : { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-    );
-    return `${sign}${formatted}%`;
-  }
+  const formatPct = (val, useCompactAxis = false) =>
+    formatPctSigned(val, { compactAxis: useCompactAxis });
 
   $: numericHeight = (() => {
     const parsed = typeof height === 'number' ? height : parseInt(String(height || '235'), 10);

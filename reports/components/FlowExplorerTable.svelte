@@ -1,4 +1,12 @@
 <script>
+  import {
+    downloadCsv,
+    formatFlowBrl,
+    signClass as baseSignClass,
+    toArray,
+    toIsoDate,
+  } from './formatters.js';
+
   export let data = [];
   export let title = 'Perfis Oficiais B3';
   export let subtitle = 'Saldos diário, mensal (MTD) e acumulado contínuo (R$ mi / bi) no último pregão · MM21 ativa a partir de 21 pregões completos';
@@ -7,11 +15,7 @@
   let query = '';
   let visibleLimit = PAGE_STEP;
 
-  $: rawRows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rawRows = toArray(data);
 
   $: filteredRows = query.trim()
     ? rawRows.filter((r) => {
@@ -35,29 +39,11 @@
   $: hasMoreRows = filteredRows.length > visibleLimit;
 
   function formatDate(d) {
-    if (!d) return '—';
-    if (d instanceof Date) return d.toISOString().slice(0, 10);
-    return String(d).slice(0, 10);
+    return toIsoDate(d) ?? (d ? String(d).slice(0, 10) : '—');
   }
 
-  function formatBi(v, signed = true) {
-    if (v === null || v === undefined) return '—';
-    const num = Number(v);
-    if (Number.isNaN(num)) return String(v);
-    const inMi = num * 1000;
-    if (Math.abs(inMi) < 0.05) return 'R$ 0';
-    const sign = inMi < 0 ? '-' : signed ? '+' : '';
-    const absMi = Math.abs(inMi);
-    if (absMi >= 999.95) {
-      return `${sign}R$ ${(absMi / 1000).toLocaleString('pt-BR', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })} bi`;
-    }
-    return `${sign}R$ ${absMi.toLocaleString('pt-BR', {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    })} mi`;
+  function formatFlow(v, signed = true) {
+    return formatFlowBrl(v, { inputUnit: 'bi', signed });
   }
 
   function formatPct(v) {
@@ -74,13 +60,7 @@
     return sig ?? '—';
   }
 
-  function signClass(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return 'muted';
-    const num = Number(v);
-    if (num > 0) return 'pos';
-    if (num < 0) return 'neg';
-    return 'muted';
-  }
+  const signClass = (v) => baseSignClass(v, { neutralClass: 'muted' });
 
   function exportCsv() {
     if (!filteredRows.length) return;
@@ -94,23 +74,11 @@
       'cum_net_flow_ma21_bi_brl',
       'flow_vs_ma21_signal',
     ];
-    const lines = [headers.join(',')];
-    for (const r of filteredRows) {
-      const vals = headers.map((h) => {
-        const raw = h === 'trading_date' ? formatDate(r[h]) : r[h] ?? '';
-        return `"${String(raw).replace(/"/g, '""')}"`;
-      });
-      lines.push(vals.join(','));
-    }
-    const blob = new Blob([`\uFEFF${lines.join('\n')}`], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'gringolake_b3_investor_flow.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCsv(
+      'gringolake_b3_investor_flow.csv',
+      headers,
+      filteredRows.map((r) => headers.map((h) => (h === 'trading_date' ? formatDate(r[h]) : r[h] ?? '')))
+    );
   }
 </script>
 
@@ -156,10 +124,10 @@
             <th scope="row" class="mono code-col">{row.investor_type_short_pt}</th>
             <td class="ind">{row.investor_type_name_pt}</td>
             <td class="mono muted">{formatDate(row.trading_date)}</td>
-            <td class={`mono num ${signClass(row.daily_net_flow_bi_brl)}`}>{formatBi(row.daily_net_flow_bi_brl)}</td>
-            <td class={`mono num ${signClass(row.mtd_net_flow_bi_brl)}`}>{formatBi(row.mtd_net_flow_bi_brl)}</td>
-            <td class={`mono num val ${signClass(row.cum_net_flow_bi_brl)}`}>{formatBi(row.cum_net_flow_bi_brl)}</td>
-            <td class="mono num muted">{formatBi(row.cum_net_flow_ma21_bi_brl)}</td>
+            <td class={`mono num ${signClass(row.daily_net_flow_bi_brl)}`}>{formatFlow(row.daily_net_flow_bi_brl)}</td>
+            <td class={`mono num ${signClass(row.mtd_net_flow_bi_brl)}`}>{formatFlow(row.mtd_net_flow_bi_brl)}</td>
+            <td class={`mono num val ${signClass(row.cum_net_flow_bi_brl)}`}>{formatFlow(row.cum_net_flow_bi_brl)}</td>
+            <td class="mono num muted">{formatFlow(row.cum_net_flow_ma21_bi_brl)}</td>
             <td class="mono num muted">{formatPct(row.purchase_share_pct)}</td>
             <td class="num status-cell">
               <span class="signal-pill" class:is-focal={row.flow_vs_ma21_signal === 'acima_mm21'}>

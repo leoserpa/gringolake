@@ -55,5 +55,6 @@ check_pair "dbt_gringolake/models/silver/int_b3_investor_flow_daily.sql" "docs/d
 check_pair "src/gringolake/definitions.py" "docs/decisions/004-dual-storage-duckdb-and-zstd-parquet.md"
 check_pair "dbt_gringolake/macros/export_parquet.sql" "docs/decisions/004-dual-storage-duckdb-and-zstd-parquet.md"
 check_pair "dbt_gringolake/tests/assert_b3_daily_flow_zero_sum.sql" "docs/decisions/005-multi-layer-data-quality-and-zero-sum-invariant.md"
+check_pair "dbt_gringolake/tests/assert_ma21_window_integrity.sql" "docs/decisions/006-strict-ma21-full-window-and-unified-brl-billions.md"
 check_pair "dbt_gringolake/models/gold/fct_ibov_investor_flow_daily.sql" "docs/data-dictionary.md"
 check_pair "src/gringolake/components/b3_market_data_component.py" "AGENTS.md"

@@ -1,6 +1,13 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import TradingViewRangeSlider from './TradingViewRangeSlider.svelte';
+  import {
+    formatDateBR,
+    formatPctSigned,
+    formatPoints,
+    toArray,
+    toIsoDate,
+  } from './formatters.js';
 
   export let data = [];
   export let panelTitle = 'Qual a trajetória do Ibovespa no horizonte selecionado?';
@@ -28,31 +35,9 @@
   let visibleTo = 0;
   let syncingFromSlider = false;
 
-  function toIsoDate(val) {
-    if (!val) return '';
-    if (val instanceof Date) return val.toISOString().slice(0, 10);
-    return String(val).slice(0, 10);
-  }
-
-  function formatBrDate(iso) {
-    if (!iso || iso.length < 10) return iso || '—';
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${iso.slice(0, 4)}`;
-  }
-
-  function formatPts(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    return Math.round(Number(v)).toLocaleString('pt-BR');
-  }
-
-  function formatPct(v) {
-    if (v === null || v === undefined || Number.isNaN(Number(v))) return '—';
-    const num = Number(v);
-    const sign = num > 0 ? '+' : num < 0 ? '-' : '';
-    return `${sign}${Math.abs(num).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}%`;
-  }
+  const formatBrDate = (iso) => formatDateBR(iso);
+  const formatPts = (v) => formatPoints(v, { withUnit: false });
+  const formatPct = (v) => formatPctSigned(v);
 
   function getWeekKey(iso) {
     const [y, m, d] = iso.split('-').map(Number);
@@ -62,11 +47,7 @@
     return dt.toISOString().slice(0, 10);
   }
 
-  $: rawRows = Array.isArray(data)
-    ? data
-    : data && typeof data[Symbol.iterator] === 'function'
-      ? Array.from(data)
-      : [];
+  $: rawRows = toArray(data);
 
   $: dailyParsed = (() => {
     const seen = new Set();

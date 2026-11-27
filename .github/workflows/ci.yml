@@ -38,3 +38,62 @@ jobs:
 
       - name: Run Python unit tests and offline Medallion E2E dbt build + tests
         run: uv run pytest -v
+
+  frontend-quality:
+    name: Frontend Formatter Tests & Evidence.dev Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: reports/package-lock.json
+
+      - name: Run frontend formatter unit tests
+        run: node --test reports/tests/*.test.mjs
+
+      - name: Check availability of Bronze snapshot branch
+        id: bronze
+        run: |
+          set +e
+          git ls-remote --exit-code --heads origin data-bronze >/dev/null
+          status=$?
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo "Restoring Bronze snapshots from origin/data-bronze for offline Evidence build..."
+            git fetch origin data-bronze:refs/remotes/origin/data-bronze
+            git archive origin/data-bronze data/bronze | tar -x
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          elif [ "$status" -eq 2 ]; then
+            echo "No origin/data-bronze branch found; skipping Evidence static build."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Failed to query remote branch origin/data-bronze (exit code $status)." >&2
+            exit "$status"
+          fi
+
+      - name: Set up uv and Python 3.12
+        if: steps.bronze.outputs.available == 'true'
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Materialize Silver/Gold Parquet offline via dbt
+        if: steps.bronze.outputs.available == 'true'
+        run: |
+          uv sync --locked --group dev
+          (cd dbt_gringolake && uv run dbt build --profiles-dir .)
+
+      - name: Install Evidence.dev dependencies and build (strict)
+        if: steps.bronze.outputs.available == 'true'
+        working-directory: reports
+        run: |
+          npm ci
+          npm run sources:strict
+          npm run build:strict

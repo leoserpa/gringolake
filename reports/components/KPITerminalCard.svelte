@@ -1,4 +1,6 @@
 <script>
+  import { formatDayMonthBR, formatFlowBrl } from './formatters.js';
+
   export let data = [];
   export let value = null;
   export let dateCol = null;
@@ -50,24 +52,11 @@
     const canAutoUnit = autoScaleUnit && (trimmedSuffix === 'mi' || trimmedSuffix === 'bi');
 
     if (canAutoUnit) {
-      const inMi = trimmedSuffix === 'bi' ? num * 1000 : num;
-      if (Math.abs(inMi) < 0.05) {
-        return `${prefix}0`;
-      }
-      const sign = inMi < 0 ? '-' : signed ? '+' : '';
-      const absMi = Math.abs(inMi);
-      if (absMi >= 999.95) {
-        const formatted = (absMi / 1000).toLocaleString('pt-BR', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-        return `${sign}${prefix}${formatted} bi`;
-      }
-      const formatted = absMi.toLocaleString('pt-BR', {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1,
+      return formatFlowBrl(num, {
+        inputUnit: trimmedSuffix,
+        signed,
+        prefix,
       });
-      return `${sign}${prefix}${formatted} mi`;
     }
 
     const epsilon = 0.5 * Math.pow(10, -decimals);
@@ -80,14 +69,7 @@
     return `${sign}${prefix}${formatted}${suffix}`;
   }
 
-  function formatDate(d) {
-    if (!d) return '';
-    const iso = d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
-    if (iso.length < 10) return iso;
-    return `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
-  }
-
-  $: formattedDate = rawDate ? formatDate(rawDate) : '';
+  $: formattedDate = rawDate ? formatDayMonthBR(rawDate) : '';
 </script>
 
 <div class="kpi-card" data-code={code || undefined} data-icon={resolvedIcon}>
